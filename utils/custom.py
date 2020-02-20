@@ -2,18 +2,13 @@
 Custom
 
 This script is where all reporting configuration takes place
-
-TODO(jschroeder) examples needed of each type of attribute and method
 """
-import os
 import sys
 import inspect
 import pandas as pd
 
-# IMPORT CUSTOM CHILDREN HERE
-from utils.custom_children.google_analytics_events import GoogleAnalyticsEventsCustomizer
 
-
+# UTILITY FUNCTIONS - DO NOT TOUCH
 def get_customizers() -> list:
     """
     Crawl this file and all files in custom_children and return all classes
@@ -23,12 +18,23 @@ def get_customizers() -> list:
     return clsmembers  # as list
 
 
+def check_attribute(attribute: str):
+    """
+    Get the right Customizer class / child class for the attribute
+    :param attribute:
+    :return:
+    """
+    clsmembers = get_customizers()
+    for cls in clsmembers:
+        init_cls = cls[1]()
+        if hasattr(init_cls, attribute):
+            return init_cls
+
+
 class Customizer:
     """
     Required to run scripts
     Manages all report data transformation and customization
-
-    TODO(jschroeder) could we / would we ever want to inherit from this?
     """
 
     # GLOBALS - REQUIRED TO BE REFERENCED FOR ALL PROJECTS
@@ -45,6 +51,7 @@ class Customizer:
     version = '<VERSION HERE>'
     recipients = [
         # EMAILS HERE for error notifications
+        'jschroeder@linkmedia360.com'
     ]
 
     def __init__(self):
@@ -56,6 +63,9 @@ class Customizer:
                 return False
         return True
 
+
+
+class GoogleAnalyticsTrafficCustomizer(Customizer):
     # DATA SOURCE SPECIFIC - REQUIRED FOR INDIVIDUAL SCRIPTS TO BE RUN
     # GA - Traffic
     # attributes
@@ -129,7 +139,7 @@ class Customizer:
         'active': 1,
         'code': """
         UPDATE ...
-        
+
         SELECT 1;
         """,
         'return': 'integer',
@@ -141,7 +151,7 @@ class Customizer:
         'name': 'googleanalytics_audit',
         'active': 1,
         'code': """
-        
+
         """,
         'return': 'integer',
         'owner': 'postgres'
@@ -198,6 +208,3 @@ class Customizer:
         """
         return df
 
-
-customizers = get_customizers()
-print(customizers)
