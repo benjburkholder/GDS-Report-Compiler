@@ -8,44 +8,29 @@ import inspect
 import pandas as pd
 
 
-# UTILITY FUNCTIONS - DO NOT TOUCH
-def get_customizers() -> list:
-    """
-    Crawl this file and all files in custom_children and return all classes
-    :return:
-    """
-    clsmembers = inspect.getmembers(sys.modules[__name__], inspect.isclass)
-    return clsmembers  # as list
-
-
-def check_attribute(attribute: str):
-    """
-    Get the right Customizer class / child class for the attribute
-    :param attribute:
-    :return:
-    """
-    clsmembers = get_customizers()
-    for cls in clsmembers:
-        init_cls = cls[1]()
-        if hasattr(init_cls, attribute):
-            return init_cls
-
-
 class Customizer:
     """
     Required to run scripts
     Manages all report data transformation and customization
     """
+    # attributes
+    prefix = ''
 
     # GLOBALS - REQUIRED TO BE REFERENCED FOR ALL PROJECTS
     required_attributes = [
+        'dbms',
         'client',
         'project',
         'version',
         'recipients'
     ]
+    supported_dbms = [
+        'postgresql'
+    ]
     global_configuration_message = "Invalid global configuration. Please check your Customizer class and try again"
 
+    # ### START EDITING HERE ###
+    dbms = 'postgresql'
     client = '<CLIENT HERE>'
     project = '<PROJECT HERE>'
     version = '<VERSION HERE>'
@@ -53,6 +38,7 @@ class Customizer:
         # EMAILS HERE for error notifications
         'jschroeder@linkmedia360.com'
     ]
+    # ### END EDITING ###
 
     def __init__(self):
         assert self.valid_global_configuration(), self.global_configuration_message
@@ -61,101 +47,113 @@ class Customizer:
         for attribute in self.required_attributes:
             if not getattr(self, attribute):
                 return False
+            if attribute == 'dbms':
+                if getattr(self, attribute) not in self.supported_dbms:
+                    return False
         return True
 
 
+# DATA SOURCE SPECIFIC - REQUIRED FOR INDIVIDUAL SCRIPTS TO BE RUN
 
 class GoogleAnalyticsTrafficCustomizer(Customizer):
-    # DATA SOURCE SPECIFIC - REQUIRED FOR INDIVIDUAL SCRIPTS TO BE RUN
-    # GA - Traffic
-    # attributes
-    google_analytics_traffic_class = True  # flag that indicates this is the class to use for google_analytics_traffic
-    google_analytics_traffic_debug = True
-    google_analytics_traffic_metrics = [
-        'sessions',
-        'percentNewSessions',
-        'pageviews',
-        'uniquePageviews',
-        'pageviewsPerSession',
-        'entrances',
-        'bounces',
-        'sessionDuration',
-        'users',
-        'newUsers'
-    ]
-    google_analytics_traffic_dimensions = [
-        'date',
-        'channelGrouping',
-        'sourceMedium',
-        'device',
-        'campaign',
-        'page',
-    ]
+    # class configuration
+    prefix = 'google_analytics_traffic'
 
-    # model
-    google_analytics_traffic_schema = {
-        'table': 'googleanalytics_traffic',
-        'type': 'reporting',
-        'columns': [
-            {'name': 'report_date', 'type': 'date'},
-            {'name': 'data_source', 'type': 'character varying', 'length': 100},
-            {'name': 'property', 'type': 'character varying', 'length': 100},
-            {'name': 'community', 'type': 'character varying', 'length': 100},
-            {'name': 'service_line', 'type': 'character varying', 'length': 100},
-            {'name': 'view_id', 'type': 'character varying', 'length': 25},
-            {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-            {'name': 'device', 'type': 'character varying', 'length': 50},
-            {'name': 'campaign', 'type': 'character varying', 'length': 100},
-            {'name': 'page', 'type': 'character varying', 'length': 500},
-            {'name': 'sessions', 'type': 'character varying', 'length': 500},
-            {'name': 'percent_new_sessions', 'type': 'double precision'},
-            {'name': 'pageviews', 'type': 'bigint'},
-            {'name': 'unique_pageviews', 'type': 'bigint'},
-            {'name': 'pageviews_per_session', 'type': 'double precision'},
-            {'name': 'entrances', 'type': 'bigint'},
-            {'name': 'bounces', 'type': 'bigint'},
-            {'name': 'session_duration', 'type': 'double precision'},
-            {'name': 'users', 'type': 'bigint'},
-            {'name': 'new_users', 'type': 'bigint'},
-        ],
-        'indexes': [
-            {
-                'name': 'ix_google_analytics_traffic',
-                'clustered': True,
-                'method': 'btree',
-                'columns': [
-                    {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                    {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
-                    {'name': 'device', 'sort': 'asc', 'null_last': True}
-                ]
-            }
-        ],
-        'owner': 'postgres'
-    }
+    def __init__(self):
+        super().__init__()
+        setattr(self, f'{self.prefix}_class', True)
+        setattr(self, f'{self.prefix}_debug', True)
+        setattr(self, f'{self.prefix}_view_id', '1234')
+        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_metrics', [
+            'sessions',
+            'percentNewSessions',
+            'pageviews',
+            'uniquePageviews',
+            'pageviewsPerSession',
+            'entrances',
+            'bounces',
+            'sessionDuration',
+            'users',
+            'newUsers'
+        ])
+        setattr(self, f'{self.prefix}_dimensions', [
+            'date',
+            'channelGrouping',
+            'sourceMedium',
+            'device',
+            'campaign',
+            'page',
+        ])
 
-    # backfilter procedure
-    google_analytics_traffic_backfilter_procedure = {
-        'name': 'googleanalytics_backfilter',
-        'active': 1,
-        'code': """
-        UPDATE ...
+        # model
+        setattr(self, f'{self.prefix}_schema', {
+            'table': 'googleanalytics_traffic',
+            'schema': 'public',
+            'type': 'reporting',
+            'columns': [
+                {'name': 'report_date', 'type': 'date'},
+                {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 100},
+                {'name': 'community', 'type': 'character varying', 'length': 100},
+                {'name': 'service_line', 'type': 'character varying', 'length': 100},
+                {'name': 'view_id', 'type': 'character varying', 'length': 25},
+                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
+                {'name': 'device', 'type': 'character varying', 'length': 50},
+                {'name': 'campaign', 'type': 'character varying', 'length': 100},
+                {'name': 'page', 'type': 'character varying', 'length': 500},
+                {'name': 'sessions', 'type': 'character varying', 'length': 500},
+                {'name': 'percent_new_sessions', 'type': 'double precision'},
+                {'name': 'pageviews', 'type': 'bigint'},
+                {'name': 'unique_pageviews', 'type': 'bigint'},
+                {'name': 'pageviews_per_session', 'type': 'double precision'},
+                {'name': 'entrances', 'type': 'bigint'},
+                {'name': 'bounces', 'type': 'bigint'},
+                {'name': 'session_duration', 'type': 'double precision'},
+                {'name': 'users', 'type': 'bigint'},
+                {'name': 'new_users', 'type': 'bigint'},
+            ],
+            'indexes': [
+                {
+                    'name': 'ix_google_analytics_traffic',
+                    'tablespace': 'pg_default',
+                    'clustered': True,
+                    'method': 'btree',
+                    'columns': [
+                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
+                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                    ]
+                }
+            ],
+            'owner': 'postgres'
+        })
 
-        SELECT 1;
-        """,
-        'return': 'integer',
-        'owner': 'postgres'
-    }
+        # backfilter procedure
+        setattr(self, f'{self.prefix}_backfilter_procedure', {
+            'name': 'googleanalytics_backfilter',
+            'active': 1,
+            'code': """
+            UPDATE ...
+    
+            SELECT 1;
+            """,
+            'return': 'integer',
+            'owner': 'postgres'
+        })
 
-    # audit procedure
-    google_analytics_traffic_audit_procedure = {
-        'name': 'googleanalytics_audit',
-        'active': 1,
-        'code': """
-
-        """,
-        'return': 'integer',
-        'owner': 'postgres'
-    }
+        # audit procedure
+        setattr(self, f'{self.prefix}_audit_procedure', {
+            'name': 'googleanalytics_audit',
+            'active': 1,
+            'code': """
+    
+            """,
+            'return': 'integer',
+            'owner': 'postgres'
+        })
 
     # noinspection PyMethodMayBeStatic
     def google_analytics_traffic_getter(self) -> str:
@@ -172,7 +170,10 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
         :param df:
         :return:
         """
-        return df
+        # TODO(jschroeder) flesh out this example a bit more
+        return df.rename(columns={
+            'date': 'report_date'
+        })
 
     # noinspection PyMethodMayBeStatic
     def google_analytics_traffic_type(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -181,7 +182,7 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
         :param df:
         :return:
         """
-        for column in self.google_analytics_traffic_schema['columns']:
+        for column in getattr(self, f'{self.prefix}_schema')['columns']:
             assert column['name'] in df.columns
             if column['type'] == 'character varying':
                 assert 'length' in column.keys()
@@ -191,7 +192,7 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
             elif column['type'] == 'double precision':
                 df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
             elif column['type'] == 'date':
-                df[column['name']] = pd.to_datetime(df[column['name']]).dt.date
+                df[column['name']] = pd.to_datetime(df[column['name']])
             elif column['type'] == 'timestamp without time zone':
                 df[column['name']] = pd.to_datetime(df[column['name']])
             elif column['type'] == 'datetime with time zone':
@@ -208,3 +209,32 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
         """
         return df
 
+
+# NO EDITING BEYOND THIS POINT
+# ````````````````````````````````````````````````````````````````````````````````````````````````````
+# GRC UTILITY FUNCTIONS
+def get_customizers() -> list:
+    """
+    Return all custom.py Class objects in [(name, <class>)] format
+    :return:
+    """
+    cls_members = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+    return cls_members  # as list
+
+
+def get_customizer(calling_file: str) -> Customizer:
+    """
+    Loop through and initialize each class in custom.py
+    Return the proper Customizer instance that will have the necessary attributes, methods and schema
+    for the calling file
+    :param calling_file:
+    :return:
+    """
+    cls_members = get_customizers()
+    target_attribute = f'{calling_file}_class'
+    for cls in cls_members:
+        ini_cls = cls[1]()  # initialize the class
+        if hasattr(ini_cls, target_attribute):
+            if getattr(ini_cls, target_attribute):
+                return ini_cls
+    raise AssertionError("No configured classes for data source {}".format(calling_file))
