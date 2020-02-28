@@ -230,14 +230,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'new_users': 'new_users'
         })
 
-    # methods
-    # noinspection PyMethodMayBeStatic
-    def google_analytics_traffic_parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Parse the data by pagePath to their respective entities
-        :return:
-        """
-        return df
 
     # noinspection PyMethodMayBeStatic
     def google_analytics_traffic_type(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -264,6 +256,14 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
+    def google_analytics_traffic_post_processing(self):
+        """
+        Execute UPDATE... JOIN statements against the source table of the calling class
+        :return:
+        """
+        # build engine
+        # execute statements
+        return
 
 # NO EDITING BEYOND THIS POINT
 # ````````````````````````````````````````````````````````````````````````````````````````````````````

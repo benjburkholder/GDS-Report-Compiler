@@ -75,8 +75,7 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer) -> pd.DataFr
     processing_stages = [
         'rename',
         'type',
-        'parse',
-        'post_processing'
+        'post_processing'  # TODO:(jake) build this out as a function that executes custom SQL to override/customize after update_join
     ]
     for stage in processing_stages:
         logger.info('Checking for custom stage {}'.format(stage))
