@@ -35,10 +35,17 @@ def main() -> int:
         if df.shape[0]:
             df = run_processing(df=df, customizer=customizer)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
-            return 0
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
-            return -1
+    grc.run_update_join(
+        customizer=customizer,
+        target_table=grc.get_required_attribute(customizer, 'table'),
+        lookup_table=grc.get_required_attribute(customizer, 'lookup_table'),
+        on='page_path',
+        exact_match=True,
+        default=grc.get_required_attribute(customizer, 'entity_defaults')
+    )
+    grc.run_update_join(customizer=customizer, on='page_path', exact_match=True)
 
 
 def run_configuration_check(customizer):
@@ -68,7 +75,8 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer) -> pd.DataFr
     processing_stages = [
         'rename',
         'type',
-        'parse'
+        'parse',
+        'post_processing'
     ]
     for stage in processing_stages:
         logger.info('Checking for custom stage {}'.format(stage))
