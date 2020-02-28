@@ -5,6 +5,7 @@ import logging
 import datetime
 import pandas as pd
 
+from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
 from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
 logger = logging.getLogger(__file__)
@@ -14,7 +15,11 @@ logger.setLevel(logging.INFO)
 def main() -> int:
     customizer = custom.get_customizer(SCRIPT_NAME)
     run_configuration_check(customizer)
-    view_id = grc.get_required_attribute(customizer, 'view_id')
+    client_name = grc.get_required_attribute(customizer, 'client_name')
+    view_id_list = grc.get_required_attribute(customizer, 'get_view_ids')()
+    secrets_path = grc.get_required_attribute(customizer, 'secrets_path')
+    dimensions = grc.get_required_attribute(customizer, 'dimensions')
+    metrics = grc.get_required_attribute(customizer, 'metrics')
     historical = grc.get_required_attribute(customizer, 'historical')
     if historical:
         start_date = grc.get_required_attribute(customizer, 'historical_start_date')
@@ -22,15 +27,18 @@ def main() -> int:
     else:
         end_date = datetime.date.today()
         start_date = (end_date - datetime.timedelta(7))
-    # TODO(jschroeder) call GoogleAnalyticsReporting::query() and return to df
-    df = pd.DataFrame()  # TEST
-    if df.shape[0]:
-        df = run_processing(df=df, customizer=customizer)
-        grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
-        return 0
-    else:
-        logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
-        return -1
+    for view_id in view_id_list:
+        df = GoogleAnalytics(client_name=client_name, secrets_path=secrets_path).query(
+            view_id=view_id, raw_dimensions=dimensions, raw_metrics=metrics,
+            start_date=start_date, end_date=end_date
+        )
+        if df.shape[0]:
+            df = run_processing(df=df, customizer=customizer)
+            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
+            return 0
+        else:
+            logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
+            return -1
 
 
 def run_configuration_check(customizer):
@@ -40,7 +48,6 @@ def run_configuration_check(customizer):
     :return:
     """
     required_attributes = [
-        'view_id',
         'historical',
         'historical_start_date',
         'historical_end_date',
@@ -67,7 +74,7 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer) -> pd.DataFr
         logger.info('Checking for custom stage {}'.format(stage))
         if grc.get_optional_attribute(cls=customizer, attribute=stage):
             logger.info('Now processing stage {}'.format(stage))
-            grc.get_optional_attribute(cls=customizer, attribute=stage)(df=df)
+            df = grc.get_optional_attribute(cls=customizer, attribute=stage)(df=df)
     return df
 
 
