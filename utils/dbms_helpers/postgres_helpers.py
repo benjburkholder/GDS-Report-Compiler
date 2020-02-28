@@ -105,7 +105,7 @@ def _generate_postgresql_create_table_statement(schema: dict) -> str:
 def _generate_postgresql_create_index_statement(index: dict, schema: dict) -> str:
     assert 'columns' in index.keys(), "'columns' attribute missing from index. {}".format(index)
     assert 'tablespace' in index.keys(), "'tablespace' attribute missing from index. {}".format(index)
-    stmt = f"CREATE INDEX ix_{index['name']}\n"
+    stmt = f"CREATE INDEX {index['name']}\n"
     stmt += f"ON {schema['schema']}.{schema['table']} USING {index['method']}\n"
     stmt += "(\n"
     col_len = len(index['columns'])
@@ -120,7 +120,7 @@ def _generate_postgresql_create_index_statement(index: dict, schema: dict) -> st
         else:
             line += " DESC"
         if column['nulls_last']:
-            line += "NULLS LAST"
+            line += " NULLS LAST"
         line += ",\n"
         idx += 1
         if idx == col_len:

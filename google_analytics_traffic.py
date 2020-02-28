@@ -5,8 +5,8 @@ import logging
 import datetime
 import pandas as pd
 
-from utils import custom, platform
-SCRIPT_NAME = platform.get_script_name(__file__)
+from utils import custom, grc
+SCRIPT_NAME = grc.get_script_name(__file__)
 logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
@@ -14,11 +14,11 @@ logger.setLevel(logging.INFO)
 def main() -> int:
     customizer = custom.get_customizer(SCRIPT_NAME)
     run_configuration_check(customizer)
-    view_id = platform.get_required_attribute(customizer, 'view_id')
-    historical = platform.get_required_attribute(customizer, 'historical')
+    view_id = grc.get_required_attribute(customizer, 'view_id')
+    historical = grc.get_required_attribute(customizer, 'historical')
     if historical:
-        start_date = platform.get_required_attribute(customizer, 'historical_start_date')
-        end_date = platform.get_required_attribute(customizer, 'historical_end_date')
+        start_date = grc.get_required_attribute(customizer, 'historical_start_date')
+        end_date = grc.get_required_attribute(customizer, 'historical_end_date')
     else:
         end_date = datetime.date.today()
         start_date = (end_date - datetime.timedelta(7))
@@ -26,7 +26,7 @@ def main() -> int:
     df = pd.DataFrame()  # TEST
     if df.shape[0]:
         df = run_processing(df=df, customizer=customizer)
-        platform.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
+        grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
         return 0
     else:
         logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
@@ -47,7 +47,7 @@ def run_configuration_check(customizer):
         'table',
     ]
     for attribute in required_attributes:
-        result = platform.get_optional_attribute(cls=customizer, attribute=attribute)
+        result = grc.get_optional_attribute(cls=customizer, attribute=attribute)
         assert result, f"{SCRIPT_NAME}|Required attribute not configured, {attribute}"
 
 
@@ -65,9 +65,9 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer) -> pd.DataFr
     ]
     for stage in processing_stages:
         logger.info('Checking for custom stage {}'.format(stage))
-        if platform.get_optional_attribute(cls=customizer, attribute=stage):
+        if grc.get_optional_attribute(cls=customizer, attribute=stage):
             logger.info('Now processing stage {}'.format(stage))
-            platform.get_optional_attribute(cls=customizer, attribute=stage)(df=df)
+            grc.get_optional_attribute(cls=customizer, attribute=stage)(df=df)
     return df
 
 
