@@ -3,8 +3,10 @@ Custom
 
 This script is where all reporting configuration takes place
 """
+import os
 import sys
 import inspect
+import pathlib
 import pandas as pd
 
 
@@ -24,20 +26,28 @@ class Customizer:
         'version',
         'recipients'
     ]
+
     supported_dbms = [
         'postgresql'
     ]
+
     global_configuration_message = "Invalid global configuration. Please check your Customizer class and try again"
 
     # ### START EDITING HERE ###
     dbms = 'postgresql'
-    client = '<CLIENT HERE>'
-    project = '<PROJECT HERE>'
-    version = '<VERSION HERE>'
+    client = '<CLIENT>'
+    project = '<PROJECT>'
+    version = '<VERSION>'
     recipients = [
         # EMAILS HERE for error notifications
         'jschroeder@linkmedia360.com'
     ]
+    db = {
+        'DATABASE': 'fairfieldresidences_omnilocal',
+        'USERNAME': 'python-2',
+        'PASSWORD': 'pythonpipelines',
+        'SERVER': '35.222.11.147'
+    }
     # ### END EDITING ###
 
     def __init__(self):
@@ -55,7 +65,37 @@ class Customizer:
 
 # DATA SOURCE SPECIFIC - REQUIRED FOR INDIVIDUAL SCRIPTS TO BE RUN
 
-class GoogleAnalyticsTrafficCustomizer(Customizer):
+class GoogleAnalytics(Customizer):
+    prefix = 'google_analytics'
+
+    supported_metrics = [
+
+    ]
+    supported_dimensions = [
+        'date',
+        'channelGrouping',
+        'sourceMedium',
+        'deviceCategory',
+        'campaign',
+        'page',
+    ]
+
+    def __init__(self):
+        super().__init__()
+        setattr(self, f'{self.prefix}_secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parent))
+        setattr(self, f'{self.prefix}_client_name', self.client)
+        setattr(self, f'{self.prefix}_get_view_ids', self.get_view_ids)
+
+    def get_view_ids(self) -> list:
+        """
+        Required hook, user is free to provide this list of dictionaries as they choose
+        """
+        return [
+            '107395718'
+        ]
+
+
+class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
     # class configuration
     prefix = 'google_analytics_traffic'
 
@@ -63,10 +103,10 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
         super().__init__()
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_view_id', '1234')
         setattr(self, f'{self.prefix}_historical', True)
-        setattr(self, f'{self.prefix}_historical', True)
-        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
+        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
+        setattr(self, f'{self.prefix}_table', 'googleanalytics_traffic')
         setattr(self, f'{self.prefix}_metrics', [
             'sessions',
             'percentNewSessions',
@@ -83,9 +123,9 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
             'date',
             'channelGrouping',
             'sourceMedium',
-            'device',
+            'deviceCategory',
             'campaign',
-            'page',
+            'pagePath',
         ])
 
         # model
@@ -123,7 +163,7 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
                     'method': 'btree',
                     'columns': [
                         {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
+                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
                         {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                     ]
                 }
@@ -172,8 +212,32 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
         """
         # TODO(jschroeder) flesh out this example a bit more
         return df.rename(columns={
-            'date': 'report_date'
+            'date': 'report_date',
+            'view_id': 'view_id',
+            'sourceMedium': 'source_medium',
+            'deviceCategory': 'device',
+            'campaign': 'campaign',
+            'pagePath': 'page',
+            'sessions': 'sessions',
+            'percentNewPageviews': 'percent_new_pageviews',
+            'pageviews': 'pageviews',
+            'uniquePageviews': 'unique_pageviews',
+            'pageviewsPerSession': 'pageviews_per_session',
+            'entrances': 'entrances',
+            'bounces': 'bounces',
+            'sessionDuration': 'session_duration',
+            'users': 'users',
+            'new_users': 'new_users'
         })
+
+    # methods
+    # noinspection PyMethodMayBeStatic
+    def google_analytics_traffic_parse(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Parse the data by pagePath to their respective entities
+        :return:
+        """
+        return df
 
     # noinspection PyMethodMayBeStatic
     def google_analytics_traffic_type(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -183,30 +247,21 @@ class GoogleAnalyticsTrafficCustomizer(Customizer):
         :return:
         """
         for column in getattr(self, f'{self.prefix}_schema')['columns']:
-            assert column['name'] in df.columns
-            if column['type'] == 'character varying':
-                assert 'length' in column.keys()
-                df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-            elif column['type'] == 'bigint':
-                df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-            elif column['type'] == 'double precision':
-                df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-            elif column['type'] == 'date':
-                df[column['name']] = pd.to_datetime(df[column['name']])
-            elif column['type'] == 'timestamp without time zone':
-                df[column['name']] = pd.to_datetime(df[column['name']])
-            elif column['type'] == 'datetime with time zone':
-                # TODO(jschroeder) how better to interpret timezone data?
-                df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        return df
-
-    # methods
-    # noinspection PyMethodMayBeStatic
-    def google_analytics_traffic_parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Parse the data by pagePath to their respective entities
-        :return:
-        """
+            if column['name'] in df.columns:
+                if column['type'] == 'character varying':
+                    assert 'length' in column.keys()
+                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+                elif column['type'] == 'bigint':
+                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                elif column['type'] == 'double precision':
+                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                elif column['type'] == 'date':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'timestamp without time zone':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'datetime with time zone':
+                    # TODO(jschroeder) how better to interpret timezone data?
+                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
 
