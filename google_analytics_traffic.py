@@ -19,22 +19,17 @@ def main() -> int:
     ga_customizer = GoogleAnalyticsTrafficCustomizer()
 
     run_configuration_check(customizer)
-    # Todo: Combine below elements into customizer class
-    client_name = grc.get_required_attribute(customizer, 'client_name')
-    view_id_list = grc.get_required_attribute(customizer, 'get_view_ids')()
-    secrets_path = grc.get_required_attribute(customizer, 'secrets_path')
-    dimensions = grc.get_required_attribute(customizer, 'dimensions')
-    metrics = grc.get_required_attribute(customizer, 'metrics')
-    historical = grc.get_required_attribute(customizer, 'historical')
-    if historical:
-        start_date = grc.get_required_attribute(customizer, 'historical_start_date')
-        end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+
+    if ga_customizer.google_analytics_traffic_historical:
+        start_date = ga_customizer.google_analytics_traffic_historical_start_date
+        end_date = ga_customizer.google_analytics_traffic_historical_end_date
     else:
         end_date = datetime.date.today()
         start_date = (end_date - datetime.timedelta(7))
-    for view_id in view_id_list:
-        df = GoogleAnalytics(client_name=client_name, secrets_path=secrets_path).query(
-            view_id=view_id, raw_dimensions=dimensions, raw_metrics=metrics,
+
+    for view_id in ga_customizer.view_ids:
+        df = GoogleAnalytics(client_name=ga_customizer.client, secrets_path=ga_customizer.google_analytics_traffic_secrets_path).query(
+            view_id=view_id, raw_dimensions=ga_customizer.google_analytics_traffic_dimensions, raw_metrics=ga_customizer.google_analytics_traffic_metrics,
             start_date=start_date, end_date=end_date
         )
         if df.shape[0]:
