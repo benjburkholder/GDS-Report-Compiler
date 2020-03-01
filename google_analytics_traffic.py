@@ -6,6 +6,7 @@ import datetime
 import pandas as pd
 
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
+from utils.custom import GoogleAnalyticsTrafficCustomizer
 from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
 logger = logging.getLogger(__file__)
@@ -13,8 +14,12 @@ logger.setLevel(logging.INFO)
 
 
 def main() -> int:
+    # Initiate instances of data source classes
     customizer = custom.get_customizer(SCRIPT_NAME)
+    ga_customizer = GoogleAnalyticsTrafficCustomizer()
+
     run_configuration_check(customizer)
+    # Todo: Combine below elements into customizer class
     client_name = grc.get_required_attribute(customizer, 'client_name')
     view_id_list = grc.get_required_attribute(customizer, 'get_view_ids')()
     secrets_path = grc.get_required_attribute(customizer, 'secrets_path')

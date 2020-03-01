@@ -80,6 +80,10 @@ class GoogleAnalytics(Customizer):
         'page',
     ]
 
+    view_ids = [
+        '107395718'
+    ]
+
     def __init__(self):
         super().__init__()
         setattr(self, f'{self.prefix}_secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parent))
