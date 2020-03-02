@@ -16,7 +16,6 @@ logger.setLevel(logging.INFO)
 def main() -> int:
     # Initiate instances of data source classes
     customizer = custom.get_customizer(SCRIPT_NAME)
-    ga_customizer = GoogleAnalyticsTrafficCustomizer()
 
     run_configuration_check(customizer)
 
