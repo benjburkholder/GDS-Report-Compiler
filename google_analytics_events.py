@@ -1,12 +1,12 @@
 """
-Google Analytics Traffic
+Google Analytics Events
 """
 import logging
 import datetime
 import pandas as pd
 
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
-from utils.custom import GoogleAnalyticsTrafficCustomizer
+from utils.custom import GoogleAnalyticsEventsCustomizer
 from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
 logger = logging.getLogger(__file__)
@@ -16,22 +16,21 @@ logger.setLevel(logging.INFO)
 def main() -> int:
     # Initiate instances of data source classes
     customizer = custom.get_customizer(SCRIPT_NAME)
-    ga_customizer = GoogleAnalyticsTrafficCustomizer()
 
     run_configuration_check(customizer)
 
-    if GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_historical:
-        start_date = GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_historical_start_date
-        end_date = GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_historical_end_date
+    if GoogleAnalyticsEventsCustomizer().google_analytics_events_historical:
+        start_date = GoogleAnalyticsEventsCustomizer().google_analytics_events_historical_start_date
+        end_date = GoogleAnalyticsEventsCustomizer().google_analytics_events_historical_end_date
     else:
         end_date = datetime.date.today()
         start_date = (end_date - datetime.timedelta(7))
 
-    for view_id in GoogleAnalyticsTrafficCustomizer().view_ids:
-        df = GoogleAnalytics(client_name=GoogleAnalyticsTrafficCustomizer().client,
-                             secrets_path=GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_secrets_path).query(
-                             view_id=view_id, raw_dimensions=GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_dimensions,
-                             raw_metrics=GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_metrics,
+    for view_id in GoogleAnalyticsEventsCustomizer().view_ids:
+        df = GoogleAnalytics(client_name=GoogleAnalyticsEventsCustomizer().client,
+                             secrets_path=GoogleAnalyticsEventsCustomizer().google_analytics_events_secrets_path).query(
+                             view_id=view_id, raw_dimensions=GoogleAnalyticsEventsCustomizer().google_analytics_events_dimensions,
+                             raw_metrics=GoogleAnalyticsEventsCustomizer().google_analytics_events_metrics,
                              start_date=start_date, end_date=end_date
         )
         if df.shape[0]:
