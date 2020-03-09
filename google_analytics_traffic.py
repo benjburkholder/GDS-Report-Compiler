@@ -17,14 +17,13 @@ def main() -> int:
     # Initiate instances of data source classes
     customizer = custom.get_customizer(SCRIPT_NAME)
 
-    run_configuration_check(customizer)
-
     if GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_historical:
         start_date = GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_historical_start_date
         end_date = GoogleAnalyticsTrafficCustomizer().google_analytics_traffic_historical_end_date
     else:
-        end_date = datetime.date.today()
-        start_date = (end_date - datetime.timedelta(7))
+        # automated setup - last week by default
+        start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
+        end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
     for view_id in GoogleAnalyticsTrafficCustomizer().view_ids:
         df = GoogleAnalytics(client_name=GoogleAnalyticsTrafficCustomizer().client,
@@ -34,6 +33,7 @@ def main() -> int:
                              start_date=start_date, end_date=end_date
         )
         if df.shape[0]:
+            df['view_id'] = view_id
             df = run_processing(df=df, customizer=customizer)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
         else:
@@ -77,6 +77,7 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer) -> pd.DataFr
     processing_stages = [
         'rename',
         'type',
+        'custom_column_assignment',
         'post_processing'  # TODO:(jake) build this out as a function that executes custom SQL to override/customize after update_join
     ]
     for stage in processing_stages:

@@ -40,10 +40,11 @@ class Customizer:
     version = '<VERSION>'
     recipients = [
         # EMAILS HERE for error notifications
-        'jschroeder@linkmedia360.com'
+        'jschroeder@linkmedia360.com',
+        'bburkholder@linkmedia360.com'
     ]
     db = {
-        'DATABASE': 'fairfieldresidences_omnilocal',
+        'DATABASE': '<DATABASE>',
         'USERNAME': 'python-2',
         'PASSWORD': 'pythonpipelines',
         'SERVER': '35.222.11.147'
@@ -81,7 +82,7 @@ class GoogleAnalytics(Customizer):
     ]
 
     view_ids = [
-        '107395718'
+
     ]
 
     def __init__(self):
@@ -298,6 +299,12 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
             'eventAction',
         ])
 
+        # Used to set columns which vary from data source and client vertical
+        setattr(self, f'{self.prefix}_custom_columns', {
+                 'data_source': 'Google Analytics - Events',
+                 'property': None
+        })
+
         # model
         setattr(self, f'{self.prefix}_schema', {
             'table': 'googleanalytics_events',
@@ -306,24 +313,20 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
             'columns': [
                 {'name': 'report_date', 'type': 'date'},
                 {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                {'name': 'channel_grouping', 'type': 'character varying', 'length': 200},
                 {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'community', 'type': 'character varying', 'length': 100},
                 {'name': 'service_line', 'type': 'character varying', 'length': 100},
                 {'name': 'view_id', 'type': 'character varying', 'length': 25},
                 {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                 {'name': 'device', 'type': 'character varying', 'length': 50},
                 {'name': 'campaign', 'type': 'character varying', 'length': 100},
                 {'name': 'page', 'type': 'character varying', 'length': 500},
-                {'name': 'sessions', 'type': 'character varying', 'length': 500},
-                {'name': 'percent_new_sessions', 'type': 'double precision'},
-                {'name': 'pageviews', 'type': 'bigint'},
-                {'name': 'unique_pageviews', 'type': 'bigint'},
-                {'name': 'pageviews_per_session', 'type': 'double precision'},
-                {'name': 'entrances', 'type': 'bigint'},
-                {'name': 'bounces', 'type': 'bigint'},
-                {'name': 'session_duration', 'type': 'double precision'},
-                {'name': 'users', 'type': 'bigint'},
-                {'name': 'new_users', 'type': 'bigint'},
+                {'name': 'event_label', 'type': 'character varying', 'length': 200},
+                {'name': 'event_action', 'type': 'character varying', 'length': 200},
+                {'name': 'total_events', 'type': 'bigint'},
+                {'name': 'unique_events', 'type': 'bigint'},
+                {'name': 'event_value', 'type': 'double precision'},
+
             ],
             'indexes': [
                 {
@@ -383,21 +386,15 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         # TODO(jschroeder) flesh out this example a bit more
         return df.rename(columns={
             'date': 'report_date',
-            'view_id': 'view_id',
+            'channelGrouping': 'channel_grouping',
             'sourceMedium': 'source_medium',
             'deviceCategory': 'device',
-            'campaign': 'campaign',
             'pagePath': 'page',
-            'sessions': 'sessions',
-            'percentNewPageviews': 'percent_new_pageviews',
-            'pageviews': 'pageviews',
-            'uniquePageviews': 'unique_pageviews',
-            'pageviewsPerSession': 'pageviews_per_session',
-            'entrances': 'entrances',
-            'bounces': 'bounces',
-            'sessionDuration': 'session_duration',
-            'users': 'users',
-            'new_users': 'new_users'
+            'eventLabel': 'event_label',
+            'eventAction': 'event_action',
+            'totalEvents': 'total_events',
+            'uniqueEvents': 'unique_events',
+            'eventValue': 'event_value'
         })
 
     # noinspection PyMethodMayBeStatic
@@ -425,6 +422,13 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
+    def google_analytics_events_custom_column_assignment(self, df: pd.DataFrame) -> pd.DataFrame:
+        if getattr(self, f'{self.prefix}_custom_columns'):
+            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
+                df[key] = value
+
+        return df
+
     def google_analytics_event_post_processing(self):
         """
         Execute UPDATE... JOIN statements against the source table of the calling class
@@ -449,6 +453,12 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         setattr(self, f'{self.prefix}_table', 'googleanalytics_goals')
         setattr(self, f'{self.prefix}_metrics', [
             'goal1Completions',  # Contact Form
+            'goal5Completions',
+            'goal7Completions',
+            'goal6Completions',
+            'goal3Completions',
+            'goal4Completions',
+            'goal2Completions'
         ])
         setattr(self, f'{self.prefix}_dimensions', [
             'date',
