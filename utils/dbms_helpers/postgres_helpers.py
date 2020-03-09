@@ -18,10 +18,12 @@ def build_postgresql_engine(customizer):
 
 def clear_postgresql_non_golden_data(customizer, date_col, min_date, max_date):
     engine = build_postgresql_engine(customizer=customizer)
+
     sql = sqlalchemy.text(
         f"""
         DELETE
-        FROM {customizer.schema['schema']}.{customizer.table}
+        FROM {getattr(customizer, f'{customizer.prefix}_schema')['schema']}.{getattr(customizer, f'{customizer.prefix}_table')}
+
         WHERE {date_col} BETWEEN :min_date AND :max_date;
         """
     )
@@ -33,7 +35,7 @@ def insert_postgresql_data(customizer, df, if_exists='append', index=False, inde
     engine = build_postgresql_engine(customizer=customizer)
     with engine.connect() as con:
         df.to_sql(
-            customizer.table,
+            getattr(customizer, f'{customizer.prefix}_table'),
             con=con,
             if_exists=if_exists,
             index=index,
@@ -49,7 +51,7 @@ def check_postgresql_table_exists(customizer, table, schema) -> bool:
            SELECT FROM pg_tables
            WHERE
                 schemaname = :schema AND
-                tablename  = :schema
+                tablename  = :table
         );
         """
     )

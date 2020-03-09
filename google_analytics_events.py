@@ -48,6 +48,8 @@ def main() -> int:
     )
     grc.run_update_join(customizer=customizer, on='page_path', exact_match=True)
 
+    return 0
+
 
 def run_configuration_check(customizer):
     """
@@ -64,7 +66,6 @@ def run_configuration_check(customizer):
     for attribute in required_attributes:
         result = grc.get_optional_attribute(cls=customizer, attribute=attribute)
         assert result, f"{SCRIPT_NAME}|Required attribute not configured, {attribute}"
-
 
 def run_processing(df: pd.DataFrame, customizer: custom.Customizer) -> pd.DataFrame:
     """

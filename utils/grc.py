@@ -70,11 +70,24 @@ def insert_data(customizer, df):
 def run_data_ingest_rolling_dates(df, customizer, date_col='report_date') -> int:
     min_date = df[date_col].min()
     max_date = df[date_col].max()
-    # clear non-golden data
-    clear_non_golden_data(customizer=customizer, date_col=date_col, min_date=min_date, max_date=max_date)
-    # insert fresh data
-    insert_data(customizer=customizer, df=df)
-    return stdlib.EXIT_SUCCESS
+
+    table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_schema'))
+
+    if table_existence:
+        # clear non-golden data
+        clear_non_golden_data(customizer=customizer, date_col=date_col, min_date=min_date, max_date=max_date)
+        # insert fresh data
+        insert_data(customizer=customizer, df=df)
+        return stdlib.EXIT_SUCCESS
+
+    if not table_existence:
+        create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_schema'))
+        insert_data(customizer=customizer, df=df)
+        return stdlib.EXIT_SUCCESS
+
+    else:
+        raise ValueError("Other Error: An error occurred regardless of the table's existence, "
+                         "check custom.py schema attribute.")
 
 
 def check_table_exists(customizer, schema) -> bool:
@@ -94,7 +107,7 @@ def check_table_exists(customizer, schema) -> bool:
 def create_table_from_schema(customizer, schema) -> int:
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
-        return postgres_helpers.create_table_from_schema(
+        return postgres_helpers.create_postgresql_table_from_schema(
             customizer=customizer,
             schema=schema
         )

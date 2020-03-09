@@ -48,6 +48,7 @@ def main() -> int:
     )
     grc.run_update_join(customizer=customizer, on='page_path', exact_match=True)
 
+    return 0
 
 def run_configuration_check(customizer):
     """
