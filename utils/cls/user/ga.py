@@ -20,14 +20,12 @@ class GoogleAnalytics(Customizer):
         'page',
     ]
 
-    view_ids = [
-
-    ]
+    view_ids = ['89266602']
 
     def __init__(self):
         super().__init__()
         setattr(self, f'{self.prefix}_secrets_path',
-                str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parent))
+                str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
         setattr(self, f'{self.prefix}_client_name', self.client)
         setattr(self, f'{self.prefix}_get_view_ids', self.get_view_ids)
 
@@ -70,6 +68,12 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'campaign',
             'pagePath',
         ])
+
+        # Used to set columns which vary from data source and client vertical
+        setattr(self, f'{self.prefix}_custom_columns', {
+            'data_source': 'Google Analytics - Traffic',
+            'property': None
+        })
 
         # model
         setattr(self, f'{self.prefix}_schema', {
@@ -196,6 +200,13 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        return df
+
+    def google_analytics_traffic_parse(self, df: pd.DataFrame) -> pd.DataFrame:
+        if getattr(self, f'{self.prefix}_custom_columns'):
+            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
+                df[key] = value
+
         return df
 
     def google_analytics_traffic_post_processing(self):
@@ -359,6 +370,13 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
+    def google_analytics_events_parse(self, df: pd.DataFrame) -> pd.DataFrame:
+        if getattr(self, f'{self.prefix}_custom_columns'):
+            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
+                df[key] = value
+
+        return df
+
     def google_analytics_events_custom_column_assignment(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
             for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
@@ -389,13 +407,11 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
         setattr(self, f'{self.prefix}_table', 'googleanalytics_goals')
         setattr(self, f'{self.prefix}_metrics', [
-            'goal1Completions',  # Contact Form
             'goal5Completions',
             'goal7Completions',
             'goal6Completions',
             'goal3Completions',
             'goal4Completions',
-            'goal2Completions'
         ])
         setattr(self, f'{self.prefix}_dimensions', [
             'date',
@@ -406,6 +422,12 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'pagePath'
         ])
 
+        # Used to set columns which vary from data source and client vertical
+        setattr(self, f'{self.prefix}_custom_columns', {
+            'data_source': 'Google Analytics - Goals',
+            'property': None
+        })
+
         # model
         setattr(self, f'{self.prefix}_schema', {
             'table': 'googleanalytics_goals',
@@ -414,24 +436,20 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'columns': [
                 {'name': 'report_date', 'type': 'date'},
                 {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
                 {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'community', 'type': 'character varying', 'length': 100},
                 {'name': 'service_line', 'type': 'character varying', 'length': 100},
                 {'name': 'view_id', 'type': 'character varying', 'length': 25},
                 {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                 {'name': 'device', 'type': 'character varying', 'length': 50},
                 {'name': 'campaign', 'type': 'character varying', 'length': 100},
                 {'name': 'page', 'type': 'character varying', 'length': 500},
-                {'name': 'sessions', 'type': 'character varying', 'length': 500},
-                {'name': 'percent_new_sessions', 'type': 'double precision'},
-                {'name': 'pageviews', 'type': 'bigint'},
-                {'name': 'unique_pageviews', 'type': 'bigint'},
-                {'name': 'pageviews_per_session', 'type': 'double precision'},
-                {'name': 'entrances', 'type': 'bigint'},
-                {'name': 'bounces', 'type': 'bigint'},
-                {'name': 'session_duration', 'type': 'double precision'},
-                {'name': 'users', 'type': 'bigint'},
-                {'name': 'new_users', 'type': 'bigint'},
+                {'name': 'request_a_quote', 'type': 'bigint'},
+                {'name': 'sidebar_contact_us', 'type': 'bigint'},
+                {'name': 'contact_us_form_submission', 'type': 'bigint'},
+                {'name': 'newsletter_signups', 'type': 'bigint'},
+                {'name': 'dialogtech_calls', 'type': 'bigint'},
+
             ],
             'indexes': [
                 {
@@ -492,6 +510,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         return df.rename(columns={
             'date': 'report_date',
             'view_id': 'view_id',
+            'channelGrouping': 'channel_grouping',
             'sourceMedium': 'source_medium',
             'deviceCategory': 'device',
             'campaign': 'campaign',
@@ -499,13 +518,12 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'sessions': 'sessions',
             'percentNewPageviews': 'percent_new_pageviews',
             'pageviews': 'pageviews',
-            'uniquePageviews': 'unique_pageviews',
-            'pageviewsPerSession': 'pageviews_per_session',
-            'entrances': 'entrances',
-            'bounces': 'bounces',
-            'sessionDuration': 'session_duration',
-            'users': 'users',
-            'new_users': 'new_users'
+            'goal3Completions': 'request_a_quote',
+            'goal4Completions': 'sidebar_contact_us',
+            'goal5Completions': 'contact_us_form_submission',
+            'goal6Completions': 'newsletter_signups',
+            'goal7Completions': 'dialogtech_calls',
+
         })
 
     # noinspection PyMethodMayBeStatic
@@ -532,6 +550,13 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        return df
+
+    def google_analytics_goals_parse(self, df: pd.DataFrame) -> pd.DataFrame:
+        if getattr(self, f'{self.prefix}_custom_columns'):
+            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
+                df[key] = value
+
         return df
 
     def google_analytics_goals_post_processing(self):
