@@ -91,6 +91,27 @@ def run_data_ingest_rolling_dates(df, customizer, date_col='report_date') -> int
                          "check custom.py schema attribute.")
 
 
+def build_lookup_tables(customizer):
+
+    if customizer.lookup_tables['ga']:
+        url_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_urltolocation_schema'))
+
+        if not url_lookup_table_existence:
+            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_urltolocation_schema'))
+
+    if customizer.lookup_tables['moz']:
+        moz_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_listingtolocation_schema'))
+
+        if not moz_lookup_table_existence:
+            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_listingtolocation_schema'))
+
+    if customizer.lookup_tables['gmb']:
+        gmb_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_listingtolocation_schema'))
+
+        if not gmb_lookup_table_existence:
+            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_listingtolocation_schema'))
+
+
 def check_table_exists(customizer, schema) -> bool:
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     schema_name = schema['schema']

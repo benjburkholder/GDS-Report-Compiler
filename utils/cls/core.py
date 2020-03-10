@@ -22,6 +22,12 @@ class Customizer:
         'recipients'
     ]
 
+    lookup_tables = {
+        'moz': False,
+        'gmb': False,
+        'ga': True
+    }
+
     supported_dbms = [
         'postgresql'
     ]
