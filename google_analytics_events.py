@@ -9,13 +9,29 @@ from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
 from utils.custom import GoogleAnalyticsEventsCustomizer
 from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
+PROCESSING_STAGES = [
+    'rename',
+    'type',
+    'parse'
+]
+REQUIRED_ATTRIBUTES = [
+    'view_id',
+    'historical',
+    'historical_start_date',
+    'historical_end_date',
+    'table'
+]
 logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
 
 def main() -> int:
-    # Initiate instances of data source classes
-    customizer = custom.get_customizer(SCRIPT_NAME)
+    # run startup global checks
+    grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=PROCESSING_STAGES, label='PROCESSING_STAGES')
+    grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
+
+    # run startup data source checks and initialize data source specific customizer
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
 
     if GoogleAnalyticsEventsCustomizer().google_analytics_events_historical:
         start_date = GoogleAnalyticsEventsCustomizer().google_analytics_events_historical_start_date
@@ -35,7 +51,7 @@ def main() -> int:
         )
         if df.shape[0]:
             df['view_id'] = view_id
-            df = run_processing(df=df, customizer=customizer)
+            df = grc.run_processing(df=df, customizer=customizer)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
@@ -50,43 +66,6 @@ def main() -> int:
     grc.run_update_join(customizer=customizer, on='page_path', exact_match=True)
 
     return 0
-
-
-def run_configuration_check(customizer):
-    """
-    In order to run the script, the configured Customizer must be valid
-    :param customizer:
-    :return:
-    """
-    required_attributes = [
-        'historical',
-        'historical_start_date',
-        'historical_end_date',
-        'table',
-    ]
-    for attribute in required_attributes:
-        result = grc.get_optional_attribute(cls=customizer, attribute=attribute)
-        assert result, f"{SCRIPT_NAME}|Required attribute not configured, {attribute}"
-
-def run_processing(df: pd.DataFrame, customizer: custom.Customizer) -> pd.DataFrame:
-    """
-    Iterate through pre-defined processing stages that may or may not be configured in Customizer
-    :param df:
-    :param customizer:
-    :return:
-    """
-    processing_stages = [
-        'rename',
-        'type',
-        'custom_column_assignment',
-        'post_processing'  # TODO:(jake) build this out as a function that executes custom SQL to override/customize after update_join
-    ]
-    for stage in processing_stages:
-        logger.info('Checking for custom stage {}'.format(stage))
-        if grc.get_optional_attribute(cls=customizer, attribute=stage):
-            logger.info('Now processing stage {}'.format(stage))
-            df = grc.get_optional_attribute(cls=customizer, attribute=stage)(df=df)
-    return df
 
 
 if __name__ == '__main__':

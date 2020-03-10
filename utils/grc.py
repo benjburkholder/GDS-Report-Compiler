@@ -2,9 +2,10 @@
 Platform
 """
 import os
+import pandas as pd
 
 from utils.dbms_helpers import postgres_helpers
-from utils import stdlib
+from utils import custom, stdlib
 
 
 def get_script_name(file):
@@ -114,3 +115,49 @@ def create_table_from_schema(customizer, schema) -> int:
     else:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
+
+def setup(script_name: str, required_attributes: list):
+    """
+    Before allowing any root-level script to execute
+    Get the Customizer instance configured for script_name
+    Run the customizer against configuration_check, a script-defined function
+    Return the Customizer instance (initialized) if successful
+    Upon failure raise whatever error configuration_check deems useful and informative
+
+    :param script_name:
+    :param required_attributes:
+    :return:
+    """
+    customizer = custom.get_customizer(calling_file=script_name)
+    assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
+    run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
+
+
+def run_configuration_check(script_name: str, required_attributes: list, customizer: custom.Customizer):
+    """
+    In order to run the script, the configured Customier must be valid
+
+    :param script_name:
+    :param required_attributes:
+    :param customizer:
+    :return:
+    """
+    try:
+        for attribute in required_attributes:
+            get_required_attribute(cls=customizer, attribute=attribute)
+    except AssertionError:
+        print(f"{script_name} | run_configuration_check failed")
+        raise
+
+
+def run_prestart_assertion(script_name: str, attribute: list, label: str):
+    assert attribute, f"{script_name} | Global error, {label} either not defined or empty"
+
+
+def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_stages: list):
+    for stage in processing_stages:
+        print(f'Checking for processing stage {stage}...')
+        if get_optional_attribute(cls=customizer, attribute=stage):
+            print(f'\tNow processing stage {stage}')
+            df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
+    return df
