@@ -35,9 +35,7 @@ class GoogleAnalytics(Customizer):
         """
         Required hook, user is free to provide this list of dictionaries as they choose
         """
-        return [
-            '107395718'
-        ]
+        return self.view_ids
 
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
