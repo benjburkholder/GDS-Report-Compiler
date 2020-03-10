@@ -132,6 +132,7 @@ def setup(script_name: str, required_attributes: list):
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
 
+    return customizer
 
 def run_configuration_check(script_name: str, required_attributes: list, customizer: custom.Customizer):
     """
