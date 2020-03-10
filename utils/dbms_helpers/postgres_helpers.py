@@ -75,6 +75,7 @@ def create_postgresql_table_from_schema(customizer, schema):
                 cluster_sql = _generate_postgresql_cluster_statement(schema=schema, index=index)
                 with engine.connect() as con:
                     con.execute(cluster_sql)
+
         return stdlib.EXIT_SUCCESS
 
     return stdlib.EXIT_SUCCESS
