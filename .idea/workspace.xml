@@ -2,9 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/utils/cls/core.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/cls/user/ga.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/custom-archive.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/google_analytics_events.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_events.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/grc.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/grc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/custom.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,16 +50,19 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/utils" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Repositories\GDS-Report-Compiler\utils\dbms_helpers" />
       <recent name="C:\Repositories\gds-report-compiler" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.postgres_helpers">
+  <component name="RunManager" selected="Python.custom (1)">
     <configuration name="check_models" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -165,11 +170,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.custom (1)" />
         <item itemvalue="Python.postgres_helpers" />
         <item itemvalue="Python.check_models" />
         <item itemvalue="Python.custom (2)" />
         <item itemvalue="Python.google_analytics_traffic" />
-        <item itemvalue="Python.custom (1)" />
       </list>
     </recent_temporary>
   </component>
@@ -230,42 +235,42 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="424" y="7" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1582923778470" />
-    <state width="1899" height="348" key="GridCell.Tab.0.bottom" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.0.bottom" timestamp="1583843397864">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1515" height="282" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1582251038414" />
-    <state width="1899" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
-    <state width="1899" height="348" key="GridCell.Tab.0.center" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397864" />
+    <state width="1899" height="348" key="GridCell.Tab.0.center" timestamp="1583843397864">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1515" height="282" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1582251038414" />
-    <state width="1899" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
-    <state width="1899" height="348" key="GridCell.Tab.0.left" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397864" />
+    <state width="1899" height="348" key="GridCell.Tab.0.left" timestamp="1583843397864">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1515" height="282" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1582251038414" />
-    <state width="1899" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
-    <state width="1899" height="348" key="GridCell.Tab.0.right" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397864" />
+    <state width="1899" height="348" key="GridCell.Tab.0.right" timestamp="1583843397864">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1515" height="282" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1582251038414" />
-    <state width="1899" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397864" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1583843397780">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
-    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397780" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1583843397780">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
-    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397780" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1583843397780">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
-    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1582291591924">
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397780" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1583843397780">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1582291591924" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1583843397780" />
     <state x="369" y="110" key="SettingsEditor" timestamp="1582232162486">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
