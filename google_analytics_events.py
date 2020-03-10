@@ -4,18 +4,17 @@ Google Analytics Events
 import logging
 import datetime
 import pandas as pd
-
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
-from utils.custom import GoogleAnalyticsEventsCustomizer
 from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
+
 PROCESSING_STAGES = [
     'rename',
     'type',
     'parse'
 ]
 REQUIRED_ATTRIBUTES = [
-    'view_id',
+    'get_view_ids',
     'historical',
     'historical_start_date',
     'historical_end_date',
@@ -33,20 +32,20 @@ def main() -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
 
-    if GoogleAnalyticsEventsCustomizer().google_analytics_events_historical:
-        start_date = GoogleAnalyticsEventsCustomizer().google_analytics_events_historical_start_date
-        end_date = GoogleAnalyticsEventsCustomizer().google_analytics_events_historical_end_date
+    if customizer.google_analytics_events_historical:
+        start_date = customizer.google_analytics_events_historical_start_date
+        end_date = customizer.google_analytics_events_historical_end_date
 
     else:
         # automated setup - last week by default
         start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
         end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
-    for view_id in GoogleAnalyticsEventsCustomizer().view_ids:
-        df = GoogleAnalytics(client_name=GoogleAnalyticsEventsCustomizer().client,
-                             secrets_path=GoogleAnalyticsEventsCustomizer().google_analytics_events_secrets_path).query(
-                             view_id=view_id, raw_dimensions=GoogleAnalyticsEventsCustomizer().google_analytics_events_dimensions,
-                             raw_metrics=GoogleAnalyticsEventsCustomizer().google_analytics_events_metrics,
+    for view_id in customizer.view_ids:
+        df = GoogleAnalytics(client_name=customizer.client,
+                             secrets_path=customizer.google_analytics_events_secrets_path).query(
+                             view_id=view_id, raw_dimensions=customizer.google_analytics_events_dimensions,
+                             raw_metrics=customizer.google_analytics_events_metrics,
                              start_date=start_date, end_date=end_date
         )
         if df.shape[0]:
