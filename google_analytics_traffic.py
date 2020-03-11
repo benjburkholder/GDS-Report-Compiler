@@ -53,7 +53,6 @@ def main() -> int:
             df['view_id'] = view_id
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
-            grc.build_lookup_tables(customizer=customizer)
 
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))

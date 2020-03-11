@@ -157,6 +157,9 @@ def setup(script_name: str, required_attributes: list):
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
 
+    # Check if required lookup tables exist, create if not and do nothing if existing
+    build_lookup_tables(customizer=customizer)
+
     return customizer
 
 def run_configuration_check(script_name: str, required_attributes: list, customizer: custom.Customizer):
