@@ -6,6 +6,7 @@ import pandas as pd
 
 from utils.dbms_helpers import postgres_helpers
 from utils import custom, stdlib
+from utils.gs_manager import GoogleSheetsManager
 
 
 def get_script_name(file):
@@ -92,26 +93,43 @@ def run_data_ingest_rolling_dates(df, customizer, date_col='report_date') -> int
 
 
 def build_lookup_tables(customizer) -> int:
-    if customizer.lookup_tables['ga']:
+    if customizer.lookup_tables['ga']['active']:
         url_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_urltolocation_schema'))
 
         if not url_lookup_table_existence:
             print('url_lookup_table does not exist, creating...')
             create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_urltolocation_schema'))
 
-    if customizer.lookup_tables['moz']:
+    if customizer.lookup_tables['moz']['active']:
         moz_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_listingtolocation_schema'))
 
         if not moz_lookup_table_existence:
             print('moz_lookup_table does not exist, creating...')
             create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_listingtolocation_schema'))
 
-    if customizer.lookup_tables['gmb']:
+    if customizer.lookup_tables['gmb']['active']:
         gmb_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_listingtolocation_schema'))
 
         if not gmb_lookup_table_existence:
             print('gmb_lookup_table does not exist, creating...')
             create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_listingtolocation_schema'))
+
+    return 0
+
+
+def refresh_lookup_tables(workbook: str, worksheet: str, customizer) -> int:
+    raw_location_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=workbook,
+                                                                                       worksheet_name=worksheet)
+    # TODO(Ben) - build logic to take raw gsheet data and ingest into correct lookup table
+    if 'moz' in worksheet.lower():
+        pass
+
+    if 'gmb' in worksheet.lower():
+        pass
+
+    if 'url' in worksheet.lower():
+        pass
+
 
     return 0
 
@@ -160,7 +178,28 @@ def setup(script_name: str, required_attributes: list):
     # Check if required lookup tables exist, create if not and do nothing if existing
     build_lookup_tables(customizer=customizer)
 
+    # Lookup table refresh status, will be switched to True after first related script run then will not run for others
+    url_lookup_table_refreshed = False
+    moz_lookup_table_refreshed = False
+    gmb_lookup_table_refreshed = False
+
+    if customizer.lookup_tables['ga']['active']:
+        if not url_lookup_table_refreshed:
+            refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK,
+                                  worksheet=customizer.lookup_tables['ga']['lookup_source_sheet'], customizer=customizer)
+
+    if customizer.lookup_tables['gmb']['active']:
+        if not gmb_lookup_table_refreshed:
+            refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK,
+                                  worksheet=customizer.lookup_tables['gmb']['lookup_source_sheet'], customizer=customizer)
+
+    if customizer.lookup_tables['moz']['active']:
+        if not moz_lookup_table_refreshed:
+            refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK,
+                                  worksheet=customizer.lookup_tables['moz']['lookup_source_sheet'], customizer=customizer)
+
     return customizer
+
 
 def run_configuration_check(script_name: str, required_attributes: list, customizer: custom.Customizer):
     """

@@ -22,10 +22,24 @@ class Customizer:
         'recipients'
     ]
 
+    CONFIGURATION_WORKBOOK = '<CLIENT WORKBOOK>'
+
     lookup_tables = {
-        'moz': False,
-        'gmb': False,
-        'ga': True
+        'moz': {
+            'active': True,
+            'refresh_status': False,
+            'lookup_source_sheet': 'Moz Listing to Property'
+        },
+        'gmb': {
+            'active': True,
+            'refresh_status': False,
+            'lookup_source_sheet': 'GMB Listing to Property'
+        },
+        'ga': {
+            'active': False,
+            'refresh_status': False,
+            'lookup_source_sheet': 'URL to Property'
+        }
     }
 
     supported_dbms = [
