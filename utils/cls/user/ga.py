@@ -29,6 +29,16 @@ class GoogleAnalytics(Customizer):
         setattr(self, f'{self.prefix}_client_name', self.client)
         setattr(self, f'{self.prefix}_get_view_ids', self.get_view_ids)
 
+        setattr(self, 'lookup_tables', {
+            'status': {
+                'table_type': 'ga',
+                'active': True,
+                'refresh_status': False,
+                'lookup_source_sheet': 'URL to Property',
+                'schema': 'lookup_url_schema',
+                'table_name': 'lookup_urltolocation'
+            }}),
+
         # Schema for URL lookup table
         setattr(self, f'{self.prefix}_lookup_url_schema', {
             'table': 'lookup_urltolocation',
@@ -38,45 +48,6 @@ class GoogleAnalytics(Customizer):
                 {'name': 'url', 'type': 'character varying', 'length': 100},
                 {'name': 'property', 'type': 'character varying', 'length': 100},
                 {'name': 'exact', 'type': 'bigint'},
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for GMB lookup table
-        setattr(self, f'{self.prefix}_lookup_gmb_schema', {
-            'table': 'lookup_gmb_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'character varying', 'length': 50},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for Moz lookup table
-        setattr(self, f'{self.prefix}_lookup_mozlocal_schema', {
-            'table': 'lookup_mozlocal_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'account', 'type': 'character varying', 'length': 150},
-                {'name': 'label', 'type': 'character varying', 'length': 150},
-                {'name': 'name', 'type': 'character varying', 'length': 150},
-                {'name': 'address', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'bigint'},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
             ],
             'owner': 'postgres'
         })

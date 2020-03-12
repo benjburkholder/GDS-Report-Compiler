@@ -31,13 +31,13 @@ def clear_postgresql_non_golden_data(customizer, date_col, min_date, max_date):
         con.execute(sql, min_date=min_date, max_date=max_date)
 
 
-def clear_postgresql_lookup_table(customizer, lookup_table):
+def clear_postgresql_lookup_table(customizer):
     engine = build_postgresql_engine(customizer=customizer)
 
     sql = sqlalchemy.text(
         f"""
             DELETE
-            FROM {lookup_table['schema']}.{lookup_table['table']};
+            FROM public.{customizer.lookup_tables["status"]["table_name"]};
 
             """
     )
@@ -55,6 +55,21 @@ def insert_postgresql_data(customizer, df, if_exists='append', index=False, inde
             index=index,
             index_label=index_label
         )
+
+
+def insert_postgresql_lookup_data(customizer, df, if_exists='append', index=False, index_label=None):
+    engine = build_postgresql_engine(customizer=customizer)
+
+    with engine.connect() as con:
+        df.to_sql(
+            customizer.lookup_tables["status"]["table_name"],
+            con=con,
+            if_exists=if_exists,
+            index=index,
+            index_label=index_label
+        )
+
+    return 0
 
 
 def check_postgresql_table_exists(customizer, table, schema) -> bool:
