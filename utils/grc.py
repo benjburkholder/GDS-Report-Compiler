@@ -189,6 +189,9 @@ def setup(script_name: str, required_attributes: list):
         refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK,
                               worksheet=customizer.lookup_tables['status']['lookup_source_sheet'], customizer=customizer)
 
+        # After lookup table is refreshed, set status of attribute to True
+        customizer.lookup_tables['status']['refresh_status'] = True
+
     return customizer
 
 
