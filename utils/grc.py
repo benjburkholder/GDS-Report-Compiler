@@ -60,6 +60,15 @@ def clear_non_golden_data(customizer, date_col, min_date, max_date):
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
+def clear_lookup_table_data(customizer, lookup_table):
+    assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
+    if customizer.dbms == 'postgresql':
+        return postgres_helpers.clear_postgresql_lookup_table(
+            customizer=customizer, lookup_table=lookup_table)
+    else:
+        raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
+
+
 def insert_data(customizer, df):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
@@ -94,25 +103,25 @@ def run_data_ingest_rolling_dates(df, customizer, date_col='report_date') -> int
 
 def build_lookup_tables(customizer) -> int:
     if customizer.lookup_tables['ga']['active']:
-        url_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_urltolocation_schema'))
+        url_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_url_schema'))
 
         if not url_lookup_table_existence:
             print('url_lookup_table does not exist, creating...')
-            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_urltolocation_schema'))
+            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_url_schema'))
 
     if customizer.lookup_tables['moz']['active']:
-        moz_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_listingtolocation_schema'))
+        moz_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_schema'))
 
         if not moz_lookup_table_existence:
             print('moz_lookup_table does not exist, creating...')
-            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_listingtolocation_schema'))
+            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_mozlocal_schema'))
 
     if customizer.lookup_tables['gmb']['active']:
-        gmb_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_listingtolocation_schema'))
+        gmb_lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_schema'))
 
         if not gmb_lookup_table_existence:
             print('gmb_lookup_table does not exist, creating...')
-            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_listingtolocation_schema'))
+            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_lookup_gmb_schema'))
 
     return 0
 
@@ -122,14 +131,16 @@ def refresh_lookup_tables(workbook: str, worksheet: str, customizer) -> int:
                                                                                        worksheet_name=worksheet)
     # TODO(Ben) - build logic to take raw gsheet data and ingest into correct lookup table
     if 'moz' in worksheet.lower():
-        pass
+        clear_lookup_table_data(customizer=customizer, lookup_table=getattr(customizer, f'{customizer.prefix}_lookup_moz_schema'))
+        insert_data(customizer, df=raw_location_data)
 
     if 'gmb' in worksheet.lower():
-        pass
+        clear_lookup_table_data(customizer=customizer, lookup_table=getattr(customizer, f'{customizer.prefix}_lookup_gmb_schema'))
+        insert_data(customizer, df=raw_location_data)
 
     if 'url' in worksheet.lower():
-        pass
-
+        clear_lookup_table_data(customizer=customizer, lookup_table=getattr(customizer, f'{customizer.prefix}_lookup_url_schema'))
+        insert_data(customizer, df=raw_location_data)
 
     return 0
 

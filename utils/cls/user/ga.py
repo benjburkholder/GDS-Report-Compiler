@@ -29,6 +29,58 @@ class GoogleAnalytics(Customizer):
         setattr(self, f'{self.prefix}_client_name', self.client)
         setattr(self, f'{self.prefix}_get_view_ids', self.get_view_ids)
 
+        # Schema for URL lookup table
+        setattr(self, f'{self.prefix}_lookup_url_schema', {
+            'table': 'lookup_urltolocation',
+            'schema': 'public',
+            'type': 'lookup',
+            'columns': [
+                {'name': 'url', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 100},
+                {'name': 'exact', 'type': 'bigint'},
+            ],
+            'owner': 'postgres'
+        })
+
+        # Schema for GMB lookup table
+        setattr(self, f'{self.prefix}_lookup_gmb_schema', {
+            'table': 'lookup_gmb_listingtolocation',
+            'schema': 'public',
+            'type': 'lookup',
+            'columns': [
+                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 150},
+                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
+                {'name': 'city', 'type': 'character varying', 'length': 50},
+                {'name': 'state', 'type': 'character varying', 'length': 50},
+                {'name': 'zip', 'type': 'character varying', 'length': 50},
+                {'name': 'phone', 'type': 'character varying', 'length': 25},
+
+            ],
+            'owner': 'postgres'
+        })
+
+        # Schema for Moz lookup table
+        setattr(self, f'{self.prefix}_lookup_mozlocal_schema', {
+            'table': 'lookup_mozlocal_listingtolocation',
+            'schema': 'public',
+            'type': 'lookup',
+            'columns': [
+                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 150},
+                {'name': 'account', 'type': 'character varying', 'length': 150},
+                {'name': 'label', 'type': 'character varying', 'length': 150},
+                {'name': 'name', 'type': 'character varying', 'length': 150},
+                {'name': 'address', 'type': 'character varying', 'length': 250},
+                {'name': 'city', 'type': 'character varying', 'length': 50},
+                {'name': 'state', 'type': 'character varying', 'length': 50},
+                {'name': 'zip', 'type': 'bigint'},
+                {'name': 'phone', 'type': 'character varying', 'length': 25},
+
+            ],
+            'owner': 'postgres'
+        })
+
     def get_view_ids(self) -> list:
         """
         Required hook, user is free to provide this list of dictionaries as they choose
@@ -114,58 +166,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                         {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                     ]
                 }
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for URL lookup table
-        setattr(self, f'{self.prefix}_lookup_urltolocation_schema', {
-            'table': 'lookup_urltolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'url', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'exact', 'type': 'bigint'},
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for GMB lookup table
-        setattr(self, f'{self.prefix}_lookup_gmb_listingtolocation_schema', {
-            'table': 'lookup_gmb_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'character varying', 'length': 50},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for Moz lookup table
-        setattr(self, f'{self.prefix}_lookup_mozlocal_listingtolocation_schema', {
-            'table': 'lookup_mozlocal_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'account', 'type': 'character varying', 'length': 150},
-                {'name': 'label', 'type': 'character varying', 'length': 150},
-                {'name': 'name', 'type': 'character varying', 'length': 150},
-                {'name': 'address', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'bigint'},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
             ],
             'owner': 'postgres'
         })
@@ -340,58 +340,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                         {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                     ]
                 }
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for URL lookup table
-        setattr(self, f'{self.prefix}_lookup_urltolocation_schema', {
-            'table': 'lookup_urltolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'url', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'exact', 'type': 'bigint'},
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for GMB lookup table
-        setattr(self, f'{self.prefix}_lookup_gmb_listingtolocation_schema', {
-            'table': 'lookup_gmb_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'character varying', 'length': 50},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for Moz lookup table
-        setattr(self, f'{self.prefix}_lookup_mozlocal_listingtolocation_schema', {
-            'table': 'lookup_mozlocal_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'account', 'type': 'character varying', 'length': 150},
-                {'name': 'label', 'type': 'character varying', 'length': 150},
-                {'name': 'name', 'type': 'character varying', 'length': 150},
-                {'name': 'address', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'bigint'},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
             ],
             'owner': 'postgres'
         })
@@ -571,58 +519,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'owner': 'postgres'
         })
 
-        # Schema for URL lookup table
-        setattr(self, f'{self.prefix}_lookup_urltolocation_schema', {
-            'table': 'lookup_urltolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'url', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'exact', 'type': 'bigint'},
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for GMB lookup table
-        setattr(self, f'{self.prefix}_lookup_gmb_listingtolocation_schema', {
-            'table': 'lookup_gmb_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'character varying', 'length': 50},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for Moz lookup table
-        setattr(self, f'{self.prefix}_lookup_mozlocal_listingtolocation_schema', {
-            'table': 'lookup_mozlocal_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'account', 'type': 'character varying', 'length': 150},
-                {'name': 'label', 'type': 'character varying', 'length': 150},
-                {'name': 'name', 'type': 'character varying', 'length': 150},
-                {'name': 'address', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'bigint'},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
-
-            ],
-            'owner': 'postgres'
-        })
-
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'googleanalytics_backfilter',
@@ -723,3 +619,5 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         # build engine
         # execute statements
         return
+
+
