@@ -121,10 +121,27 @@ def build_lookup_tables(customizer) -> int:
     return 0
 
 
-def reshape_lookup_data(df):
+def reshape_lookup_data(customizer, df):
 
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
+
+    for column in getattr(customizer, f'{customizer.prefix}_{customizer.lookup_tables["status"]["schema"]}')['columns']:
+        if column['name'] in df.columns:
+            if column['type'] == 'character varying':
+                assert 'length' in column.keys()
+                df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+            elif column['type'] == 'bigint':
+                df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+            elif column['type'] == 'double precision':
+                df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+            elif column['type'] == 'date':
+                df[column['name']] = pd.to_datetime(df[column['name']])
+            elif column['type'] == 'timestamp without time zone':
+                df[column['name']] = pd.to_datetime(df[column['name']])
+            elif column['type'] == 'datetime with time zone':
+                # TODO(jschroeder) how better to interpret timezone data?
+                df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
 
     return df
 
@@ -133,7 +150,7 @@ def refresh_lookup_tables(workbook: str, worksheet: str, customizer) -> int:
     raw_location_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=workbook, worksheet_name=worksheet)
 
     clear_lookup_table_data(customizer=customizer)
-    df = reshape_lookup_data(df=raw_location_data)
+    df = reshape_lookup_data(df=raw_location_data, customizer=customizer)
     insert_lookup_data(customizer, df=df)
 
     return 0
