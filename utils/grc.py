@@ -203,11 +203,15 @@ def setup(script_name: str, required_attributes: list):
     # Lookup table refresh status, will be switched to True after first related script run then will not run for others
 
     if not customizer.lookup_tables['status']['refresh_status']:
+        print(f'{customizer.lookup_tables["status"]["table_name"]} not refreshed, refreshing now...')
         refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK,
                               worksheet=customizer.lookup_tables['status']['lookup_source_sheet'], customizer=customizer)
 
         # After lookup table is refreshed, set status of attribute to True
         customizer.lookup_tables['status']['refresh_status'] = True
+
+        if customizer.lookup_tables['status']['refresh_status']:
+            print("SUCCESS: Table Refreshed.")
 
     return customizer
 

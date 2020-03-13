@@ -28,7 +28,7 @@ class GoogleSheetsManager:
             'https://www.googleapis.com/auth/drive'
         ]
 
-    def get_spreadsheet_by_name(self, workbook_name: str, worksheet_name: str) -> list:
+    def get_spreadsheet_by_name(self, workbook_name: str, worksheet_name: str) -> pd.DataFrame:
         """
         High-level helper method to get a spreadsheet by name
         Returns list of dictionaries (record format)
@@ -43,4 +43,6 @@ class GoogleSheetsManager:
             worksheet_name
         ).get_all_records()
 
-        return data_dict
+        df = pd.DataFrame(data_dict)
+
+        return df
