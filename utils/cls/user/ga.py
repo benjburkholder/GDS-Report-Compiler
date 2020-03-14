@@ -20,7 +20,8 @@ class GoogleAnalytics(Customizer):
         'page',
     ]
 
-    view_ids = ['89266602']
+    # Enter list of view ids as str
+    view_ids = []
 
     def __init__(self):
         super().__init__()
