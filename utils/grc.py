@@ -126,6 +126,10 @@ def reshape_lookup_data(customizer, df):
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
 
+    if hasattr(customizer, f'{customizer.prefix}_drop_columns'):
+        if getattr(customizer, f'{customizer.prefix}_drop_columns')['active']:
+            df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
+
     for column in getattr(customizer, f'{customizer.prefix}_{customizer.lookup_tables["status"]["schema"]}')['columns']:
         if column['name'] in df.columns:
             if column['type'] == 'character varying':

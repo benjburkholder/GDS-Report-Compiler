@@ -52,6 +52,11 @@ class GoogleAnalytics(Customizer):
             'owner': 'postgres'
         })
 
+        setattr(self, f'{self.prefix}_drop_columns', {
+            'status': False,
+            'columns': ['zip', 'phone']
+        })
+
     def get_view_ids(self) -> list:
         """
         Required hook, user is free to provide this list of dictionaries as they choose
