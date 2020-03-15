@@ -152,9 +152,28 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'name': 'googleanalytics_backfilter',
             'active': 1,
             'code': """
-            UPDATE ...
+            UPDATE public.googleanalytics_traffic TARGET
+            SET 
+                property = LOOKUP.property
+            FROM public.lookup_urltolocation LOOKUP
+            WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')
+            AND LOOKUP.exact = 0;
 
-            SELECT 1;
+            UPDATE public.googleanalytics_traffic TARGET
+            SET 
+                property = LOOKUP.property
+            FROM public.lookup_urltolocation LOOKUP
+            WHERE TARGET.page = LOOKUP.url
+            AND LOOKUP.exact = 1;
+
+            UPDATE public.googleanalytics_traffic
+            SET
+                property = 'Non-Location Pages'
+            WHERE property IS NULL;
+
+            CLUSTER public.googleanalytics_traffic;
+
+            SELECT 0;
             """,
             'return': 'integer',
             'owner': 'postgres'
@@ -313,7 +332,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                     'method': 'btree',
                     'columns': [
                         {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
+                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
                         {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                     ]
                 }
@@ -326,9 +345,28 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
             'name': 'googleanalytics_backfilter',
             'active': 1,
             'code': """
-            UPDATE ...
+            UPDATE public.googleanalytics_events TARGET
+            SET 
+                property = LOOKUP.property
+            FROM public.lookup_urltolocation LOOKUP
+            WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')
+            AND LOOKUP.exact = 0;
 
-            SELECT 1;
+            UPDATE public.googleanalytics_events TARGET
+            SET 
+                property = LOOKUP.property
+            FROM public.lookup_urltolocation LOOKUP
+            WHERE TARGET.page = LOOKUP.url
+            AND LOOKUP.exact = 1;
+
+            UPDATE public.googleanalytics_events
+            SET
+                property = 'Non-Location Pages'
+            WHERE property IS NULL;
+
+            CLUSTER public.googleanalytics_events;
+
+            SELECT 0;
             """,
             'return': 'integer',
             'owner': 'postgres'
@@ -488,7 +526,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
                     'method': 'btree',
                     'columns': [
                         {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
+                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
                         {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                     ]
                 }
@@ -501,9 +539,28 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'name': 'googleanalytics_backfilter',
             'active': 1,
             'code': """
-            UPDATE ...
+           UPDATE public.googleanalytics_goals TARGET
+            SET 
+                property = LOOKUP.property
+            FROM public.lookup_urltolocation LOOKUP
+            WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')
+            AND LOOKUP.exact = 0;
 
-            SELECT 1;
+            UPDATE public.googleanalytics_goals TARGET
+            SET 
+                property = LOOKUP.property
+            FROM public.lookup_urltolocation LOOKUP
+            WHERE TARGET.page = LOOKUP.url
+            AND LOOKUP.exact = 1;
+
+            UPDATE public.googleanalytics_goals
+            SET
+                property = 'Non-Location Pages'
+            WHERE property IS NULL;
+
+            CLUSTER public.googleanalytics_goals;
+
+            SELECT 0;
             """,
             'return': 'integer',
             'owner': 'postgres'
