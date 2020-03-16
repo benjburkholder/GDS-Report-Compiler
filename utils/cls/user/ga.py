@@ -112,8 +112,8 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'columns': [
                 {'name': 'report_date', 'type': 'date'},
                 {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
                 {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'community', 'type': 'character varying', 'length': 100},
                 {'name': 'service_line', 'type': 'character varying', 'length': 100},
                 {'name': 'view_id', 'type': 'character varying', 'length': 25},
                 {'name': 'source_medium', 'type': 'character varying', 'length': 100},
@@ -147,36 +147,25 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'owner': 'postgres'
         })
 
+        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt += "WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')\n"
+        stmt += "AND LOOKUP.exact = 0;"
+        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt2 += "SET property = LOOKUP.property\n"
+        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt2 += "WHERE TARGET.page = LOOKUP.url\n"
+        stmt2 += "AND LOOKUP.exact = 1;"
+        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
+        stmt3 += "SET property = 'Non-Location Pages'\n"
+        stmt3 += "WHERE property IS NULL;\n"
+
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'googleanalytics_backfilter',
             'active': 1,
-            'code': """
-            UPDATE public.googleanalytics_traffic TARGET
-            SET 
-                property = LOOKUP.property
-            FROM public.lookup_urltolocation LOOKUP
-            WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')
-            AND LOOKUP.exact = 0;
-
-            UPDATE public.googleanalytics_traffic TARGET
-            SET 
-                property = LOOKUP.property
-            FROM public.lookup_urltolocation LOOKUP
-            WHERE TARGET.page = LOOKUP.url
-            AND LOOKUP.exact = 1;
-
-            UPDATE public.googleanalytics_traffic
-            SET
-                property = 'Non-Location Pages'
-            WHERE property IS NULL;
-
-            CLUSTER public.googleanalytics_traffic;
-
-            SELECT 0;
-            """,
-            'return': 'integer',
-            'owner': 'postgres'
+            'code': [stmt, stmt2, stmt3]
         })
 
         # audit procedure
@@ -210,10 +199,12 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'date': 'report_date',
             'view_id': 'view_id',
             'sourceMedium': 'source_medium',
+            'channelGrouping': 'channel_grouping',
             'deviceCategory': 'device',
             'campaign': 'campaign',
             'pagePath': 'page',
             'sessions': 'sessions',
+            'percentNewSessions': 'percent_new_sessions',
             'percentNewPageviews': 'percent_new_pageviews',
             'pageviews': 'pageviews',
             'uniquePageviews': 'unique_pageviews',
@@ -222,7 +213,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'bounces': 'bounces',
             'sessionDuration': 'session_duration',
             'users': 'users',
-            'new_users': 'new_users'
+            'newUsers': 'new_users'
         })
 
     # noinspection PyMethodMayBeStatic

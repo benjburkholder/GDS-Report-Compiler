@@ -5,8 +5,10 @@ import os
 import pandas as pd
 
 from utils.dbms_helpers import postgres_helpers
+import sqlalchemy
 from utils import custom, stdlib
 from utils.gs_manager import GoogleSheetsManager
+from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
 
 
 def get_script_name(file):
@@ -127,7 +129,7 @@ def reshape_lookup_data(customizer, df):
     df.columns = [col.replace(' ', '_') for col in df.columns]
 
     if hasattr(customizer, f'{customizer.prefix}_drop_columns'):
-        if getattr(customizer, f'{customizer.prefix}_drop_columns')['active']:
+        if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
             df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
 
     for column in getattr(customizer, f'{customizer.prefix}_{customizer.lookup_tables["status"]["schema"]}')['columns']:
@@ -136,7 +138,7 @@ def reshape_lookup_data(customizer, df):
                 assert 'length' in column.keys()
                 df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
             elif column['type'] == 'bigint':
-                df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                df[column['name']] = df[column['name']].apply(lambda x: int(x) if x == 0 or x == 1 else None)
             elif column['type'] == 'double precision':
                 df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
             elif column['type'] == 'date':
@@ -248,3 +250,14 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
             print(f'\tNow processing stage {stage}')
             df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
     return df
+
+
+def table_backfilter(customizer: custom.Customizer):
+    if getattr(customizer, f'{customizer.prefix}_backfilter_procedure'):
+        engine = build_postgresql_engine(customizer=customizer)
+        with engine.connect() as con:
+            for block in getattr(customizer, f'{customizer.prefix}_backfilter_procedure')['code']:
+                sql = sqlalchemy.text(block)
+                con.execute(sql)
+
+        print('SUCCESS: Table Backfiltered.')
