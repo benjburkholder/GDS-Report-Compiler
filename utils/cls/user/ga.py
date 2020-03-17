@@ -54,8 +54,8 @@ class GoogleAnalytics(Customizer):
         })
 
         setattr(self, f'{self.prefix}_drop_columns', {
-            'status': False,
-            'columns': ['zip', 'phone']
+          'status': False,
+          'columns': ['zip', 'phone']
         })
 
     def get_view_ids(self) -> list:
@@ -331,36 +331,26 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
             'owner': 'postgres'
         })
 
+        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt += "WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')\n"
+        stmt += "AND LOOKUP.exact = 0;"
+        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt2 += "SET property = LOOKUP.property\n"
+        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt2 += "WHERE TARGET.page = LOOKUP.url\n"
+        stmt2 += "AND LOOKUP.exact = 1;"
+        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
+        stmt3 += "SET property = 'Non-Location Pages'\n"
+        stmt3 += "WHERE property IS NULL;\n"
+
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'googleanalytics_backfilter',
             'active': 1,
-            'code': """
-            UPDATE public.googleanalytics_events TARGET
-            SET 
-                property = LOOKUP.property
-            FROM public.lookup_urltolocation LOOKUP
-            WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')
-            AND LOOKUP.exact = 0;
+            'code': [stmt, stmt2, stmt3]
 
-            UPDATE public.googleanalytics_events TARGET
-            SET 
-                property = LOOKUP.property
-            FROM public.lookup_urltolocation LOOKUP
-            WHERE TARGET.page = LOOKUP.url
-            AND LOOKUP.exact = 1;
-
-            UPDATE public.googleanalytics_events
-            SET
-                property = 'Non-Location Pages'
-            WHERE property IS NULL;
-
-            CLUSTER public.googleanalytics_events;
-
-            SELECT 0;
-            """,
-            'return': 'integer',
-            'owner': 'postgres'
         })
 
         # audit procedure
@@ -525,36 +515,25 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'owner': 'postgres'
         })
 
+        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt += "WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')\n"
+        stmt += "AND LOOKUP.exact = 0;"
+        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt2 += "SET property = LOOKUP.property\n"
+        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt2 += "WHERE TARGET.page = LOOKUP.url\n"
+        stmt2 += "AND LOOKUP.exact = 1;"
+        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
+        stmt3 += "SET property = 'Non-Location Pages'\n"
+        stmt3 += "WHERE property IS NULL;\n"
+
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'googleanalytics_backfilter',
             'active': 1,
-            'code': """
-           UPDATE public.googleanalytics_goals TARGET
-            SET 
-                property = LOOKUP.property
-            FROM public.lookup_urltolocation LOOKUP
-            WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')
-            AND LOOKUP.exact = 0;
-
-            UPDATE public.googleanalytics_goals TARGET
-            SET 
-                property = LOOKUP.property
-            FROM public.lookup_urltolocation LOOKUP
-            WHERE TARGET.page = LOOKUP.url
-            AND LOOKUP.exact = 1;
-
-            UPDATE public.googleanalytics_goals
-            SET
-                property = 'Non-Location Pages'
-            WHERE property IS NULL;
-
-            CLUSTER public.googleanalytics_goals;
-
-            SELECT 0;
-            """,
-            'return': 'integer',
-            'owner': 'postgres'
+            'code': [stmt, stmt2, stmt3]
         })
 
         # audit procedure
