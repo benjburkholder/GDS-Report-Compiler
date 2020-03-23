@@ -42,4 +42,22 @@ class GoogleMyBusiness(Customizer):
             'owner': 'postgres'
         })
 
+        # Schema for GMB source table
+        setattr(self, f'{self.prefix}_source_gmb_schema', {
+            'table': 'source_gmb_listingtolocation',
+            'schema': 'public',
+            'type': 'source',
+            'columns': [
+                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 150},
+                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
+                {'name': 'city', 'type': 'character varying', 'length': 50},
+                {'name': 'state', 'type': 'character varying', 'length': 50},
+                {'name': 'zip', 'type': 'character varying', 'length': 50},
+                {'name': 'phone', 'type': 'character varying', 'length': 25},
+
+            ],
+            'owner': 'postgres'
+        })
+
 

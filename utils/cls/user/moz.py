@@ -45,6 +45,27 @@ class Moz(Customizer):
             'owner': 'postgres'
         })
 
+        # Schema for Moz source table
+        setattr(self, f'{self.prefix}_source_moz_schema', {
+            'table': 'source_moz_listingtoproperty',
+            'schema': 'public',
+            'type': 'source',
+            'columns': [
+                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 150},
+                {'name': 'account', 'type': 'character varying', 'length': 150},
+                {'name': 'label', 'type': 'character varying', 'length': 150},
+                {'name': 'name', 'type': 'character varying', 'length': 150},
+                {'name': 'address', 'type': 'character varying', 'length': 250},
+                {'name': 'city', 'type': 'character varying', 'length': 50},
+                {'name': 'state', 'type': 'character varying', 'length': 50},
+                {'name': 'zip', 'type': 'bigint'},
+                {'name': 'phone', 'type': 'character varying', 'length': 25},
+
+            ],
+            'owner': 'postgres'
+        })
+
         setattr(self, f'{self.prefix}_account_label_pairs', {
             'account_label_pairs': [
                 {'account': 'Linkmedia360-Digital', 'label': 'zwirner'}

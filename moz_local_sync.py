@@ -56,6 +56,7 @@ def main() -> int:
             )
 
         if df.shape[0]:
+            grc.refresh_source_tables(customizer=customizer)
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
             grc.table_backfilter(customizer=customizer)

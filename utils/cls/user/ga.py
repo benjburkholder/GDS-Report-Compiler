@@ -53,6 +53,19 @@ class GoogleAnalytics(Customizer):
             'owner': 'postgres'
         })
 
+        # Schema for URL source table
+        setattr(self, f'{self.prefix}_source_url_schema', {
+            'table': 'source_urltolocation',
+            'schema': 'public',
+            'type': 'source',
+            'columns': [
+                {'name': 'url', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 100},
+                {'name': 'exact', 'type': 'bigint'},
+            ],
+            'owner': 'postgres'
+        })
+
         setattr(self, f'{self.prefix}_drop_columns', {
           'status': False,
           'columns': ['zip', 'phone']

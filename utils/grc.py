@@ -153,6 +153,35 @@ def reshape_lookup_data(customizer, df):
     return df
 
 
+def reshape_source_table_data(customizer, df):
+
+    df.columns = map(str.lower, df.columns)
+    df.columns = [col.replace(' ', '_') for col in df.columns]
+
+    if hasattr(customizer, f'{customizer.prefix}_drop_columns'):
+        if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
+            df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
+
+    for column in getattr(customizer, f'{customizer.prefix}_source_url_schema')['columns']:
+        if column['name'] in df.columns:
+            if column['type'] == 'character varying':
+                assert 'length' in column.keys()
+                df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+            elif column['type'] == 'bigint':
+                df[column['name']] = df[column['name']].apply(lambda x: int(x) if x == 0 or x == 1 else None)
+            elif column['type'] == 'double precision':
+                df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+            elif column['type'] == 'date':
+                df[column['name']] = pd.to_datetime(df[column['name']])
+            elif column['type'] == 'timestamp without time zone':
+                df[column['name']] = pd.to_datetime(df[column['name']])
+            elif column['type'] == 'datetime with time zone':
+                # TODO(jschroeder) how better to interpret timezone data?
+                df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+
+    return df
+
+
 def refresh_lookup_tables(workbook: str, worksheet: str, customizer) -> int:
     raw_location_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=workbook, worksheet_name=worksheet)
 
@@ -218,7 +247,7 @@ def setup(script_name: str, required_attributes: list):
         customizer.lookup_tables['status']['refresh_status'] = True
 
         if customizer.lookup_tables['status']['refresh_status']:
-            print("SUCCESS: Table Refreshed.")
+            print("SUCCESS: Lookup Table Refreshed.")
 
     return customizer
 
@@ -263,15 +292,16 @@ def table_backfilter(customizer: custom.Customizer):
 
         print('SUCCESS: Table Backfiltered.')
 
-# TODO (Ben) - Finish config of google sheet refresh
-def refresh_google_sheet_table(customizer: custom.Customizer):
+
+def refresh_source_tables(customizer: custom.Customizer):
     today = datetime.date.today()
 
     if today.day in [1, 15]:
+        print('STATUS: Refreshing google sheet source tables...')
         for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
-            df = pd.Dataframe(GoogleSheetsManager(customizer.CLIENT_NAME).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
+            df = pd.DataFrame(GoogleSheetsManager(customizer.CLIENT_NAME).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
                                                                                 worksheet_name=sheet['sheet']))
-
+            df = reshape_source_table_data(customizer=customizer, df=df)
             engine = build_postgresql_engine(customizer=customizer)
             with engine.connect() as con:
                 df.to_sql(
@@ -281,4 +311,9 @@ def refresh_google_sheet_table(customizer: custom.Customizer):
                     index=False,
                     index_label=False
                 )
+
+            print(f'SUCCESS: {sheet["table"]} Refreshed.')
+
+
+
 

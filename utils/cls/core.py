@@ -27,9 +27,9 @@ class Customizer:
     CONFIGURATION_WORKBOOK = {
         'config_sheet_name': '<CONFIG SHEET NAME>',
         'sheets': [
-            {'sheet': '<SHEET NAME>', 'table': '<TABLE NAME>'},
-            {'sheet': '<SHEET NAME>', 'table': '<TABLE NAME>'},
-            {'sheet': '<SHEET NAME>', 'table': '<TABLE NAME>'}
+            {'sheet': '<SHEET NAME>', 'table': '<SOURCE TABLE NAME>'},
+            {'sheet': '<SHEET NAME>', 'table': '<SOURCE TABLE NAME>'},
+            {'sheet': '<SHEET NAME>', 'table': '<SOURCE TABLE NAME>'}
         ]}
 
     supported_dbms = [
