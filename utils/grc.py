@@ -3,6 +3,7 @@ Platform
 """
 import os
 import pandas as pd
+import datetime
 
 from utils.dbms_helpers import postgres_helpers
 import sqlalchemy
@@ -210,7 +211,7 @@ def setup(script_name: str, required_attributes: list):
 
     if not customizer.lookup_tables['status']['refresh_status']:
         print(f'{customizer.lookup_tables["status"]["table_name"]} not refreshed, refreshing now...')
-        refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK,
+        refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
                               worksheet=customizer.lookup_tables['status']['lookup_source_sheet'], customizer=customizer)
 
         # After lookup table is refreshed, set status of attribute to True
@@ -261,3 +262,23 @@ def table_backfilter(customizer: custom.Customizer):
                 con.execute(sql)
 
         print('SUCCESS: Table Backfiltered.')
+
+# TODO (Ben) - Finish config of google sheet refresh
+def refresh_google_sheet_table(customizer: custom.Customizer):
+    today = datetime.date.today()
+
+    if today.day in [1, 15]:
+        for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+            df = pd.Dataframe(GoogleSheetsManager(customizer.CLIENT_NAME).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
+                                                                                worksheet_name=sheet['sheet']))
+
+            engine = build_postgresql_engine(customizer=customizer)
+            with engine.connect() as con:
+                df.to_sql(
+                    sheet['table'],
+                    con=con,
+                    if_exists='append',
+                    index=False,
+                    index_label=False
+                )
+

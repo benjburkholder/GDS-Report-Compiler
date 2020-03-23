@@ -22,25 +22,15 @@ class Customizer:
         'recipients'
     ]
 
-    CONFIGURATION_WORKBOOK = '<CLIENT WORKBOOK>'
+    CLIENT_NAME = '<NAME>'
 
-    lookup_tables = {
-        'moz': {
-            'active': True,
-            'refresh_status': False,
-            'lookup_source_sheet': 'Moz Listing to Property'
-        },
-        'gmb': {
-            'active': True,
-            'refresh_status': False,
-            'lookup_source_sheet': 'GMB Listing to Property'
-        },
-        'ga': {
-            'active': False,
-            'refresh_status': False,
-            'lookup_source_sheet': 'URL to Property'
-        }
-    }
+    CONFIGURATION_WORKBOOK = {
+        'config_sheet_name': '<CONFIG SHEET NAME>',
+        'sheets': [
+            {'sheet': '<SHEET NAME>', 'table': '<TABLE NAME>'},
+            {'sheet': '<SHEET NAME>', 'table': '<TABLE NAME>'},
+            {'sheet': '<SHEET NAME>', 'table': '<TABLE NAME>'}
+        ]}
 
     supported_dbms = [
         'postgresql'

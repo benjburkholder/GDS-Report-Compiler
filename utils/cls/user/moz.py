@@ -21,7 +21,7 @@ class Moz(Customizer):
                 'refresh_status': False,
                 'lookup_source_sheet': 'Moz Listing to Property',
                 'schema': 'lookup_moz_schema',
-                'table_name': 'lookup_moz_listingtolocaton'
+                'table_name': 'lookup_moz_listingtolocation'
             }}),
 
         # Schema for Moz lookup table
@@ -43,6 +43,12 @@ class Moz(Customizer):
 
             ],
             'owner': 'postgres'
+        })
+
+        setattr(self, f'{self.prefix}_account_label_pairs', {
+            'account_label_pairs': [
+                {'account': 'Linkmedia360-Digital', 'label': 'zwirner'}
+            ]
         })
 
 
@@ -273,7 +279,7 @@ class MozLocalVisibilityCustomizer(Moz):
         setattr(self, f'{self.prefix}_historical', True)
         setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
         setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
-        setattr(self, f'{self.prefix}_table', 'mozlocal_directory_visibility_report')
+        setattr(self, f'{self.prefix}_table', 'mozlocal_directory_visibility_report_mdd')
 
         # Used to set columns which vary from data source and client vertical
         setattr(self, f'{self.prefix}_custom_columns', {
@@ -283,7 +289,7 @@ class MozLocalVisibilityCustomizer(Moz):
 
         # model
         setattr(self, f'{self.prefix}_schema', {
-            'table': 'mozlocal_directory_visibility_report',
+            'table': 'mozlocal_directory_visibility_report_mdd',
             'schema': 'public',
             'type': 'reporting',
             'columns': [
@@ -357,9 +363,9 @@ class MozLocalSyncCustomizer(Moz):
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
         setattr(self, f'{self.prefix}_historical', True)
-        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
-        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
-        setattr(self, f'{self.prefix}_table', 'mozlocal_directory_sync_report')
+        setattr(self, f'{self.prefix}_historical_start_date', '2020-03-01')
+        setattr(self, f'{self.prefix}_historical_end_date', '2020-03-10')
+        setattr(self, f'{self.prefix}_table', 'mozlocal_directory_sync_report_mdd')
 
         # Used to set columns which vary from data source and client vertical
         setattr(self, f'{self.prefix}_custom_columns', {
@@ -369,7 +375,7 @@ class MozLocalSyncCustomizer(Moz):
 
         # model
         setattr(self, f'{self.prefix}_schema', {
-            'table': 'mozlocal_directory_sync_report',
+            'table': 'mozlocal_directory_sync_report_mdd',
             'schema': 'public',
             'type': 'reporting',
             'columns': [
