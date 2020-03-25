@@ -45,6 +45,21 @@ def clear_postgresql_lookup_table(customizer):
         con.execute(sql)
 
 
+def clear_postgresql_source_table(customizer, sheet):
+    engine = build_postgresql_engine(customizer=customizer)
+
+    sql = sqlalchemy.text(
+        f"""
+            DELETE
+            FROM public.{sheet['table']};
+
+            """
+    )
+    with engine.connect() as con:
+        con.execute(sql)
+
+
+
 def insert_postgresql_data(customizer, df, if_exists='append', index=False, index_label=None):
     engine = build_postgresql_engine(customizer=customizer)
     with engine.connect() as con:

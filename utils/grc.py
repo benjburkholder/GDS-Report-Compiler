@@ -72,6 +72,15 @@ def clear_lookup_table_data(customizer):
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
+def clear_source_table_data(customizer, sheet):
+    assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
+    if customizer.dbms == 'postgresql':
+        return postgres_helpers.clear_postgresql_source_table(
+            customizer=customizer, sheet=sheet)
+    else:
+        raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
+
+
 def insert_data(customizer, df):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
@@ -153,7 +162,7 @@ def reshape_lookup_data(customizer, df):
     return df
 
 
-def reshape_source_table_data(customizer, df):
+def reshape_source_table_data(customizer, df, table):
 
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
@@ -162,22 +171,25 @@ def reshape_source_table_data(customizer, df):
         if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
             df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
 
-    for column in getattr(customizer, f'{customizer.prefix}_source_url_schema')['columns']:
-        if column['name'] in df.columns:
-            if column['type'] == 'character varying':
-                assert 'length' in column.keys()
-                df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-            elif column['type'] == 'bigint':
-                df[column['name']] = df[column['name']].apply(lambda x: int(x) if x == 0 or x == 1 else None)
-            elif column['type'] == 'double precision':
-                df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-            elif column['type'] == 'date':
-                df[column['name']] = pd.to_datetime(df[column['name']])
-            elif column['type'] == 'timestamp without time zone':
-                df[column['name']] = pd.to_datetime(df[column['name']])
-            elif column['type'] == 'datetime with time zone':
-                # TODO(jschroeder) how better to interpret timezone data?
-                df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+    if hasattr(customizer, f'{customizer.prefix}_{table}'):
+        for column in getattr(customizer, f'{customizer.prefix}_{table}')['columns']:
+            if column['name'] in df.columns:
+                if column['type'] == 'character varying':
+                    assert 'length' in column.keys()
+                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+                elif column['type'] == 'bigint':
+                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x == 0 or x == 1 else None)
+                elif column['type'] == 'double precision':
+                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                elif column['type'] == 'date':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'timestamp without time zone':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'datetime with time zone':
+                    # TODO(jschroeder) how better to interpret timezone data?
+                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+
+            print(f'SUCCESS: {table} refreshed.')
 
     return df
 
@@ -301,7 +313,8 @@ def refresh_source_tables(customizer: custom.Customizer):
         for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
             df = pd.DataFrame(GoogleSheetsManager(customizer.CLIENT_NAME).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
                                                                                 worksheet_name=sheet['sheet']))
-            df = reshape_source_table_data(customizer=customizer, df=df)
+            clear_source_table_data(customizer=customizer, sheet=sheet)
+            df = reshape_source_table_data(customizer=customizer, df=df, table=sheet['table'])
             engine = build_postgresql_engine(customizer=customizer)
             with engine.connect() as con:
                 df.to_sql(
@@ -311,9 +324,6 @@ def refresh_source_tables(customizer: custom.Customizer):
                     index=False,
                     index_label=False
                 )
-
-            print(f'SUCCESS: {sheet["table"]} Refreshed.')
-
 
 
 

@@ -33,6 +33,8 @@ def main() -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
 
+    grc.refresh_source_tables(customizer=customizer)
+
     if getattr(customizer, f'{customizer.prefix}_historical'):
         start_date = getattr(customizer, f'{customizer.prefix}_historical_start_date')
         end_date = getattr(customizer, f'{customizer.prefix}_historical_end_date')
@@ -57,15 +59,7 @@ def main() -> int:
 
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
-    grc.run_update_join(
-        customizer=customizer,
-        target_table=grc.get_required_attribute(customizer, 'table'),
-        lookup_table=grc.get_required_attribute(customizer, 'lookup_table'),
-        on='page_path',
-        exact_match=True,
-        default=grc.get_required_attribute(customizer, 'entity_defaults')
-    )
-    grc.run_update_join(customizer=customizer, on='page_path', exact_match=True)
+
 
     return 0
 

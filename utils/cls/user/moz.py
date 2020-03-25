@@ -1,8 +1,10 @@
 import os
 import pathlib
+import sqlalchemy
 import pandas as pd
 
 from utils.cls.core import Customizer
+from utils.dbms_helpers import postgres_helpers
 
 
 class Moz(Customizer):
@@ -46,7 +48,7 @@ class Moz(Customizer):
         })
 
         # Schema for Moz source table
-        setattr(self, f'{self.prefix}_source_moz_schema', {
+        setattr(self, f'{self.prefix}_source_moz_listingtoproperty', {
             'table': 'source_moz_listingtoproperty',
             'schema': 'public',
             'type': 'source',
@@ -66,11 +68,70 @@ class Moz(Customizer):
             'owner': 'postgres'
         })
 
-        setattr(self, f'{self.prefix}_account_label_pairs', {
-            'account_label_pairs': [
-                {'account': 'Linkmedia360-Digital', 'label': 'zwirner'}
-            ]
+        # Schema for URL lookup table
+        setattr(self, f'{self.prefix}_lookup_url_schema', {
+            'table': 'lookup_urltolocation',
+            'schema': 'public',
+            'type': 'lookup',
+            'columns': [
+                {'name': 'url', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 100},
+                {'name': 'exact', 'type': 'bigint'},
+            ],
+            'owner': 'postgres'
         })
+
+        setattr(self, f'{self.prefix}_source_moz_localacccountmaster', {
+            'table': 'source_moz_localacccountmaster',
+            'schema': 'public',
+            'type': 'source',
+            'columns': [
+                {'name': 'account', 'type': 'character varying', 'length': 150},
+                {'name': 'label', 'type': 'character varying', 'length': 150},
+
+            ],
+            'owner': 'postgres'
+        })
+
+        setattr(self, f'{self.prefix}_source_moz_procampaignmaster', {
+            'table': 'source_moz_procampaignmaster',
+            'schema': 'public',
+            'type': 'source',
+            'columns': [
+                {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
+
+            ],
+            'owner': 'postgres'
+        })
+
+        setattr(self, f'{self.prefix}_source_moz_directoryexclusions', {
+            'table': 'source_moz_directoryexclusions',
+            'schema': 'public',
+            'type': 'source',
+            'columns': [
+                {'name': 'exclusions', 'type': 'character varying', 'length': 100},
+
+            ],
+            'owner': 'postgres'
+        })
+
+    def pull_moz_local_accounts(self, customizer):
+        engine = postgres_helpers.build_postgresql_engine(customizer=customizer)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                """
+                SELECT *
+                FROM public.source_moz_localaccountmaster;
+                """
+            )
+
+            result = con.execute(sql)
+            accounts_raw = result.fetchall()
+
+            accounts_cleaned = [{'account': account[0], 'label': account[1]} for account in accounts_raw if
+                                accounts_raw]
+
+            return accounts_cleaned
 
 
 class MozProRankingsCustomizer(Moz):
@@ -383,7 +444,7 @@ class MozLocalSyncCustomizer(Moz):
         super().__init__()
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_historical', False)
         setattr(self, f'{self.prefix}_historical_start_date', '2020-03-01')
         setattr(self, f'{self.prefix}_historical_end_date', '2020-03-10')
         setattr(self, f'{self.prefix}_table', 'mozlocal_directory_sync_report_mdd')
@@ -426,28 +487,19 @@ class MozLocalSyncCustomizer(Moz):
             'owner': 'postgres'
         })
 
+        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_moz_schema')['table']} LOOKUP\n"
+        stmt += "WHERE CAST(TARGET.listing_id AS character varying(25)) = CAST(LOOKUP.listing_id AS character varying(25));\n"
+        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
+        stmt2 += "SET property = 'Non-Location Pages'\n"
+        stmt2 += "WHERE property IS NULL;\n"
+
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'mozlocalsync_backfilter',
             'active': 1,
-            'code': """
-                    UPDATE public.mozlocal_directory_sync_report TARGET
-                    SET 
-                        property = LOOKUP.property
-                    FROM public.lookup_moz_listingtolocation LOOKUP
-                    WHERE CAST(TARGET.listing_id AS character varying(25)) = CAST(LOOKUP.listing_id AS character varying(25));
-
-                    UPDATE public.mozlocal_directory_sync_report
-                    SET
-                        property = 'Non-Location Pages'
-                    WHERE property IS NULL;
-
-                    CLUSTER public.mozlocal_directory_sync_report;
-
-                    SELECT 0;
-                            """,
-            'return': 'integer',
-            'owner': 'postgres'
+            'code': [stmt, stmt2]
         })
 
         # audit procedure

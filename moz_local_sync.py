@@ -4,6 +4,7 @@ Moz Local Sync Report
 import logging
 import datetime
 import pandas as pd
+from utils.cls.user.moz import Moz
 
 from mozpy.reporting.client.local.llm_reporting import LLMReporting
 from utils import custom, grc
@@ -16,7 +17,6 @@ PROCESSING_STAGES = [
 ]
 
 REQUIRED_ATTRIBUTES = [
-    'account_label_pairs',
     'historical',
     'historical_start_date',
     'historical_end_date',
@@ -34,6 +34,9 @@ def main() -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
 
+    grc.refresh_source_tables(customizer=customizer)
+    accounts = Moz().pull_moz_local_accounts(customizer)
+
     if getattr(customizer, f'{customizer.prefix}_historical'):
         start_date = getattr(customizer, f'{customizer.prefix}_historical_start_date')
         end_date = getattr(customizer, f'{customizer.prefix}_historical_end_date')
@@ -43,7 +46,7 @@ def main() -> int:
         start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
         end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
-    for account in getattr(customizer, f'{customizer.prefix}_account_label_pairs')['account_label_pairs']:
+    for account in accounts:
         df_listings = LLMReporting().get_listings(account_label=account['account'], client_label=account['label'])
 
         # pull report from Linkmedia360 database
@@ -56,7 +59,6 @@ def main() -> int:
             )
 
         if df.shape[0]:
-            grc.refresh_source_tables(customizer=customizer)
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
             grc.table_backfilter(customizer=customizer)

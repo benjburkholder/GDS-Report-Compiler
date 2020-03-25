@@ -33,6 +33,8 @@ def main() -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
 
+    grc.refresh_source_tables(customizer=customizer)
+
     if getattr(customizer, f'{customizer.prefix}_historical'):
         start_date = getattr(customizer, f'{customizer.prefix}_historical_start_date')
         end_date = getattr(customizer, f'{customizer.prefix}_historical_end_date')
@@ -51,7 +53,6 @@ def main() -> int:
         )
         if df.shape[0]:
             df['view_id'] = view_id
-            grc.refresh_source_tables(customizer=customizer)
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
             grc.table_backfilter(customizer=customizer)
