@@ -62,16 +62,7 @@ def main() -> int:
             grc.table_backfilter(customizer=customizer)
 
         else:
-            logger.warning('No data returned for view id {} for dates {} - {}'.format(start_date, end_date))
-    grc.run_update_join(
-        customizer=customizer,
-        target_table=grc.get_required_attribute(customizer, 'table'),
-        lookup_table=grc.get_required_attribute(customizer, 'lookup_table'),
-        on='page_path',
-        exact_match=True,
-        default=grc.get_required_attribute(customizer, 'entity_defaults')
-    )
-    grc.run_update_join(customizer=customizer, on='page_path', exact_match=True)
+            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
 
     return 0
 

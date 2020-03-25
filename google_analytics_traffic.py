@@ -58,15 +58,6 @@ def main() -> int:
 
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
-    grc.run_update_join(
-        customizer=customizer,
-        target_table=grc.get_required_attribute(customizer, 'table'),
-        lookup_table=grc.get_required_attribute(customizer, 'lookup_table'),
-        on='page_path',
-        exact_match=True,
-        default=grc.get_required_attribute(customizer, 'entity_defaults')
-    )
-    grc.run_update_join(customizer=customizer, on='page_path', exact_match=True)
 
     return 0
 
