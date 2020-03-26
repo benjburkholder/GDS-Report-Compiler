@@ -4,9 +4,9 @@ Moz Local Sync Report
 import logging
 import datetime
 import pandas as pd
-from utils.cls.user.moz import Moz
 
 from mozpy.reporting.client.local.llm_reporting import LLMReporting
+from utils.cls.user.moz import Moz
 from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
 
@@ -59,6 +59,8 @@ def main() -> int:
             )
 
         if df.shape[0]:
+            df['data_source'] = 'Moz Local - Sync Report'
+            df = Moz().exclude_moz_directories(customizer=customizer, df=df)
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
             grc.table_backfilter(customizer=customizer)

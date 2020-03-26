@@ -26,6 +26,7 @@ class Customizer:
 
     CONFIGURATION_WORKBOOK = {
         'config_sheet_name': '<CONFIG SHEET NAME>',
+        'refresh_dates': [1, 15],
         'sheets': [
             {'sheet': '<SHEET NAME>', 'table': '<SOURCE TABLE NAME>'},
             {'sheet': '<SHEET NAME>', 'table': '<SOURCE TABLE NAME>'},

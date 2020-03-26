@@ -308,7 +308,7 @@ def table_backfilter(customizer: custom.Customizer):
 def refresh_source_tables(customizer: custom.Customizer):
     today = datetime.date.today()
 
-    if today.day in [1, 15]:
+    if today.day in customizer.CONFIGURATION_WORKBOOK['refresh_dates']:
         print('STATUS: Refreshing google sheet source tables...')
         for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
             df = pd.DataFrame(GoogleSheetsManager(customizer.CLIENT_NAME).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],

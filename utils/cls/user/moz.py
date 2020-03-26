@@ -1,5 +1,6 @@
 import os
 import pathlib
+import datetime
 import sqlalchemy
 import pandas as pd
 
@@ -119,7 +120,7 @@ class Moz(Customizer):
         engine = postgres_helpers.build_postgresql_engine(customizer=customizer)
         with engine.connect() as con:
             sql = sqlalchemy.text(
-                """
+                f"""
                 SELECT *
                 FROM public.source_moz_localaccountmaster;
                 """
@@ -133,6 +134,48 @@ class Moz(Customizer):
 
             return accounts_cleaned
 
+    def pull_moz_pro_accounts(self, customizer):
+        engine = postgres_helpers.build_postgresql_engine(customizer=customizer)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                f"""
+                SELECT *
+                FROM public.source_moz_procampaignmaster;
+                """
+            )
+
+            result = con.execute(sql)
+            accounts_raw = result.fetchall()
+
+            campaign_ids = [{'campaign_id': campaign_id} for campaign_id in accounts_raw[0]]
+
+            return campaign_ids
+
+    def exclude_moz_directories(self, customizer, df):
+        engine = postgres_helpers.build_postgresql_engine(customizer=customizer)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                """
+                SELECT *
+                FROM public.source_moz_directoryexclusions;
+                """
+            )
+
+            result = con.execute(sql)
+            exclusions_raw = result.fetchall()
+
+            exclusion_list = [exclusion[0] for exclusion in exclusions_raw]
+
+            if exclusion_list:
+                df_cleaned = df.loc[
+                             ~(df['directory'].isin(exclusion_list))
+                ,
+                             :
+
+                             ]
+
+            return df_cleaned if True else df
+
 
 class MozProRankingsCustomizer(Moz):
     prefix = 'moz_pro_rankings'
@@ -142,8 +185,7 @@ class MozProRankingsCustomizer(Moz):
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
         setattr(self, f'{self.prefix}_historical', True)
-        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
-        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
+        setattr(self, f'{self.prefix}_historical_report_date', datetime.date(2020, 1, 1))
         setattr(self, f'{self.prefix}_table', 'mozpro_rankings')
 
         # Used to set columns which vary from data source and client vertical
@@ -190,37 +232,26 @@ class MozProRankingsCustomizer(Moz):
             'owner': 'postgres'
         })
 
+        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%');\n"
+
+        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt2 += "SET property = LOOKUP.property\n"
+        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt2 += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%')\n"
+        stmt2 += "AND LOOKUP.exact = 1;"
+
+        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
+        stmt3 += "SET property = 'Non-Location Pages'\n"
+        stmt3 += "WHERE property IS NULL;\n"
+
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'mozprorankings_backfilter',
             'active': 1,
-            'code': """
-
-                    UPDATE public.mozpro_rankings TARGET
-                    SET 
-                        property = LOOKUP.property
-                    FROM public.lookup_urltolocation LOOKUP
-                    WHERE TARGET.url LIKE CONCAT('%', LOOKUP.url, '%')
-                    AND LOOKUP.exact = 0;
-
-                    UPDATE public.mozpro_rankings TARGET
-                    SET 
-                        property = LOOKUP.property
-                    FROM public.lookup_urltolocation LOOKUP
-                    WHERE TARGET.url = LOOKUP.url
-                    AND LOOKUP.exact = 1;
-
-                    UPDATE public.mozpro_rankings
-                    SET
-                        property = 'Non-Location Pages'
-                    WHERE property IS NULL;
-
-                    CLUSTER public.mozpro_rankings;
-
-                                        SELECT 1;
-                    """,
-            'return': 'integer',
-            'owner': 'postgres'
+            'code': [stmt, stmt2, stmt3]
         })
 
         # audit procedure
@@ -243,8 +274,7 @@ class MozProSERPCustomizer(Moz):
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
         setattr(self, f'{self.prefix}_historical', True)
-        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
-        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
+        setattr(self, f'{self.prefix}_historical_report_date', datetime.date(2020, 1, 1))
         setattr(self, f'{self.prefix}_table', 'mozpro_serp')
 
         # Used to set columns which vary from data source and client vertical
@@ -285,7 +315,7 @@ class MozProSERPCustomizer(Moz):
                 {'name': 'related_questions', 'type': 'bigint'},
                 {'name': 'review', 'type': 'bigint'},
                 {'name': 'shopping_results', 'type': 'bigint'},
-                {'name': 'sitelinks', 'type': 'bigint'},
+                {'name': 'site_links', 'type': 'bigint'},
                 {'name': 'tweet', 'type': 'bigint'},
                 {'name': 'video', 'type': 'bigint'},
                 {'name': 'branded', 'type': 'bigint'},
@@ -306,37 +336,26 @@ class MozProSERPCustomizer(Moz):
             'owner': 'postgres'
         })
 
+        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%');\n"
+
+        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt2 += "SET property = LOOKUP.property\n"
+        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
+        stmt2 += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%')\n"
+        stmt2 += "AND LOOKUP.exact = 1;"
+
+        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
+        stmt3 += "SET property = 'Non-Location Pages'\n"
+        stmt3 += "WHERE property IS NULL;\n"
+
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'mozproserp_backfilter',
             'active': 1,
-            'code': """
-                    UPDATE public.mozpro_serp TARGET
-                    SET 
-                        property = LOOKUP.property
-                    FROM public.lookup_urltolocation LOOKUP
-                    WHERE TARGET.url LIKE CONCAT('%', LOOKUP.url, '%')
-                    AND LOOKUP.exact = 0;
-
-                    UPDATE public.mozpro_serp TARGET
-                    SET 
-                        property = LOOKUP.property
-                    FROM public.lookup_urltolocation LOOKUP
-                    WHERE TARGET.url = LOOKUP.url
-                    AND LOOKUP.exact = 1;
-
-                    UPDATE public.mozpro_serp
-                    SET
-                        property = 'Non-Location Pages'
-                    WHERE property IS NULL;
-
-                    CLUSTER public.mozpro_serp;
-
-                    SELECT 0;
-
-                    """,
-            'return': 'integer',
-            'owner': 'postgres'
+            'code': [stmt, stmt2, stmt3]
         })
 
         # audit procedure
@@ -358,7 +377,7 @@ class MozLocalVisibilityCustomizer(Moz):
         super().__init__()
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_historical', False)
         setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
         setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
         setattr(self, f'{self.prefix}_table', 'mozlocal_directory_visibility_report_mdd')
@@ -401,28 +420,20 @@ class MozLocalVisibilityCustomizer(Moz):
             'owner': 'postgres'
         })
 
+        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_moz_schema')['table']} LOOKUP\n"
+
+        stmt += "WHERE CAST(TARGET.listing_id AS character varying(25)) = CAST(LOOKUP.listing_id AS character varying(25));\n"
+        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
+        stmt2 += "SET property = 'Non-Location Pages'\n"
+        stmt2 += "WHERE property IS NULL;\n"
+
         # backfilter procedure
         setattr(self, f'{self.prefix}_backfilter_procedure', {
             'name': 'mozlocalvisibility_backfilter',
             'active': 1,
-            'code': """
-                    UPDATE public.mozlocal_directory_visibility_report TARGET
-                    SET 
-                        property = LOOKUP.property
-                    FROM public.lookup_moz_listingtolocation LOOKUP
-                    WHERE CAST(TARGET.listing_id AS character varying(25)) = CAST(LOOKUP.listing_id AS character varying(25));
-
-                    UPDATE public.mozlocal_directory_visibility_report
-                    SET
-                        property = 'Non-Location Pages'
-                    WHERE property IS NULL;
-
-                    CLUSTER public.mozlocal_directory_visibility_report;
-
-                    SELECT 0;
-                    """,
-            'return': 'integer',
-            'owner': 'postgres'
+            'code': [stmt, stmt2]
         })
 
         # audit procedure
@@ -491,6 +502,7 @@ class MozLocalSyncCustomizer(Moz):
         stmt += "SET property = LOOKUP.property\n"
         stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_moz_schema')['table']} LOOKUP\n"
         stmt += "WHERE CAST(TARGET.listing_id AS character varying(25)) = CAST(LOOKUP.listing_id AS character varying(25));\n"
+
         stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
         stmt2 += "SET property = 'Non-Location Pages'\n"
         stmt2 += "WHERE property IS NULL;\n"
