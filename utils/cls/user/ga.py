@@ -6,7 +6,6 @@ from utils.cls.core import Customizer
 
 
 class GoogleAnalytics(Customizer):
-    prefix = 'google_analytics'
 
     supported_metrics = [
 
@@ -79,8 +78,6 @@ class GoogleAnalytics(Customizer):
 
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
-    # class configuration
-    prefix = 'google_analytics_traffic'
 
     def __init__(self):
         super().__init__()
@@ -193,7 +190,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         })
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_traffic_getter(self) -> str:
+    def getter(self) -> str:
         """
         Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
         :return:
@@ -201,7 +198,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         return '{"msg": "i am json credentials"}'
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_traffic_rename(self, df: pd.DataFrame) -> pd.DataFrame:
+    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Renames columns into pg/sql friendly aliases
         :param df:
@@ -230,7 +227,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         })
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_traffic_type(self, df: pd.DataFrame) -> pd.DataFrame:
+    def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
@@ -254,14 +251,14 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
-    def google_analytics_traffic_parse(self, df: pd.DataFrame) -> pd.DataFrame:
+    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
             for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
                 df[key] = value
 
         return df
 
-    def google_analytics_traffic_post_processing(self):
+    def post_processing(self):
         """
         Execute UPDATE... JOIN statements against the source table of the calling class
         :return:
@@ -272,8 +269,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
 
 class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
-    # class configuration
-    prefix = 'google_analytics_events'
 
     def __init__(self):
         super().__init__()
@@ -378,7 +373,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         })
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_events_getter(self) -> str:
+    def getter(self) -> str:
         """
         Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
         :return:
@@ -386,7 +381,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         return '{"msg": "i am json credentials"}'
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_events_rename(self, df: pd.DataFrame) -> pd.DataFrame:
+    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Renames columns into pg/sql friendly aliases
         :param df:
@@ -407,7 +402,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         })
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_events_type(self, df: pd.DataFrame) -> pd.DataFrame:
+    def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
@@ -431,7 +426,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
-    def google_analytics_events_parse(self, df: pd.DataFrame) -> pd.DataFrame:
+    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
             for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
                 df[key] = value
@@ -442,10 +437,9 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         if getattr(self, f'{self.prefix}_custom_columns'):
             for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
                 df[key] = value
-
         return df
 
-    def google_analytics_event_post_processing(self):
+    def post_processing(self):
         """
         Execute UPDATE... JOIN statements against the source table of the calling class
         :return:
@@ -456,8 +450,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
 
 
 class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
-    # class configuration
-    prefix = 'google_analytics_goals'
 
     def __init__(self):
         super().__init__()
@@ -561,7 +553,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         })
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_goals_getter(self) -> str:
+    def getter(self) -> str:
         """
         Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
         :return:
@@ -569,7 +561,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         return '{"msg": "i am json credentials"}'
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_goals_rename(self, df: pd.DataFrame) -> pd.DataFrame:
+    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Renames columns into pg/sql friendly aliases
         :param df:
@@ -596,7 +588,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         })
 
     # noinspection PyMethodMayBeStatic
-    def google_analytics_goals_type(self, df: pd.DataFrame) -> pd.DataFrame:
+    def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
@@ -621,14 +613,14 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
-    def google_analytics_goals_parse(self, df: pd.DataFrame) -> pd.DataFrame:
+    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
             for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
                 df[key] = value
 
         return df
 
-    def google_analytics_goals_post_processing(self):
+    def post_processing(self):
         """
         Execute UPDATE... JOIN statements against the source table of the calling class
         :return:
@@ -636,5 +628,3 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         # build engine
         # execute statements
         return
-
-

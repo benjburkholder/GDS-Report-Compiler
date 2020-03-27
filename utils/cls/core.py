@@ -56,7 +56,8 @@ class Customizer:
     # ### END EDITING ###
 
     def __init__(self):
-        self.prefix = self.get_prefix()
+        self.prefix = self.get_class_prefix()
+        self.set_function_prefixes()
         assert self.valid_global_configuration(), self.global_configuration_message
 
     def valid_global_configuration(self) -> bool:
@@ -68,6 +69,19 @@ class Customizer:
                     return False
         return True
 
-    def get_prefix(self):
+    def get_class_prefix(self):
         cls_name = self.__class__.__name__.replace('Customizer', '')
         return re.sub(r'(?<!^)(?=[A-Z])', '_', cls_name).lower()
+
+    def generate_attribute_prefix(self, attrib):
+        return f"{self.prefix}_{attrib}"
+
+    def set_attribute(self, attrib, value):
+        setattr(self, self.generate_attribute_prefix(attrib=attrib), value)
+
+    def set_function_prefixes(self) -> None:
+        for func in dir(self):
+            if (callable(getattr(self, func))) and not (re.match(r'_+.*', func)):
+                if not hasattr(self, self.generate_attribute_prefix(attrib=func)):
+                    setattr(self, self.generate_attribute_prefix(attrib=func), getattr(self, func))
+
