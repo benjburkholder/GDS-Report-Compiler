@@ -216,7 +216,14 @@
       <option name="project" value="LOCAL" />
       <updated>1582923780609</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="2020-03-27: Get prefix dynamically">
+      <created>1585332127904</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1585332127904</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -227,13 +234,15 @@
     <MESSAGE value="2020-02-28: Updates from Test Client" />
     <MESSAGE value="2020-02-28: Updates from Test Client (b2)" />
     <MESSAGE value="2020-02-28: Ideas for next iteration (b1)" />
-    <option name="LAST_COMMIT_MESSAGE" value="2020-02-28: Ideas for next iteration (b1)" />
+    <MESSAGE value="2020-03-27: Get prefix dynamically" />
+    <option name="LAST_COMMIT_MESSAGE" value="2020-03-27: Get prefix dynamically" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="424" y="7" key="CommitChangelistDialog2" timestamp="1582923778470">
-      <screen x="0" y="0" width="1536" height="824" />
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1585332126605">
+      <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="424" y="7" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1582923778470" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1585332126605" />
     <state width="1899" height="348" key="GridCell.Tab.0.bottom" timestamp="1583843397864">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

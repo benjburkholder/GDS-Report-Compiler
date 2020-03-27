@@ -8,7 +8,6 @@ from utils.dbms_helpers import postgres_helpers
 
 
 class Moz(Customizer):
-    prefix = 'moz'
 
     def __init__(self):
         super().__init__()

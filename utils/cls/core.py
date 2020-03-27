@@ -69,4 +69,5 @@ class Customizer:
         return True
 
     def get_prefix(self):
-        return re.sub(r'(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
+        cls_name = self.__class__.__name__.replace('Customizer', '')
+        return re.sub(r'(?<!^)(?=[A-Z])', '_', cls_name).lower()
