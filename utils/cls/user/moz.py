@@ -2,7 +2,6 @@ import os
 import pathlib
 import datetime
 import sqlalchemy
-import pandas as pd
 
 from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
@@ -115,6 +114,8 @@ class Moz(Customizer):
             ],
             'owner': 'postgres'
         })
+
+        setattr(self, f'{self.prefix}_exclude_moz_directories', self.exclude_moz_directories)
 
     def pull_moz_local_accounts(self, customizer):
         engine = postgres_helpers.build_postgresql_engine(customizer=customizer)

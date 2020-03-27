@@ -3,6 +3,7 @@ Custom
 
 This script is where all reporting configuration takes place
 """
+import re
 
 
 class Customizer:
@@ -10,9 +11,6 @@ class Customizer:
     Required to run scripts
     Manages all report data transformation and customization
     """
-    # attributes
-    prefix = ''
-
     # GLOBALS - REQUIRED TO BE REFERENCED FOR ALL PROJECTS
     required_attributes = [
         'dbms',
@@ -58,6 +56,7 @@ class Customizer:
     # ### END EDITING ###
 
     def __init__(self):
+        self.prefix = self.get_prefix()
         assert self.valid_global_configuration(), self.global_configuration_message
 
     def valid_global_configuration(self) -> bool:
@@ -68,3 +67,6 @@ class Customizer:
                 if getattr(self, attribute) not in self.supported_dbms:
                     return False
         return True
+
+    def get_prefix(self):
+        return re.sub(r'(?<!^)(?=[A-Z])', '_', self.__class__.__name__).lower()
