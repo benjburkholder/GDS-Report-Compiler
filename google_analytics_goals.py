@@ -54,7 +54,7 @@ def main() -> int:
         if df.shape[0]:
             df['view_id'] = view_id
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
+            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='googleanalytics_goals')
             grc.table_backfilter(customizer=customizer)
 
         else:

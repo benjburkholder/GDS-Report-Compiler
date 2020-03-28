@@ -51,7 +51,7 @@ def main() -> int:
         if df.shape[0]:
             df['data_source'] = 'Moz Pro - Rankings'
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
+            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='moz_pro_rankings')
             grc.table_backfilter(customizer=customizer)
 
         else:

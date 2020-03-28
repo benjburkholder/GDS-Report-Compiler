@@ -62,7 +62,7 @@ def main() -> int:
             df['data_source'] = 'Moz Local - Sync Report'
             df = Moz().exclude_moz_directories(customizer=customizer, df=df)
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
+            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='mozlocal_directory_sync_report_mdd')
             grc.table_backfilter(customizer=customizer)
 
         else:
