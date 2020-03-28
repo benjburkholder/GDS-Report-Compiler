@@ -34,7 +34,6 @@ def main() -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
 
-    grc.refresh_source_tables(customizer=customizer)
     accounts = Moz().pull_moz_local_accounts(customizer)
 
     if getattr(customizer, f'{customizer.prefix}_historical'):
@@ -62,7 +61,7 @@ def main() -> int:
             df['data_source'] = 'Moz Local - Visibility Report'
             df = Moz().exclude_moz_directories(customizer=customizer, df=df)
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date')
+            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='mozlocal_directory_visibility_report_mdd')
             grc.table_backfilter(customizer=customizer)
 
         else:

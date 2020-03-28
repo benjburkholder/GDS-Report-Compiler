@@ -377,9 +377,9 @@ class MozLocalVisibilityCustomizer(Moz):
         super().__init__()
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_historical', False)
-        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
-        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
+        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_historical_start_date', '2020-02-01')
+        setattr(self, f'{self.prefix}_historical_end_date', '2020-02-15')
         setattr(self, f'{self.prefix}_table', 'mozlocal_directory_visibility_report_mdd')
 
         # Used to set columns which vary from data source and client vertical

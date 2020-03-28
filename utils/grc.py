@@ -54,20 +54,20 @@ def create_sql_engine(customizer):
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def clear_non_golden_data(customizer, date_col, min_date, max_date):
+def clear_non_golden_data(customizer, date_col, min_date, max_date, table):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
         return postgres_helpers.clear_postgresql_non_golden_data(
-            customizer=customizer, date_col=date_col, min_date=min_date, max_date=max_date)
+            customizer=customizer, date_col=date_col, min_date=min_date, max_date=max_date, table=table)
     else:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def clear_lookup_table_data(customizer):
+def clear_lookup_table_data(customizer, sheet):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
-        return postgres_helpers.clear_postgresql_lookup_table(
-            customizer=customizer)
+        return postgres_helpers.clear_postgresql_other_table(
+            customizer=customizer, sheet=sheet)
     else:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
@@ -75,65 +75,79 @@ def clear_lookup_table_data(customizer):
 def clear_source_table_data(customizer, sheet):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
-        return postgres_helpers.clear_postgresql_source_table(
+        return postgres_helpers.clear_postgresql_other_table(
             customizer=customizer, sheet=sheet)
     else:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def insert_data(customizer, df):
+def insert_data(customizer, df, table):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
         return postgres_helpers.insert_postgresql_data(
-            customizer=customizer, df=df)
+            customizer=customizer, df=df, table=table)
     else:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def insert_lookup_data(customizer, df):
+def insert_other_data(customizer, df, sheet):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
-        return postgres_helpers.insert_postgresql_lookup_data(
-            customizer=customizer, df=df)
+        return postgres_helpers.insert_postgresql_other_data(
+            customizer=customizer, df=df, sheet=sheet)
     else:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def run_data_ingest_rolling_dates(df, customizer, date_col='report_date') -> int:
+def run_data_ingest_rolling_dates(df, customizer, table, date_col='report_date') -> int:
     min_date = df[date_col].min()
     max_date = df[date_col].max()
 
-    table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_schema'))
-
-    if table_existence:
-        # clear non-golden data
-        clear_non_golden_data(customizer=customizer, date_col=date_col, min_date=min_date, max_date=max_date)
-        # insert fresh data
-        insert_data(customizer=customizer, df=df)
-        return stdlib.EXIT_SUCCESS
-
-    if not table_existence:
-        create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_schema'))
-        insert_data(customizer=customizer, df=df)
-        return stdlib.EXIT_SUCCESS
-
-    else:
-        raise ValueError("Other Error: An error occurred regardless of the table's existence, "
-                         "check custom.py schema attribute.")
+    # clear non-golden data
+    clear_non_golden_data(customizer=customizer, date_col=date_col, min_date=min_date, max_date=max_date, table=table)
+    # insert fresh data
+    insert_data(customizer=customizer, df=df, table=table)
+    return stdlib.EXIT_SUCCESS
 
 
 def build_lookup_tables(customizer) -> int:
-    if customizer.lookup_tables['status']:
-        lookup_table_existence = check_table_exists(customizer, getattr(customizer, f'{customizer.prefix}_{customizer.lookup_tables["status"]["schema"]}'))
+    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['type'] == 'lookup':
+            lookup_table_existence = check_table_exists(customizer, schema=sheet)
 
-        if not lookup_table_existence:
-            print(f'{customizer.lookup_tables["status"]["schema"]} does not exist, creating...')
-            create_table_from_schema(customizer, getattr(customizer, f'{customizer.prefix}_{customizer.lookup_tables["status"]["schema"]}'))
+            if not lookup_table_existence:
+                print(f'{sheet["table"]["name"]} does not exist, creating...')
+                create_table_from_schema(customizer, sheet)
 
     return 0
 
 
-def reshape_lookup_data(customizer, df):
+def build_reporting_tables(customizer) -> int:
+    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['type'] == 'reporting':
+            print(f'Checking if {sheet["table"]["name"]} exists...')
+            reporting_table_existence = check_table_exists(customizer, schema=sheet)
+
+            if not reporting_table_existence:
+                print(f'{sheet["table"]["name"]} does not exist, creating...')
+                create_table_from_schema(customizer, sheet)
+
+    return 0
+
+
+def build_source_tables(customizer) -> int:
+    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['type'] == 'source':
+            source_table_existence = check_table_exists(customizer, schema=sheet)
+
+            if not source_table_existence:
+                print(f'{sheet["table"]["name"]} does not exist, creating...')
+                create_table_from_schema(customizer, sheet)
+
+    return 0
+
+
+def reshape_lookup_data(customizer, df, sheet):
 
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
@@ -142,7 +156,7 @@ def reshape_lookup_data(customizer, df):
         if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
             df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
 
-    for column in getattr(customizer, f'{customizer.prefix}_{customizer.lookup_tables["status"]["schema"]}')['columns']:
+    for column in sheet['table']['columns']:
         if column['name'] in df.columns:
             if column['type'] == 'character varying':
                 assert 'length' in column.keys()
@@ -162,7 +176,7 @@ def reshape_lookup_data(customizer, df):
     return df
 
 
-def reshape_source_table_data(customizer, df, table):
+def reshape_source_table_data(customizer, df, sheet):
 
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
@@ -171,43 +185,45 @@ def reshape_source_table_data(customizer, df, table):
         if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
             df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
 
-    if hasattr(customizer, f'{customizer.prefix}_{table}'):
-        for column in getattr(customizer, f'{customizer.prefix}_{table}')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x == 0 or x == 1 else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-            print(f'SUCCESS: {table} refreshed.')
+    for column in sheet['table']['columns']:
+        if column['name'] in df.columns:
+            if column['type'] == 'character varying':
+                assert 'length' in column.keys()
+                df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+            elif column['type'] == 'bigint':
+                df[column['name']] = df[column['name']].apply(lambda x: int(x) if x == 0 or x == 1 else None)
+            elif column['type'] == 'double precision':
+                df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+            elif column['type'] == 'date':
+                df[column['name']] = pd.to_datetime(df[column['name']])
+            elif column['type'] == 'timestamp without time zone':
+                df[column['name']] = pd.to_datetime(df[column['name']])
+            elif column['type'] == 'datetime with time zone':
+                # TODO(jschroeder) how better to interpret timezone data?
+                df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
 
     return df
 
 
-def refresh_lookup_tables(workbook: str, worksheet: str, customizer) -> int:
-    raw_location_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=workbook, worksheet_name=worksheet)
+def refresh_lookup_tables(customizer) -> int:
+    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['type'] == 'lookup':
+            raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
+                                                                                           worksheet_name=sheet['sheet'])
 
-    clear_lookup_table_data(customizer=customizer)
-    df = reshape_lookup_data(df=raw_location_data, customizer=customizer)
-    insert_lookup_data(customizer, df=df)
+            clear_lookup_table_data(customizer=customizer, sheet=sheet)
+            df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
+            insert_other_data(customizer, df=df, sheet=sheet)
+
+    print("SUCCESS: Lookup Tables Refreshed.")
 
     return 0
 
 
 def check_table_exists(customizer, schema) -> bool:
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
-    schema_name = schema['schema']
-    table_name = schema['table']
+    schema_name = schema['table']['schema']
+    table_name = schema['table']['name']
     if customizer.dbms == 'postgresql':
         return postgres_helpers.check_postgresql_table_exists(
             customizer=customizer,
@@ -245,21 +261,22 @@ def setup(script_name: str, required_attributes: list):
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
 
-    # Check if required lookup tables exist, create if not and do nothing if existing
+    # Build reporting tables
+    build_reporting_tables(customizer=customizer)
+
+    # Build listed lookup tables
     build_lookup_tables(customizer=customizer)
 
-    # Lookup table refresh status, will be switched to True after first related script run then will not run for others
+    # Build listed source tables
+    build_source_tables(customizer=customizer)
 
-    if not customizer.lookup_tables['status']['refresh_status']:
-        print(f'{customizer.lookup_tables["status"]["table_name"]} not refreshed, refreshing now...')
-        refresh_lookup_tables(workbook=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
-                              worksheet=customizer.lookup_tables['status']['lookup_source_sheet'], customizer=customizer)
+    # Lookup table refresh
+    print('refreshing lookup tables...')
+    refresh_lookup_tables(customizer=customizer)
 
-        # After lookup table is refreshed, set status of attribute to True
-        customizer.lookup_tables['status']['refresh_status'] = True
-
-        if customizer.lookup_tables['status']['refresh_status']:
-            print("SUCCESS: Lookup Table Refreshed.")
+    # Source table refresh
+    print('refreshing source tables...')
+    refresh_source_tables(customizer=customizer)
 
     return customizer
 
@@ -308,22 +325,22 @@ def table_backfilter(customizer: custom.Customizer):
 def refresh_source_tables(customizer: custom.Customizer):
     today = datetime.date.today()
 
-    if today.day in customizer.CONFIGURATION_WORKBOOK['refresh_dates']:
-        print('STATUS: Refreshing google sheet source tables...')
+    if today.day in customizer.CONFIGURATION_WORKBOOK['source_refresh_dates']:
+
         for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
-            df = pd.DataFrame(GoogleSheetsManager(customizer.CLIENT_NAME).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
-                                                                                worksheet_name=sheet['sheet']))
-            clear_source_table_data(customizer=customizer, sheet=sheet)
-            df = reshape_source_table_data(customizer=customizer, df=df, table=sheet['table'])
-            engine = build_postgresql_engine(customizer=customizer)
-            with engine.connect() as con:
-                df.to_sql(
-                    sheet['table'],
-                    con=con,
-                    if_exists='append',
-                    index=False,
-                    index_label=False
-                )
+            if sheet['table']['type'] == 'source':
+                raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'], worksheet_name=sheet['sheet'])
+
+                clear_source_table_data(customizer=customizer, sheet=sheet)
+                df = reshape_source_table_data(customizer=customizer, df=raw_source_data, sheet=sheet)
+                insert_other_data(customizer, df=df, sheet=sheet)
+
+        print("SUCCESS: Source Tables Refreshed.")
+
+    else:
+        print('Not listed refresh day.')
+
+    return 0
 
 
 

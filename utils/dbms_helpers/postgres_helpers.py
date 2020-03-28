@@ -16,13 +16,13 @@ def build_postgresql_engine(customizer):
     return sqlalchemy.create_engine(connection_string)
 
 
-def clear_postgresql_non_golden_data(customizer, date_col, min_date, max_date):
+def clear_postgresql_non_golden_data(customizer, date_col, min_date, max_date, table):
     engine = build_postgresql_engine(customizer=customizer)
 
     sql = sqlalchemy.text(
         f"""
         DELETE
-        FROM {getattr(customizer, f'{customizer.prefix}_schema')['schema']}.{getattr(customizer, f'{customizer.prefix}_table')}
+        FROM public.{table}
 
         WHERE {date_col} BETWEEN :min_date AND :max_date;
         """
@@ -31,13 +31,13 @@ def clear_postgresql_non_golden_data(customizer, date_col, min_date, max_date):
         con.execute(sql, min_date=min_date, max_date=max_date)
 
 
-def clear_postgresql_lookup_table(customizer):
+def clear_postgresql_other_table(customizer, sheet):
     engine = build_postgresql_engine(customizer=customizer)
 
     sql = sqlalchemy.text(
         f"""
             DELETE
-            FROM public.{customizer.lookup_tables["status"]["table_name"]};
+            FROM public.{sheet['table']['name']};
 
             """
     )
@@ -45,26 +45,11 @@ def clear_postgresql_lookup_table(customizer):
         con.execute(sql)
 
 
-def clear_postgresql_source_table(customizer, sheet):
-    engine = build_postgresql_engine(customizer=customizer)
-
-    sql = sqlalchemy.text(
-        f"""
-            DELETE
-            FROM public.{sheet['table']};
-
-            """
-    )
-    with engine.connect() as con:
-        con.execute(sql)
-
-
-
-def insert_postgresql_data(customizer, df, if_exists='append', index=False, index_label=None):
+def insert_postgresql_data(customizer, df, table, if_exists='append', index=False, index_label=None):
     engine = build_postgresql_engine(customizer=customizer)
     with engine.connect() as con:
         df.to_sql(
-            getattr(customizer, f'{customizer.prefix}_table'),
+            table,
             con=con,
             if_exists=if_exists,
             index=index,
@@ -72,12 +57,12 @@ def insert_postgresql_data(customizer, df, if_exists='append', index=False, inde
         )
 
 
-def insert_postgresql_lookup_data(customizer, df, if_exists='append', index=False, index_label=None):
+def insert_postgresql_other_data(customizer, df, sheet, if_exists='append', index=False, index_label=None):
     engine = build_postgresql_engine(customizer=customizer)
 
     with engine.connect() as con:
         df.to_sql(
-            customizer.lookup_tables["status"]["table_name"],
+            sheet['table']['name'],
             con=con,
             if_exists=if_exists,
             index=index,
@@ -110,7 +95,7 @@ def create_postgresql_table_from_schema(customizer, schema):
     with engine.connect() as con:
         con.execute(table_sql)
 
-    if schema['type'] != 'lookup':
+    if schema['table']['type'] != 'lookup' and schema['table']['type'] != 'source':
         for index in schema['indexes']:
             index_sql = _generate_postgresql_create_index_statement(schema=schema, index=index)
             with engine.connect() as con:
@@ -127,14 +112,14 @@ def create_postgresql_table_from_schema(customizer, schema):
 
 def _generate_postgresql_create_table_statement(schema: dict) -> str:
     assert 'table' in schema.keys(), "Schema not formed properly {}".format(schema)
-    assert 'columns' in schema.keys(), "Schema not formed properly {}".format(schema)
-    assert len(schema['columns']), "Columns not specified in schema for table {}".format(schema['table'])
-    stmt = f"CREATE TABLE {schema['schema']}.{schema['table']}"
+    assert 'columns' in schema['table'].keys(), "Schema not formed properly {}".format(schema)
+    assert len(schema['table']['columns']), "Columns not specified in schema for table {}".format(schema['table']['name'])
+    stmt = f"CREATE TABLE {schema['table']['schema']}.{schema['table']['name']}"
     stmt += "\n"
     stmt += "(\n"
-    col_len = len(schema['columns'])
+    col_len = len(schema['table']['columns'])
     idx = 0
-    for column in schema['columns']:
+    for column in schema['table']['columns']:
         line = f"\t{column['name']} {column['type']}(),\n"
         if 'length' in column.keys():
             line = line.replace('()', f"({column['length']})")
