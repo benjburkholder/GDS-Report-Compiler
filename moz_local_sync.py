@@ -34,7 +34,6 @@ def main() -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
 
-    grc.refresh_source_tables(customizer=customizer)
     accounts = Moz().pull_moz_local_accounts(customizer)
 
     if getattr(customizer, f'{customizer.prefix}_historical'):

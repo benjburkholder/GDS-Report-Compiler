@@ -207,14 +207,18 @@ def reshape_source_table_data(customizer, df, sheet):
 
 
 def refresh_lookup_tables(customizer) -> int:
-    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
-        if sheet['table']['type'] == 'lookup':
-            raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
-                                                                                           worksheet_name=sheet['sheet'])
+    if customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] is False:
+        for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+            if sheet['table']['type'] == 'lookup':
+                raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
+                                                                                               worksheet_name=sheet['sheet'])
 
-            clear_lookup_table_data(customizer=customizer, sheet=sheet)
-            df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
-            insert_other_data(customizer, df=df, sheet=sheet)
+                clear_lookup_table_data(customizer=customizer, sheet=sheet)
+                df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
+                insert_other_data(customizer, df=df, sheet=sheet)
+
+    # Once one script refreshed lookup tables, set global status to True to bypass with following scripts
+    customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] = True
 
     print("SUCCESS: Lookup Tables Refreshed.")
 
@@ -339,8 +343,6 @@ def refresh_source_tables(customizer: custom.Customizer):
                 insert_other_data(customizer, df=df, sheet=sheet)
 
                 print(f"SUCCESS: {sheet['table']['name']} Refreshed.")
-        return
-
     else:
         print('Not listed refresh day.')
 

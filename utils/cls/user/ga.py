@@ -1,8 +1,10 @@
 import os
 import pathlib
+import sqlalchemy
 import pandas as pd
 
 from utils.cls.core import Customizer
+from utils.dbms_helpers import postgres_helpers
 
 
 class GoogleAnalytics(Customizer):
@@ -19,9 +21,6 @@ class GoogleAnalytics(Customizer):
         'page',
     ]
 
-    # Enter list of view ids as str
-    view_ids = []
-
     def __init__(self):
         super().__init__()
         setattr(self, f'{self.prefix}_secrets_path',
@@ -34,11 +33,22 @@ class GoogleAnalytics(Customizer):
           'columns': ['zip', 'phone']
         })
 
-    def get_view_ids(self) -> list:
-        """
-        Required hook, user is free to provide this list of dictionaries as they choose
-        """
-        return self.view_ids
+    def get_view_ids(self, customizer) -> list:
+        engine = postgres_helpers.build_postgresql_engine(customizer=customizer)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                f"""
+                SELECT *
+                FROM public.source_ga_views;
+                """
+            )
+
+            result = con.execute(sql)
+            raw_views = result.fetchall()
+
+            view_ids = [{'view_id': view[0]} for view in raw_views if raw_views]
+
+            return view_ids
 
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
@@ -47,7 +57,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         super().__init__()
         setattr(self, f'{self.prefix}_class', True)
         setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_historical', True)
+        setattr(self, f'{self.prefix}_historical', False)
         setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
         setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
         setattr(self, f'{self.prefix}_table', 'googleanalytics_traffic')
@@ -107,24 +117,17 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         # TODO(jschroeder) flesh out this example a bit more
         return df.rename(columns={
             'date': 'report_date',
-            'view_id': 'view_id',
             'sourceMedium': 'source_medium',
             'channelGrouping': 'channel_grouping',
             'deviceCategory': 'device',
-            'campaign': 'campaign',
-            'pagePath': 'page',
-            'sessions': 'sessions',
+            'pagePath': 'url',
             'percentNewSessions': 'percent_new_sessions',
             'percentNewPageviews': 'percent_new_pageviews',
-            'pageviews': 'pageviews',
             'uniquePageviews': 'unique_pageviews',
             'pageviewsPerSession': 'pageviews_per_session',
-            'entrances': 'entrances',
-            'bounces': 'bounces',
             'sessionDuration': 'session_duration',
-            'users': 'users',
             'newUsers': 'new_users'
-        })
+        }, inplace=True)
 
     # noinspection PyMethodMayBeStatic
     def type(self, df: pd.DataFrame) -> pd.DataFrame:

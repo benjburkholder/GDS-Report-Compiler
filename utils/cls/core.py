@@ -54,7 +54,8 @@ class Customizer:
 
     CONFIGURATION_WORKBOOK = {
         'config_sheet_name': 'Zwirner Equipment - Configuration',
-        'source_refresh_dates': [1, 15, 30],
+        'source_refresh_dates': [1, 15],
+        'lookup_refresh_status': False,
 
         'sheets': [
             {'sheet': 'URL to Property', 'table': {
@@ -89,50 +90,61 @@ class Customizer:
                             ],
                             'owner': 'postgres'
             }},
-            {'sheet': 'Moz Directory Exclusions', 'table': {
-                            'name': 'source_moz_directoryexclusions',
-                            'schema': 'public',
-                            'type': 'source',
-                            'columns': [
-                                {'name': 'exclusions', 'type': 'character varying', 'length': 100},
+            {'sheet': 'Moz Local Account Master', 'table': {
+                'name': 'source_moz_localaccountmaster',
+                'schema': 'public',
+                'type': 'source',
+                'columns': [
+                    {'name': 'account', 'type': 'character varying', 'length': 150},
+                    {'name': 'label', 'type': 'character varying', 'length': 150},
 
-                            ],
-                            'owner': 'postgres'
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': 'GA Views', 'table': {
+                    'name': 'source_ga_views',
+                    'schema': 'public',
+                    'type': 'source',
+                    'columns': [
+                        {'name': 'view_id', 'type': 'character varying', 'length': 100},
+
+                    ],
+                    'owner': 'postgres'
             }},
             {'sheet': 'Moz Listing to Property', 'table': {
-                            'name': 'lookup_moz_listingtolocation',
-                            'schema': 'public',
-                            'type': 'lookup',
-                            'columns': [
-                                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                                {'name': 'property', 'type': 'character varying', 'length': 150},
-                                {'name': 'account', 'type': 'character varying', 'length': 150},
-                                {'name': 'label', 'type': 'character varying', 'length': 150},
-                                {'name': 'name', 'type': 'character varying', 'length': 150},
-                                {'name': 'address', 'type': 'character varying', 'length': 250},
-                                {'name': 'city', 'type': 'character varying', 'length': 50},
-                                {'name': 'state', 'type': 'character varying', 'length': 50},
-                                {'name': 'zip', 'type': 'bigint'},
-                                {'name': 'phone', 'type': 'character varying', 'length': 25},
+                    'name': 'lookup_moz_listingtolocation',
+                    'schema': 'public',
+                    'type': 'lookup',
+                    'columns': [
+                        {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                        {'name': 'property', 'type': 'character varying', 'length': 150},
+                        {'name': 'account', 'type': 'character varying', 'length': 150},
+                        {'name': 'label', 'type': 'character varying', 'length': 150},
+                        {'name': 'name', 'type': 'character varying', 'length': 150},
+                        {'name': 'address', 'type': 'character varying', 'length': 250},
+                        {'name': 'city', 'type': 'character varying', 'length': 50},
+                        {'name': 'state', 'type': 'character varying', 'length': 50},
+                        {'name': 'zip', 'type': 'bigint'},
+                        {'name': 'phone', 'type': 'character varying', 'length': 25},
 
-                            ],
-                            'owner': 'postgres'
+                    ],
+                    'owner': 'postgres'
             }},
             {'sheet': 'GMB Listing to Property', 'table': {
-                            'name': 'lookup_gmb_listingtolocation',
-                            'schema': 'public',
-                            'type': 'lookup',
-                            'columns': [
-                                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                                {'name': 'property', 'type': 'character varying', 'length': 150},
-                                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                                {'name': 'city', 'type': 'character varying', 'length': 50},
-                                {'name': 'state', 'type': 'character varying', 'length': 50},
-                                {'name': 'zip', 'type': 'character varying', 'length': 50},
-                                {'name': 'phone', 'type': 'character varying', 'length': 25},
+                    'name': 'lookup_gmb_listingtolocation',
+                    'schema': 'public',
+                    'type': 'lookup',
+                    'columns': [
+                        {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                        {'name': 'property', 'type': 'character varying', 'length': 150},
+                        {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
+                        {'name': 'city', 'type': 'character varying', 'length': 50},
+                        {'name': 'state', 'type': 'character varying', 'length': 50},
+                        {'name': 'zip', 'type': 'character varying', 'length': 50},
+                        {'name': 'phone', 'type': 'character varying', 'length': 25},
 
-                            ],
-                            'owner': 'postgres'
+                    ],
+                    'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
                             'name': 'moz_local_visibility_report_mdd',
