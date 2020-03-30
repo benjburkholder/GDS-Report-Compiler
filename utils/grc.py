@@ -107,6 +107,7 @@ def run_data_ingest_rolling_dates(df, customizer, table, date_col='report_date')
     clear_non_golden_data(customizer=customizer, date_col=date_col, min_date=min_date, max_date=max_date, table=table)
     # insert fresh data
     insert_data(customizer=customizer, df=df, table=table)
+
     return stdlib.EXIT_SUCCESS
 
 
@@ -311,22 +312,24 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
     return df
 
 
-def table_backfilter(customizer: custom.Customizer):
-    if getattr(customizer, f'{customizer.prefix}_backfilter_procedure'):
-        engine = build_postgresql_engine(customizer=customizer)
-        with engine.connect() as con:
-            for block in getattr(customizer, f'{customizer.prefix}_backfilter_procedure')['code']:
-                sql = sqlalchemy.text(block)
-                con.execute(sql)
+def table_backfilter(customizer: custom.Customizer, calling_script):
+    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['type'] == 'reporting':
+            if calling_script in sheet['table']['name']:
+                print(f'Backfiltering {sheet["table"]["name"]}...')
+                engine = build_postgresql_engine(customizer=customizer)
+                with engine.connect() as con:
+                    for block in sheet['table']['backfilter'](self=customizer, target_table=sheet['table']['name']):
+                        sql = sqlalchemy.text(block)
+                        con.execute(sql)
 
-        print('SUCCESS: Table Backfiltered.')
+    print('SUCCESS: Table Backfiltered.')
 
 
 def refresh_source_tables(customizer: custom.Customizer):
     today = datetime.date.today()
 
     if today.day in customizer.CONFIGURATION_WORKBOOK['source_refresh_dates']:
-
         for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
             if sheet['table']['type'] == 'source':
                 raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'], worksheet_name=sheet['sheet'])
@@ -335,7 +338,8 @@ def refresh_source_tables(customizer: custom.Customizer):
                 df = reshape_source_table_data(customizer=customizer, df=raw_source_data, sheet=sheet)
                 insert_other_data(customizer, df=df, sheet=sheet)
 
-        print("SUCCESS: Source Tables Refreshed.")
+                print(f"SUCCESS: {sheet['table']['name']} Refreshed.")
+        return
 
     else:
         print('Not listed refresh day.')

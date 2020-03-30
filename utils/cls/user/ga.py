@@ -29,42 +29,6 @@ class GoogleAnalytics(Customizer):
         setattr(self, f'{self.prefix}_client_name', self.client)
         setattr(self, f'{self.prefix}_get_view_ids', self.get_view_ids)
 
-        setattr(self, 'lookup_tables', {
-            'status': {
-                'table_type': 'ga',
-                'active': True,
-                'refresh_status': False,
-                'lookup_source_sheet': 'URL to Property',
-                'schema': 'lookup_url_schema',
-                'table_name': 'lookup_urltolocation'
-            }}),
-
-        # Schema for URL lookup table
-        setattr(self, f'{self.prefix}_lookup_url_schema', {
-            'table': 'lookup_urltolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'url', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'exact', 'type': 'bigint'},
-            ],
-            'owner': 'postgres'
-        })
-
-        # Schema for URL source table
-        setattr(self, f'{self.prefix}_source_url_schema', {
-            'table': 'source_urltolocation',
-            'schema': 'public',
-            'type': 'source',
-            'columns': [
-                {'name': 'url', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'exact', 'type': 'bigint'},
-            ],
-            'owner': 'postgres'
-        })
-
         setattr(self, f'{self.prefix}_drop_columns', {
           'status': False,
           'columns': ['zip', 'phone']
@@ -112,70 +76,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         setattr(self, f'{self.prefix}_custom_columns', {
             'data_source': 'Google Analytics - Traffic',
             'property': None
-        })
-
-        # model
-        setattr(self, f'{self.prefix}_schema', {
-            'table': 'googleanalytics_traffic',
-            'schema': 'public',
-            'type': 'reporting',
-            'columns': [
-                {'name': 'report_date', 'type': 'date'},
-                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'service_line', 'type': 'character varying', 'length': 100},
-                {'name': 'view_id', 'type': 'character varying', 'length': 25},
-                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                {'name': 'device', 'type': 'character varying', 'length': 50},
-                {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                {'name': 'page', 'type': 'character varying', 'length': 500},
-                {'name': 'sessions', 'type': 'character varying', 'length': 500},
-                {'name': 'percent_new_sessions', 'type': 'double precision'},
-                {'name': 'pageviews', 'type': 'bigint'},
-                {'name': 'unique_pageviews', 'type': 'bigint'},
-                {'name': 'pageviews_per_session', 'type': 'double precision'},
-                {'name': 'entrances', 'type': 'bigint'},
-                {'name': 'bounces', 'type': 'bigint'},
-                {'name': 'session_duration', 'type': 'double precision'},
-                {'name': 'users', 'type': 'bigint'},
-                {'name': 'new_users', 'type': 'bigint'},
-            ],
-            'indexes': [
-                {
-                    'name': 'ix_google_analytics_traffic',
-                    'tablespace': 'pg_default',
-                    'clustered': True,
-                    'method': 'btree',
-                    'columns': [
-                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                    ]
-                }
-            ],
-            'owner': 'postgres'
-        })
-
-        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
-        stmt += "SET property = LOOKUP.property\n"
-        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
-        stmt += "WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')\n"
-        stmt += "AND LOOKUP.exact = 0;"
-        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
-        stmt2 += "SET property = LOOKUP.property\n"
-        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
-        stmt2 += "WHERE TARGET.page = LOOKUP.url\n"
-        stmt2 += "AND LOOKUP.exact = 1;"
-        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
-        stmt3 += "SET property = 'Non-Location Pages'\n"
-        stmt3 += "WHERE property IS NULL;\n"
-
-        # backfilter procedure
-        setattr(self, f'{self.prefix}_backfilter_procedure', {
-            'name': 'googleanalytics_backfilter',
-            'active': 1,
-            'code': [stmt, stmt2, stmt3]
         })
 
         # audit procedure
@@ -300,67 +200,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
             'property': None
         })
 
-        # model
-        setattr(self, f'{self.prefix}_schema', {
-            'table': 'googleanalytics_events',
-            'schema': 'public',
-            'type': 'reporting',
-            'columns': [
-                {'name': 'report_date', 'type': 'date'},
-                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                {'name': 'channel_grouping', 'type': 'character varying', 'length': 200},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'service_line', 'type': 'character varying', 'length': 100},
-                {'name': 'view_id', 'type': 'character varying', 'length': 25},
-                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                {'name': 'device', 'type': 'character varying', 'length': 50},
-                {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                {'name': 'page', 'type': 'character varying', 'length': 500},
-                {'name': 'event_label', 'type': 'character varying', 'length': 200},
-                {'name': 'event_action', 'type': 'character varying', 'length': 200},
-                {'name': 'total_events', 'type': 'bigint'},
-                {'name': 'unique_events', 'type': 'bigint'},
-                {'name': 'event_value', 'type': 'double precision'},
-
-            ],
-            'indexes': [
-                {
-                    'name': 'ix_google_analytics_events',
-                    'tablespace': 'pg_default',
-                    'clustered': True,
-                    'method': 'btree',
-                    'columns': [
-                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                    ]
-                }
-            ],
-            'owner': 'postgres'
-        })
-
-        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
-        stmt += "SET property = LOOKUP.property\n"
-        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
-        stmt += "WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')\n"
-        stmt += "AND LOOKUP.exact = 0;"
-        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
-        stmt2 += "SET property = LOOKUP.property\n"
-        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
-        stmt2 += "WHERE TARGET.page = LOOKUP.url\n"
-        stmt2 += "AND LOOKUP.exact = 1;"
-        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
-        stmt3 += "SET property = 'Non-Location Pages'\n"
-        stmt3 += "WHERE property IS NULL;\n"
-
-        # backfilter procedure
-        setattr(self, f'{self.prefix}_backfilter_procedure', {
-            'name': 'googleanalytics_backfilter',
-            'active': 1,
-            'code': [stmt, stmt2, stmt3]
-
-        })
-
         # audit procedure
         setattr(self, f'{self.prefix}_audit_procedure', {
             'name': 'googleanalytics_audit',
@@ -479,66 +318,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         setattr(self, f'{self.prefix}_custom_columns', {
             'data_source': 'Google Analytics - Goals',
             'property': None
-        })
-
-        # model
-        setattr(self, f'{self.prefix}_schema', {
-            'table': 'googleanalytics_goals',
-            'schema': 'public',
-            'type': 'reporting',
-            'columns': [
-                {'name': 'report_date', 'type': 'date'},
-                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'service_line', 'type': 'character varying', 'length': 100},
-                {'name': 'view_id', 'type': 'character varying', 'length': 25},
-                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                {'name': 'device', 'type': 'character varying', 'length': 50},
-                {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                {'name': 'page', 'type': 'character varying', 'length': 500},
-                {'name': 'request_a_quote', 'type': 'bigint'},
-                {'name': 'sidebar_contact_us', 'type': 'bigint'},
-                {'name': 'contact_us_form_submission', 'type': 'bigint'},
-                {'name': 'newsletter_signups', 'type': 'bigint'},
-                {'name': 'dialogtech_calls', 'type': 'bigint'},
-
-            ],
-            'indexes': [
-                {
-                    'name': 'ix_google_analytics_goals',
-                    'tablespace': 'pg_default',
-                    'clustered': True,
-                    'method': 'btree',
-                    'columns': [
-                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                    ]
-                }
-            ],
-            'owner': 'postgres'
-        })
-
-        stmt = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
-        stmt += "SET property = LOOKUP.property\n"
-        stmt += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
-        stmt += "WHERE TARGET.page LIKE CONCAT('%', LOOKUP.url, '%')\n"
-        stmt += "AND LOOKUP.exact = 0;"
-        stmt2 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']} TARGET\n"
-        stmt2 += "SET property = LOOKUP.property\n"
-        stmt2 += f"FROM public.{getattr(self, f'{self.prefix}_lookup_url_schema')['table']} LOOKUP\n"
-        stmt2 += "WHERE TARGET.page = LOOKUP.url\n"
-        stmt2 += "AND LOOKUP.exact = 1;"
-        stmt3 = f"UPDATE public.{getattr(self, f'{self.prefix}_schema')['table']}\n"
-        stmt3 += "SET property = 'Non-Location Pages'\n"
-        stmt3 += "WHERE property IS NULL;\n"
-
-        # backfilter procedure
-        setattr(self, f'{self.prefix}_backfilter_procedure', {
-            'name': 'googleanalytics_backfilter',
-            'active': 1,
-            'code': [stmt, stmt2, stmt3]
         })
 
         # audit procedure

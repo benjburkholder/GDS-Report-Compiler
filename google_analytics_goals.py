@@ -54,8 +54,8 @@ def main() -> int:
         if df.shape[0]:
             df['view_id'] = view_id
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='googleanalytics_goals')
-            grc.table_backfilter(customizer=customizer)
+            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='google_analytics_goals')
+            grc.table_backfilter(customizer=customizer, calling_script=SCRIPT_NAME)
 
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))

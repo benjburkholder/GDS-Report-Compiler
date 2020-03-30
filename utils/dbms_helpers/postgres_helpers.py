@@ -96,7 +96,7 @@ def create_postgresql_table_from_schema(customizer, schema):
         con.execute(table_sql)
 
     if schema['table']['type'] != 'lookup' and schema['table']['type'] != 'source':
-        for index in schema['indexes']:
+        for index in schema['table']['indexes']:
             index_sql = _generate_postgresql_create_index_statement(schema=schema, index=index)
             with engine.connect() as con:
                 con.execute(index_sql)
@@ -142,7 +142,7 @@ def _generate_postgresql_create_index_statement(index: dict, schema: dict) -> st
     assert 'columns' in index.keys(), "'columns' attribute missing from index. {}".format(index)
     assert 'tablespace' in index.keys(), "'tablespace' attribute missing from index. {}".format(index)
     stmt = f"CREATE INDEX {index['name']}\n"
-    stmt += f"ON {schema['schema']}.{schema['table']} USING {index['method']}\n"
+    stmt += f"ON {schema['table']['schema']}.{schema['table']['name']} USING {index['method']}\n"
     stmt += "(\n"
     col_len = len(index['columns'])
     idx = 0
@@ -168,6 +168,6 @@ def _generate_postgresql_create_index_statement(index: dict, schema: dict) -> st
 
 
 def _generate_postgresql_cluster_statement(schema: dict, index: dict) -> str:
-    stmt = f"ALTER TABLE {schema['schema']}.{schema['table']}\n"
+    stmt = f"ALTER TABLE {schema['table']['schema']}.{schema['table']['name']}\n"
     stmt += f"\tCLUSTER ON {index['name']};"
     return stmt

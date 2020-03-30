@@ -20,11 +20,42 @@ class Customizer:
         'recipients'
     ]
 
+    def build_url_backfilter_statement(self, target_table=None):
+        stmt = f"UPDATE public.{target_table} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.lookup_urltolocation LOOKUP\n"
+        stmt += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%');\n"
+
+        stmt2 = f"UPDATE public.{target_table} TARGET\n"
+        stmt2 += "SET property = LOOKUP.property\n"
+        stmt2 += f"FROM public.lookup_urltolocation LOOKUP\n"
+        stmt2 += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%')\n"
+        stmt2 += "AND LOOKUP.exact = 1;"
+
+        stmt3 = f"UPDATE public.{target_table}\n"
+        stmt3 += "SET property = 'Non-Location Pages'\n"
+        stmt3 += "WHERE property IS NULL;\n"
+
+        return [stmt, stmt2, stmt3]
+
+    def build_moz_backfilter_statement(self, target_table=None):
+        stmt = f"UPDATE public.{target_table} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.lookup_moz_listingtolocation LOOKUP\n"
+        stmt += "WHERE CAST(TARGET.listing_id AS character varying(25)) = CAST(LOOKUP.listing_id AS character varying(25));\n"
+
+        stmt2 = f"UPDATE public.{target_table}\n"
+        stmt2 += "SET property = 'Non-Location Pages'\n"
+        stmt2 += "WHERE property IS NULL;\n"
+
+        return [stmt, stmt2]
+
     CLIENT_NAME = 'ZwirnerEquipment'
 
     CONFIGURATION_WORKBOOK = {
         'config_sheet_name': 'Zwirner Equipment - Configuration',
-        'source_refresh_dates': [1, 15, 28],
+        'source_refresh_dates': [1, 15, 30],
+
         'sheets': [
             {'sheet': 'URL to Property', 'table': {
                             'name': 'lookup_urltolocation',
@@ -47,7 +78,6 @@ class Customizer:
                             ],
                             'owner': 'postgres'
             }},
-
             {'sheet': 'Moz Local Account Master', 'table': {
                             'name': 'source_moz_localaccountmaster',
                             'schema': 'public',
@@ -105,9 +135,10 @@ class Customizer:
                             'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'mozlocal_directory_visibility_report_mdd',
+                            'name': 'moz_local_visibility_report_mdd',
                             'schema': 'public',
                             'type': 'reporting',
+                            'backfilter': build_moz_backfilter_statement,
                             'columns': [
                                 {'name': 'report_date', 'type': 'date'},
                                 {'name': 'data_source', 'type': 'character varying', 'length': 100},
@@ -135,9 +166,10 @@ class Customizer:
                             'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'mozlocal_directory_sync_report_mdd',
+                            'name': 'moz_local_sync_report_mdd',
                             'schema': 'public',
                             'type': 'reporting',
+                            'backfilter': build_moz_backfilter_statement,
                             'columns': [
                                 {'name': 'report_date', 'type': 'date'},
                                 {'name': 'data_source', 'type': 'character varying', 'length': 100},
@@ -165,9 +197,10 @@ class Customizer:
                             'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                                'name': 'mozpro_rankings',
+                                'name': 'moz_pro_rankings',
                                 'schema': 'public',
                                 'type': 'reporting',
+                                'backfilter': build_url_backfilter_statement,
                                 'columns': [
                                     {'name': 'report_date', 'type': 'date'},
                                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
@@ -201,9 +234,10 @@ class Customizer:
                                 'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                                'name': 'mozpro_serp',
+                                'name': 'moz_pro_serp',
                                 'schema': 'public',
                                 'type': 'reporting',
+                                'backfilter': build_url_backfilter_statement,
                                 'columns': [
                                     {'name': 'report_date', 'type': 'date'},
                                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
@@ -252,9 +286,10 @@ class Customizer:
                                 'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                                'name': 'googleanalytics_traffic',
+                                'name': 'google_analytics_traffic',
                                 'schema': 'public',
                                 'type': 'reporting',
+                                'backfilter': build_url_backfilter_statement,
                                 'columns': [
                                     {'name': 'report_date', 'type': 'date'},
                                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
@@ -265,7 +300,7 @@ class Customizer:
                                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                                     {'name': 'device', 'type': 'character varying', 'length': 50},
                                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                                    {'name': 'page', 'type': 'character varying', 'length': 500},
+                                    {'name': 'url', 'type': 'character varying', 'length': 500},
                                     {'name': 'sessions', 'type': 'character varying', 'length': 500},
                                     {'name': 'percent_new_sessions', 'type': 'double precision'},
                                     {'name': 'pageviews', 'type': 'bigint'},
@@ -293,9 +328,10 @@ class Customizer:
                                 'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'googleanalytics_events',
+                            'name': 'google_analytics_events',
                             'schema': 'public',
                             'type': 'reporting',
+                            'backfilter': build_url_backfilter_statement,
                             'columns': [
                                 {'name': 'report_date', 'type': 'date'},
                                 {'name': 'data_source', 'type': 'character varying', 'length': 100},
@@ -306,7 +342,7 @@ class Customizer:
                                 {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                                 {'name': 'device', 'type': 'character varying', 'length': 50},
                                 {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                                {'name': 'page', 'type': 'character varying', 'length': 500},
+                                {'name': 'url', 'type': 'character varying', 'length': 500},
                                 {'name': 'event_label', 'type': 'character varying', 'length': 200},
                                 {'name': 'event_action', 'type': 'character varying', 'length': 200},
                                 {'name': 'total_events', 'type': 'bigint'},
@@ -322,7 +358,7 @@ class Customizer:
                                     'method': 'btree',
                                     'columns': [
                                         {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
+                                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
                                         {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                                     ]
                                 }
@@ -330,9 +366,10 @@ class Customizer:
                             'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'googleanalytics_goals',
+                            'name': 'google_analytics_goals',
                             'schema': 'public',
                             'type': 'reporting',
+                            'backfilter': build_url_backfilter_statement,
                             'columns': [
                                 {'name': 'report_date', 'type': 'date'},
                                 {'name': 'data_source', 'type': 'character varying', 'length': 100},
@@ -343,7 +380,7 @@ class Customizer:
                                 {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                                 {'name': 'device', 'type': 'character varying', 'length': 50},
                                 {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                                {'name': 'page', 'type': 'character varying', 'length': 500},
+                                {'name': 'url', 'type': 'character varying', 'length': 500},
                                 {'name': 'request_a_quote', 'type': 'bigint'},
                                 {'name': 'sidebar_contact_us', 'type': 'bigint'},
                                 {'name': 'contact_us_form_submission', 'type': 'bigint'},
@@ -359,7 +396,7 @@ class Customizer:
                                     'method': 'btree',
                                     'columns': [
                                         {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'medium', 'sort': 'asc', 'nulls_last': True},
+                                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
                                         {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                                     ]
                                 }
@@ -391,6 +428,7 @@ class Customizer:
         'PASSWORD': 'pythonpipelines',
         'SERVER': '35.222.11.147'
     }
+
     # ### END EDITING ###
 
     def __init__(self):

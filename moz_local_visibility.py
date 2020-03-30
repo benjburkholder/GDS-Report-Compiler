@@ -61,8 +61,8 @@ def main() -> int:
             df['data_source'] = 'Moz Local - Visibility Report'
             df = Moz().exclude_moz_directories(customizer=customizer, df=df)
             df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='mozlocal_directory_visibility_report_mdd')
-            grc.table_backfilter(customizer=customizer)
+            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='moz_local_visibility_report_mdd')
+            grc.table_backfilter(customizer=customizer, calling_script=SCRIPT_NAME)
 
         else:
             logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
