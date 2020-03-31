@@ -235,46 +235,56 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
 class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
 
+    metrics = [
+        'totalEvents',
+        'uniqueEvents',
+        'eventValue'
+    ]
+
+    dimensions = [
+        'date',
+        'channelGrouping',
+        'sourceMedium',
+        'deviceCategory',
+        'campaign',
+        'pagePath',
+        'eventLabel',
+        'eventAction',
+    ]
+
+    custom_columns = {
+        'data_source': 'Google Analytics - Events',
+        'property': None
+    }
+
+    audit_procedure = {
+        'name': 'googleanalytics_audit',
+        'active': 1,
+        'code': """
+
+        """,
+        'return': 'integer',
+        'owner': 'postgres'
+    }
+
     def __init__(self):
         super().__init__()
-        setattr(self, f'{self.prefix}_class', True)
-        setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_historical', True)
-        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
-        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
-        setattr(self, f'{self.prefix}_table', 'googleanalytics_events')
-        setattr(self, f'{self.prefix}_metrics', [
-            'totalEvents',
-            'uniqueEvents',
-            'eventValue'
-        ])
-        setattr(self, f'{self.prefix}_dimensions', [
-            'date',
-            'channelGrouping',
-            'sourceMedium',
-            'deviceCategory',
-            'campaign',
-            'pagePath',
-            'eventLabel',
-            'eventAction',
-        ])
+        self.set_attribute('class', True)
+        self.set_attribute('debug', True)
+        self.set_attribute('historical', True)
+        self.set_attribute('historical_start_date', '2020-01-01')
+        self.set_attribute('historical_end_date', '2020-01-02')
+
+        setattr(self, f'{self.prefix}_table', self.prefix)  # TODO: is this necessary?
+
+        self.set_attribute('metrics', self.metrics)
+        self.set_attribute('dimensions', self.dimensions)
 
         # Used to set columns which vary from data source and client vertical
-        setattr(self, f'{self.prefix}_custom_columns', {
-            'data_source': 'Google Analytics - Events',
-            'property': None
-        })
+        self.set_attribute('custom_columns', self.custom_columns)
 
         # audit procedure
-        setattr(self, f'{self.prefix}_audit_procedure', {
-            'name': 'googleanalytics_audit',
-            'active': 1,
-            'code': """
-
-            """,
-            'return': 'integer',
-            'owner': 'postgres'
-        })
+        self.set_attribute('audit_procedure', self.audit_procedure)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
