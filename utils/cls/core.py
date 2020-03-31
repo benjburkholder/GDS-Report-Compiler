@@ -354,13 +354,12 @@ class Customizer:
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                     {'name': 'device', 'type': 'character varying', 'length': 50},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                    {'name': 'url', 'type': 'character varying', 'length': 500},
+                    {'name': 'page_path', 'type': 'character varying', 'length': 1000},
                     {'name': 'event_label', 'type': 'character varying', 'length': 200},
                     {'name': 'event_action', 'type': 'character varying', 'length': 200},
                     {'name': 'total_events', 'type': 'bigint'},
                     {'name': 'unique_events', 'type': 'bigint'},
                     {'name': 'event_value', 'type': 'double precision'},
-
                 ],
                 'indexes': [
                     {
@@ -466,6 +465,9 @@ class Customizer:
 
     def set_attribute(self, attrib, value):
         setattr(self, self.generate_attribute_prefix(attrib=attrib), value)
+
+    def get_attribute(self, attrib):
+        return getattr(self, self.generate_attribute_prefix(attrib=attrib))
 
     def set_function_prefixes(self) -> None:
         # get function attributes from the Customizer child instance only

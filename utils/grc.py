@@ -250,7 +250,7 @@ def create_table_from_schema(customizer, schema) -> int:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def setup(script_name: str, required_attributes: list):
+def setup(script_name: str, required_attributes: list, expedited: bool = False):
     """
     Before allowing any root-level script to execute
     Get the Customizer instance configured for script_name
@@ -260,29 +260,29 @@ def setup(script_name: str, required_attributes: list):
 
     :param script_name:
     :param required_attributes:
+    :param expedited: (bool) skip the lookup table refreshment - good for debugging
     :return:
     """
     customizer = custom.get_customizer(calling_file=script_name)
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
+    if not expedited:
+        # Build reporting tables
+        build_reporting_tables(customizer=customizer)
 
-    # Build reporting tables
-    build_reporting_tables(customizer=customizer)
+        # Build listed lookup tables
+        build_lookup_tables(customizer=customizer)
 
-    # Build listed lookup tables
-    build_lookup_tables(customizer=customizer)
+        # Build listed source tables
+        build_source_tables(customizer=customizer)
 
-    # Build listed source tables
-    build_source_tables(customizer=customizer)
+        # Lookup table refresh
+        print('refreshing lookup tables...')
+        refresh_lookup_tables(customizer=customizer)
 
-    # Lookup table refresh
-    print('refreshing lookup tables...')
-    refresh_lookup_tables(customizer=customizer)
-
-    # Source table refresh
-    print('refreshing source tables...')
-    refresh_source_tables(customizer=customizer)
-
+        # Source table refresh
+        print('refreshing source tables...')
+        refresh_source_tables(customizer=customizer)
     return customizer
 
 

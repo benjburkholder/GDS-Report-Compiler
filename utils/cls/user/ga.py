@@ -23,6 +23,7 @@ class GoogleAnalytics(Customizer):
 
     def __init__(self):
         super().__init__()
+        # self.set_attribute('secret_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
         setattr(self, f'{self.prefix}_secrets_path',
                 str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
         setattr(self, f'{self.prefix}_client_name', self.client)
@@ -33,22 +34,20 @@ class GoogleAnalytics(Customizer):
           'columns': ['zip', 'phone']
         })
 
-    def get_view_ids(self, customizer) -> list:
-        engine = postgres_helpers.build_postgresql_engine(customizer=customizer)
+    def get_view_ids(self) -> list:
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
             sql = sqlalchemy.text(
-                f"""
-                SELECT *
+                """
+                SELECT DISTINCT
+                    view_id
                 FROM public.source_ga_views;
                 """
             )
-
-            result = con.execute(sql)
-            raw_views = result.fetchall()
-
-            view_ids = [{'view_id': view[0]} for view in raw_views if raw_views]
-
-            return view_ids
+            results = con.execute(sql).fetchall()
+            return [
+                result['view_id'] for result in results
+            ] if results else []
 
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
@@ -276,13 +275,12 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        # TODO(jschroeder) flesh out this example a bit more
         return df.rename(columns={
             'date': 'report_date',
             'channelGrouping': 'channel_grouping',
             'sourceMedium': 'source_medium',
             'deviceCategory': 'device',
-            'pagePath': 'page',
+            'pagePath': 'url',
             'eventLabel': 'event_label',
             'eventAction': 'event_action',
             'totalEvents': 'total_events',
@@ -297,7 +295,23 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        for column in getattr(self, f'{self.prefix}_schema')['columns']:
+        df['view_id'] = df['view_id'].astype(str)[:25]
+        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
+        df['channel_grouping'] = df['channel_grouping'].astype(str)[:100]
+        df['source_medium'] = df['source_medium'].astype(str)[:100]
+        df['device'] = df['device'].astype(str)[:50]
+        df['campaign'] = df['campaign'].astype(str)[:255]
+        df['url'] = df['url'].astype(str)[:1000]
+        df['event_label'] = df['event_label'].astype(str)[:1000]
+        df['event_action'] = df['event_action'].astype(str)[:255]
+        df['total_events'] = df['total_events'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['unique_events'] = df['total_events'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['event_value'] = df['event_value'].fillna('0').apply(lambda x: float(x) if x else None)
+
+        # TODO: Later optimization... keeping the schema for the table in the customizer
+        #   - and use it to reference typing command to df
+        '''
+        for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
                     assert 'length' in column.keys()
@@ -313,6 +327,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        '''
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
