@@ -143,8 +143,8 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         })
 
         # Add processing stages as class attributes
-        setattr(self, f'{self.prefix}_rename', self.rename)
-        setattr(self, f'{self.prefix}_type', self.type)
+        #setattr(self, f'{self.prefix}_rename', self.rename)
+        #setattr(self, f'{self.prefix}_type', self.type)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
