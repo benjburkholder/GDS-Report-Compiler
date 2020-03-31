@@ -322,6 +322,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         :return:
         """
         df['view_id'] = df['view_id'].astype(str)[:25]
+        # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
         df['channel_grouping'] = df['channel_grouping'].astype(str)[:100]
         df['source_medium'] = df['source_medium'].astype(str)[:100]
