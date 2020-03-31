@@ -30,7 +30,7 @@ def get_required_attribute(cls, attribute):
     """
     if hasattr(cls, f'{cls.prefix}_{attribute}'):
         return getattr(cls, f'{cls.prefix}_{attribute}')
-    raise AssertionError(f"{cls.__class__.__name__} does not have an attribute {attribute}.")
+    raise AssertionError(f"{cls.__class__.__name__} does not have an attribute {cls.prefix}_{attribute}.")
 
 
 def get_optional_attribute(cls, attribute):

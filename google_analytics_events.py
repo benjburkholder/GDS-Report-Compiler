@@ -3,10 +3,9 @@ Google Analytics Events
 """
 import logging
 import datetime
-import pandas as pd
 
+from utils import grc
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
-from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
 
 PROCESSING_STAGES = [
@@ -31,7 +30,7 @@ def main() -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=False)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=True)
 
     grc.refresh_source_tables(customizer=customizer)
 

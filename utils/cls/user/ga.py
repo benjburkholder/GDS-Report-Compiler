@@ -23,16 +23,17 @@ class GoogleAnalytics(Customizer):
 
     def __init__(self):
         super().__init__()
-        # self.set_attribute('secret_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
-        setattr(self, f'{self.prefix}_secrets_path',
-                str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
-        setattr(self, f'{self.prefix}_client_name', self.client)
-        setattr(self, f'{self.prefix}_get_view_ids', self.get_view_ids)
+        # TODO: do we still need client_name??
+        self.set_attribute('client_name', self.client)
 
-        setattr(self, f'{self.prefix}_drop_columns', {
-          'status': False,
-          'columns': ['zip', 'phone']
-        })
+        self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+
+        # TODO: is there a way to optimize this?
+        drop_columns = {
+            'status': False,
+            'columns': ['zip', 'phone']
+        }
+        self.set_attribute('drop_columns', drop_columns)
 
     def get_view_ids(self) -> list:
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -52,98 +53,106 @@ class GoogleAnalytics(Customizer):
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
+    metrics = [
+        'sessions',
+        'percentNewSessions',
+        'pageviews',
+        'uniquePageviews',
+        'pageviewsPerSession',
+        'entrances',
+        'bounces',
+        'sessionDuration',
+        'users',
+        'newUsers'
+    ]
+
+    dimensions = [
+        'date',
+        'channelGrouping',
+        'sourceMedium',
+        'deviceCategory',
+        'campaign',
+        'pagePath',
+    ]
+
+    # TODO: shouldn't this be a list? In-case we have more custom columns?
+    #   - Not sure what 'property' key does? is that for entity parsing perhaps?
+    custom_columns = {
+        'data_source': 'Google Analytics - Traffic',
+        'property': None
+    }
+
+    audit_procedure = {
+        'name': 'googleanalytics_audit',
+        'active': 1,
+        'code': """
+
+        """,
+        'return': 'integer',
+        'owner': 'postgres'
+    }
+
+    schema = {
+        'table': 'google_analytics_traffic',
+        'schema': 'public',
+        'type': 'reporting',
+        'columns': [
+            {'name': 'report_date', 'type': 'date'},
+            {'name': 'data_source', 'type': 'character varying', 'length': 100},
+            {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
+            {'name': 'property', 'type': 'character varying', 'length': 100},
+            {'name': 'service_line', 'type': 'character varying', 'length': 100},
+            {'name': 'view_id', 'type': 'character varying', 'length': 25},
+            {'name': 'source_medium', 'type': 'character varying', 'length': 100},
+            {'name': 'device', 'type': 'character varying', 'length': 50},
+            {'name': 'campaign', 'type': 'character varying', 'length': 100},
+            {'name': 'page', 'type': 'character varying', 'length': 500},
+            {'name': 'sessions', 'type': 'character varying', 'length': 500},
+            {'name': 'percent_new_sessions', 'type': 'double precision'},
+            {'name': 'pageviews', 'type': 'bigint'},
+            {'name': 'unique_pageviews', 'type': 'bigint'},
+            {'name': 'pageviews_per_session', 'type': 'double precision'},
+            {'name': 'entrances', 'type': 'bigint'},
+            {'name': 'bounces', 'type': 'bigint'},
+            {'name': 'session_duration', 'type': 'double precision'},
+            {'name': 'users', 'type': 'bigint'},
+            {'name': 'new_users', 'type': 'bigint'},
+        ],
+        'indexes': [
+            {
+                'name': 'ix_google_analytics_traffic',
+                'tablespace': 'pg_default',
+                'clustered': True,
+                'method': 'btree',
+                'columns': [
+                    {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                    {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
+                    {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                ]
+            }
+        ],
+        'owner': 'postgres'
+    }
+
     def __init__(self):
         super().__init__()
-        setattr(self, f'{self.prefix}_class', True)
-        setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_historical', False)
-        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
-        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
-        setattr(self, f'{self.prefix}_table', 'google_analytics_traffic')
-        setattr(self, f'{self.prefix}_metrics', [
-            'sessions',
-            'percentNewSessions',
-            'pageviews',
-            'uniquePageviews',
-            'pageviewsPerSession',
-            'entrances',
-            'bounces',
-            'sessionDuration',
-            'users',
-            'newUsers'
-        ])
-        setattr(self, f'{self.prefix}_dimensions', [
-            'date',
-            'channelGrouping',
-            'sourceMedium',
-            'deviceCategory',
-            'campaign',
-            'pagePath',
-        ])
+        self.set_attribute('class', True)
+        self.set_attribute('debug', True)
+        self.set_attribute('historical', False)
+        self.set_attribute('historical_start_date', '2020-01-01')
+        self.set_attribute('historical_end_date', '2020-01-02')
+        self.set_attribute('table', self.prefix)
+        self.set_attribute('metrics', self.metrics)
+        self.set_attribute('dimensions', self.dimensions)
 
         # Used to set columns which vary from data source and client vertical
-        setattr(self, f'{self.prefix}_custom_columns', {
-            'data_source': 'Google Analytics - Traffic',
-            'property': None
-        })
+        self.set_attribute('custom_columns', self.custom_columns)
 
         # audit procedure
-        setattr(self, f'{self.prefix}_audit_procedure', {
-            'name': 'googleanalytics_audit',
-            'active': 1,
-            'code': """
-
-            """,
-            'return': 'integer',
-            'owner': 'postgres'
-        })
+        self.set_attribute('audit_procedure', self.audit_procedure)
 
         # reporting model
-        setattr(self, f'{self.prefix}_schema', {
-            'table': 'google_analytics_traffic',
-            'schema': 'public',
-            'type': 'reporting',
-            'columns': [
-                {'name': 'report_date', 'type': 'date'},
-                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 100},
-                {'name': 'service_line', 'type': 'character varying', 'length': 100},
-                {'name': 'view_id', 'type': 'character varying', 'length': 25},
-                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                {'name': 'device', 'type': 'character varying', 'length': 50},
-                {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                {'name': 'page', 'type': 'character varying', 'length': 500},
-                {'name': 'sessions', 'type': 'character varying', 'length': 500},
-                {'name': 'percent_new_sessions', 'type': 'double precision'},
-                {'name': 'pageviews', 'type': 'bigint'},
-                {'name': 'unique_pageviews', 'type': 'bigint'},
-                {'name': 'pageviews_per_session', 'type': 'double precision'},
-                {'name': 'entrances', 'type': 'bigint'},
-                {'name': 'bounces', 'type': 'bigint'},
-                {'name': 'session_duration', 'type': 'double precision'},
-                {'name': 'users', 'type': 'bigint'},
-                {'name': 'new_users', 'type': 'bigint'},
-            ],
-            'indexes': [
-                {
-                    'name': 'ix_google_analytics_traffic',
-                    'tablespace': 'pg_default',
-                    'clustered': True,
-                    'method': 'btree',
-                    'columns': [
-                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                    ]
-                }
-            ],
-            'owner': 'postgres'
-        })
-
-        # Add processing stages as class attributes
-        #setattr(self, f'{self.prefix}_rename', self.rename)
-        #setattr(self, f'{self.prefix}_type', self.type)
+        self.set_attribute('schema', self.schema)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -151,6 +160,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
         :return:
         """
+        # TODO: with a new version of GA that accepts function pointers
         return '{"msg": "i am json credentials"}'
 
     # noinspection PyMethodMayBeStatic
@@ -160,7 +170,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        # TODO(jschroeder) flesh out this example a bit more
         return df.rename(columns={
             'date': 'report_date',
             'sourceMedium': 'source_medium',
@@ -182,7 +191,13 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        for column in getattr(self, f'{self.prefix}_schema')['columns']:
+        # TODO:
+
+
+        # TODO: Later optimization... keeping the schema for the table in the customizer
+        #   - and use it to reference typing command to df
+        '''
+        for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
                     assert 'length' in column.keys()
@@ -198,6 +213,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        '''
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -438,12 +454,14 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        for column in getattr(self, f'{self.prefix}_schema')['columns']:
+        # TODO: Later optimization... keeping the schema for the table in the customizer
+        #   - and use it to reference typing command to df
+        '''
+        for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
                     assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(
-                        lambda x: str(x)[:column['length']] if x else None)
+                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
                 elif column['type'] == 'bigint':
                     df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
                 elif column['type'] == 'double precision':
@@ -455,13 +473,13 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        '''
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
             for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
                 df[key] = value
-
         return df
 
     def post_processing(self):
