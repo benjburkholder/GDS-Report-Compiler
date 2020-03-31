@@ -12,8 +12,10 @@ SCRIPT_NAME = grc.get_script_name(__file__)
 
 PROCESSING_STAGES = [
     'rename',
-    'type',
-    'parse',
+    # 'type',
+    # 'parse',
+    # 'backfilter',
+
 ]
 REQUIRED_ATTRIBUTES = [
     'get_view_ids',
@@ -33,7 +35,7 @@ def main() -> int:
 
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
-
+    
     view_ids = GA().get_view_ids(customizer=customizer)
 
     if getattr(customizer, f'{customizer.prefix}_historical'):
@@ -54,7 +56,7 @@ def main() -> int:
         )
         if df.shape[0]:
             df['view_id'] = view_id['view_id']
-            # df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
+            df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='google_analytics_traffic')
             grc.table_backfilter(customizer=customizer, calling_script=SCRIPT_NAME)
 

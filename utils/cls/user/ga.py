@@ -60,7 +60,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         setattr(self, f'{self.prefix}_historical', False)
         setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
         setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
-        setattr(self, f'{self.prefix}_table', 'googleanalytics_traffic')
+        setattr(self, f'{self.prefix}_table', 'google_analytics_traffic')
         setattr(self, f'{self.prefix}_metrics', [
             'sessions',
             'percentNewSessions',
@@ -98,6 +98,53 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'return': 'integer',
             'owner': 'postgres'
         })
+
+        # reporting model
+        setattr(self, f'{self.prefix}_schema', {
+            'table': 'google_analytics_traffic',
+            'schema': 'public',
+            'type': 'reporting',
+            'columns': [
+                {'name': 'report_date', 'type': 'date'},
+                {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
+                {'name': 'property', 'type': 'character varying', 'length': 100},
+                {'name': 'service_line', 'type': 'character varying', 'length': 100},
+                {'name': 'view_id', 'type': 'character varying', 'length': 25},
+                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
+                {'name': 'device', 'type': 'character varying', 'length': 50},
+                {'name': 'campaign', 'type': 'character varying', 'length': 100},
+                {'name': 'page', 'type': 'character varying', 'length': 500},
+                {'name': 'sessions', 'type': 'character varying', 'length': 500},
+                {'name': 'percent_new_sessions', 'type': 'double precision'},
+                {'name': 'pageviews', 'type': 'bigint'},
+                {'name': 'unique_pageviews', 'type': 'bigint'},
+                {'name': 'pageviews_per_session', 'type': 'double precision'},
+                {'name': 'entrances', 'type': 'bigint'},
+                {'name': 'bounces', 'type': 'bigint'},
+                {'name': 'session_duration', 'type': 'double precision'},
+                {'name': 'users', 'type': 'bigint'},
+                {'name': 'new_users', 'type': 'bigint'},
+            ],
+            'indexes': [
+                {
+                    'name': 'ix_google_analytics_traffic',
+                    'tablespace': 'pg_default',
+                    'clustered': True,
+                    'method': 'btree',
+                    'columns': [
+                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
+                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                    ]
+                }
+            ],
+            'owner': 'postgres'
+        })
+
+        # Add processing stages as class attributes
+        setattr(self, f'{self.prefix}_rename', self.rename)
+        setattr(self, f'{self.prefix}_type', self.type)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:

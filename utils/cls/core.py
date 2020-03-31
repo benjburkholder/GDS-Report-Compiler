@@ -59,36 +59,36 @@ class Customizer:
 
         'sheets': [
             {'sheet': 'URL to Property', 'table': {
-                            'name': 'lookup_urltolocation',
-                            'schema': 'public',
-                            'type': 'lookup',
-                            'columns': [
-                                {'name': 'url', 'type': 'character varying', 'length': 100},
-                                {'name': 'property', 'type': 'character varying', 'length': 100},
-                                {'name': 'exact', 'type': 'bigint'},
-                            ],
-                            'owner': 'postgres'
+                'name': 'lookup_urltolocation',
+                'schema': 'public',
+                'type': 'lookup',
+                'columns': [
+                    {'name': 'url', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'exact', 'type': 'bigint'},
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': 'Moz Pro Campaign Master', 'table': {
-                            'name': 'source_moz_procampaignmaster',
-                            'schema': 'public',
-                            'type': 'source',
-                            'columns': [
-                                {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
+                'name': 'source_moz_procampaignmaster',
+                'schema': 'public',
+                'type': 'source',
+                'columns': [
+                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
 
-                            ],
-                            'owner': 'postgres'
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': 'Moz Local Account Master', 'table': {
-                            'name': 'source_moz_localaccountmaster',
-                            'schema': 'public',
-                            'type': 'source',
-                            'columns': [
-                                {'name': 'account', 'type': 'character varying', 'length': 150},
-                                {'name': 'label', 'type': 'character varying', 'length': 150},
+                'name': 'source_moz_localaccountmaster',
+                'schema': 'public',
+                'type': 'source',
+                'columns': [
+                    {'name': 'account', 'type': 'character varying', 'length': 150},
+                    {'name': 'label', 'type': 'character varying', 'length': 150},
 
-                            ],
-                            'owner': 'postgres'
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': 'Moz Local Account Master', 'table': {
                 'name': 'source_moz_localaccountmaster',
@@ -102,318 +102,318 @@ class Customizer:
                 'owner': 'postgres'
             }},
             {'sheet': 'GA Views', 'table': {
-                    'name': 'source_ga_views',
-                    'schema': 'public',
-                    'type': 'source',
-                    'columns': [
-                        {'name': 'view_id', 'type': 'character varying', 'length': 100},
+                'name': 'source_ga_views',
+                'schema': 'public',
+                'type': 'source',
+                'columns': [
+                    {'name': 'view_id', 'type': 'character varying', 'length': 100},
 
-                    ],
-                    'owner': 'postgres'
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': 'Moz Listing to Property', 'table': {
-                    'name': 'lookup_moz_listingtolocation',
-                    'schema': 'public',
-                    'type': 'lookup',
-                    'columns': [
-                        {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                        {'name': 'property', 'type': 'character varying', 'length': 150},
-                        {'name': 'account', 'type': 'character varying', 'length': 150},
-                        {'name': 'label', 'type': 'character varying', 'length': 150},
-                        {'name': 'name', 'type': 'character varying', 'length': 150},
-                        {'name': 'address', 'type': 'character varying', 'length': 250},
-                        {'name': 'city', 'type': 'character varying', 'length': 50},
-                        {'name': 'state', 'type': 'character varying', 'length': 50},
-                        {'name': 'zip', 'type': 'bigint'},
-                        {'name': 'phone', 'type': 'character varying', 'length': 25},
+                'name': 'lookup_moz_listingtolocation',
+                'schema': 'public',
+                'type': 'lookup',
+                'columns': [
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 150},
+                    {'name': 'account', 'type': 'character varying', 'length': 150},
+                    {'name': 'label', 'type': 'character varying', 'length': 150},
+                    {'name': 'name', 'type': 'character varying', 'length': 150},
+                    {'name': 'address', 'type': 'character varying', 'length': 250},
+                    {'name': 'city', 'type': 'character varying', 'length': 50},
+                    {'name': 'state', 'type': 'character varying', 'length': 50},
+                    {'name': 'zip', 'type': 'bigint'},
+                    {'name': 'phone', 'type': 'character varying', 'length': 25},
 
-                    ],
-                    'owner': 'postgres'
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': 'GMB Listing to Property', 'table': {
-                    'name': 'lookup_gmb_listingtolocation',
-                    'schema': 'public',
-                    'type': 'lookup',
-                    'columns': [
-                        {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                        {'name': 'property', 'type': 'character varying', 'length': 150},
-                        {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                        {'name': 'city', 'type': 'character varying', 'length': 50},
-                        {'name': 'state', 'type': 'character varying', 'length': 50},
-                        {'name': 'zip', 'type': 'character varying', 'length': 50},
-                        {'name': 'phone', 'type': 'character varying', 'length': 25},
+                'name': 'lookup_gmb_listingtolocation',
+                'schema': 'public',
+                'type': 'lookup',
+                'columns': [
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 150},
+                    {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
+                    {'name': 'city', 'type': 'character varying', 'length': 50},
+                    {'name': 'state', 'type': 'character varying', 'length': 50},
+                    {'name': 'zip', 'type': 'character varying', 'length': 50},
+                    {'name': 'phone', 'type': 'character varying', 'length': 25},
 
-                    ],
-                    'owner': 'postgres'
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'moz_local_visibility_report_mdd',
-                            'schema': 'public',
-                            'type': 'reporting',
-                            'backfilter': build_moz_backfilter_statement,
-                            'columns': [
-                                {'name': 'report_date', 'type': 'date'},
-                                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                                {'name': 'property', 'type': 'character varying', 'length': 100},
-                                {'name': 'account_name', 'type': 'character varying', 'length': 100},
-                                {'name': 'listing_id', 'type': 'character varying', 'length': 25},
-                                {'name': 'directory', 'type': 'character varying', 'length': 100},
-                                {'name': 'points_reached', 'type': 'bigint'},
-                                {'name': 'max_points', 'type': 'bigint'},
+                'name': 'moz_local_visibility_report_mdd',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_moz_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'account_name', 'type': 'character varying', 'length': 100},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 25},
+                    {'name': 'directory', 'type': 'character varying', 'length': 100},
+                    {'name': 'points_reached', 'type': 'bigint'},
+                    {'name': 'max_points', 'type': 'bigint'},
 
-                            ],
-                            'indexes': [
-                                {
-                                    'name': 'ix_moz_local_directory_visibility_report',
-                                    'tablespace': 'pg_default',
-                                    'clustered': True,
-                                    'method': 'btree',
-                                    'columns': [
-                                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'property', 'sort': 'asc', 'nulls_last': True}
-                                    ]
-                                }
-                            ],
-                            'owner': 'postgres'
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_moz_local_directory_visibility_report',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'property', 'sort': 'asc', 'nulls_last': True}
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'moz_local_sync_report_mdd',
-                            'schema': 'public',
-                            'type': 'reporting',
-                            'backfilter': build_moz_backfilter_statement,
-                            'columns': [
-                                {'name': 'report_date', 'type': 'date'},
-                                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                                {'name': 'property', 'type': 'character varying', 'length': 100},
-                                {'name': 'account_name', 'type': 'character varying', 'length': 100},
-                                {'name': 'listing_id', 'type': 'character varying', 'length': 25},
-                                {'name': 'directory', 'type': 'character varying', 'length': 100},
-                                {'name': 'field', 'type': 'character varying', 'length': 100},
-                                {'name': 'sync_status', 'type': 'bigint'},
+                'name': 'moz_local_sync_report_mdd',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_moz_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'account_name', 'type': 'character varying', 'length': 100},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 25},
+                    {'name': 'directory', 'type': 'character varying', 'length': 100},
+                    {'name': 'field', 'type': 'character varying', 'length': 100},
+                    {'name': 'sync_status', 'type': 'bigint'},
 
-                            ],
-                            'indexes': [
-                                {
-                                    'name': 'ix_moz_local_directory_sync_report',
-                                    'tablespace': 'pg_default',
-                                    'clustered': True,
-                                    'method': 'btree',
-                                    'columns': [
-                                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'property', 'sort': 'asc', 'nulls_last': True}
-                                    ]
-                                }
-                            ],
-                            'owner': 'postgres'
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_moz_local_directory_sync_report',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'property', 'sort': 'asc', 'nulls_last': True}
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                                'name': 'moz_pro_rankings',
-                                'schema': 'public',
-                                'type': 'reporting',
-                                'backfilter': build_url_backfilter_statement,
-                                'columns': [
-                                    {'name': 'report_date', 'type': 'date'},
-                                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                                    {'name': 'property', 'type': 'character varying', 'length': 100},
-                                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
-                                    {'name': 'id', 'type': 'character varying', 'length': 100},
-                                    {'name': 'search_id', 'type': 'character varying', 'length': 100},
-                                    {'name': 'keyword', 'type': 'character varying', 'length': 100},
-                                    {'name': 'search_engine', 'type': 'character varying', 'length': 100},
-                                    {'name': 'device', 'type': 'character varying', 'length': 100},
-                                    {'name': 'geo', 'type': 'character varying', 'length': 100},
-                                    {'name': 'tags', 'type': 'character varying', 'length': 250},
-                                    {'name': 'url', 'type': 'character varying', 'length': 1000},
-                                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone'},
-                                    {'name': 'rank', 'type': 'bigint'},
-                                    {'name': 'branded', 'type': 'bigint'},
+                'name': 'moz_pro_rankings',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_url_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'id', 'type': 'character varying', 'length': 100},
+                    {'name': 'search_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'keyword', 'type': 'character varying', 'length': 100},
+                    {'name': 'search_engine', 'type': 'character varying', 'length': 100},
+                    {'name': 'device', 'type': 'character varying', 'length': 100},
+                    {'name': 'geo', 'type': 'character varying', 'length': 100},
+                    {'name': 'tags', 'type': 'character varying', 'length': 250},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000},
+                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone'},
+                    {'name': 'rank', 'type': 'bigint'},
+                    {'name': 'branded', 'type': 'bigint'},
 
-                                ],
-                                'indexes': [
-                                    {
-                                        'name': 'ix_moz_pro_rankings',
-                                        'tablespace': 'pg_default',
-                                        'clustered': True,
-                                        'method': 'btree',
-                                        'columns': [
-                                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                            {'name': 'id', 'sort': 'asc', 'nulls_last': True},
-                                        ]
-                                    }
-                                ],
-                                'owner': 'postgres'
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_moz_pro_rankings',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'id', 'sort': 'asc', 'nulls_last': True},
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                                'name': 'moz_pro_serp',
-                                'schema': 'public',
-                                'type': 'reporting',
-                                'backfilter': build_url_backfilter_statement,
-                                'columns': [
-                                    {'name': 'report_date', 'type': 'date'},
-                                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                                    {'name': 'property', 'type': 'character varying', 'length': 100},
-                                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
-                                    {'name': 'id', 'type': 'character varying', 'length': 100},
-                                    {'name': 'search_id', 'type': 'character varying', 'length': 100},
-                                    {'name': 'keyword', 'type': 'character varying', 'length': 100},
-                                    {'name': 'search_engine', 'type': 'character varying', 'length': 100},
-                                    {'name': 'device', 'type': 'character varying', 'length': 100},
-                                    {'name': 'geo', 'type': 'character varying', 'length': 100},
-                                    {'name': 'tags', 'type': 'character varying', 'length': 250},
-                                    {'name': 'url', 'type': 'character varying', 'length': 1000},
-                                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone'},
-                                    {'name': 'ads_bottom', 'type': 'bigint'},
-                                    {'name': 'ads_top', 'type': 'bigint'},
-                                    {'name': 'featured_snippet', 'type': 'bigint'},
-                                    {'name': 'image_pack', 'type': 'bigint'},
-                                    {'name': 'in_depth_articles', 'type': 'bigint'},
-                                    {'name': 'knowledge_card', 'type': 'bigint'},
-                                    {'name': 'knowledge_panel', 'type': 'bigint'},
-                                    {'name': 'local_pack', 'type': 'bigint'},
-                                    {'name': 'local_teaser', 'type': 'bigint'},
-                                    {'name': 'news_pack', 'type': 'bigint'},
-                                    {'name': 'related_questions', 'type': 'bigint'},
-                                    {'name': 'review', 'type': 'bigint'},
-                                    {'name': 'shopping_results', 'type': 'bigint'},
-                                    {'name': 'site_links', 'type': 'bigint'},
-                                    {'name': 'tweet', 'type': 'bigint'},
-                                    {'name': 'video', 'type': 'bigint'},
-                                    {'name': 'branded', 'type': 'bigint'},
+                'name': 'moz_pro_serp',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_url_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'id', 'type': 'character varying', 'length': 100},
+                    {'name': 'search_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'keyword', 'type': 'character varying', 'length': 100},
+                    {'name': 'search_engine', 'type': 'character varying', 'length': 100},
+                    {'name': 'device', 'type': 'character varying', 'length': 100},
+                    {'name': 'geo', 'type': 'character varying', 'length': 100},
+                    {'name': 'tags', 'type': 'character varying', 'length': 250},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000},
+                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone'},
+                    {'name': 'ads_bottom', 'type': 'bigint'},
+                    {'name': 'ads_top', 'type': 'bigint'},
+                    {'name': 'featured_snippet', 'type': 'bigint'},
+                    {'name': 'image_pack', 'type': 'bigint'},
+                    {'name': 'in_depth_articles', 'type': 'bigint'},
+                    {'name': 'knowledge_card', 'type': 'bigint'},
+                    {'name': 'knowledge_panel', 'type': 'bigint'},
+                    {'name': 'local_pack', 'type': 'bigint'},
+                    {'name': 'local_teaser', 'type': 'bigint'},
+                    {'name': 'news_pack', 'type': 'bigint'},
+                    {'name': 'related_questions', 'type': 'bigint'},
+                    {'name': 'review', 'type': 'bigint'},
+                    {'name': 'shopping_results', 'type': 'bigint'},
+                    {'name': 'site_links', 'type': 'bigint'},
+                    {'name': 'tweet', 'type': 'bigint'},
+                    {'name': 'video', 'type': 'bigint'},
+                    {'name': 'branded', 'type': 'bigint'},
 
-                                ],
-                                'indexes': [
-                                    {
-                                        'name': 'ix_moz_pro_serp',
-                                        'tablespace': 'pg_default',
-                                        'clustered': True,
-                                        'method': 'btree',
-                                        'columns': [
-                                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                            {'name': 'id', 'sort': 'asc', 'nulls_last': True},
-                                        ]
-                                    }
-                                ],
-                                'owner': 'postgres'
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_moz_pro_serp',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'id', 'sort': 'asc', 'nulls_last': True},
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                                'name': 'google_analytics_traffic',
-                                'schema': 'public',
-                                'type': 'reporting',
-                                'backfilter': build_url_backfilter_statement,
-                                'columns': [
-                                    {'name': 'report_date', 'type': 'date'},
-                                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
-                                    {'name': 'property', 'type': 'character varying', 'length': 100},
-                                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
-                                    {'name': 'view_id', 'type': 'character varying', 'length': 25},
-                                    {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                                    {'name': 'device', 'type': 'character varying', 'length': 50},
-                                    {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                                    {'name': 'url', 'type': 'character varying', 'length': 500},
-                                    {'name': 'sessions', 'type': 'character varying', 'length': 500},
-                                    {'name': 'percent_new_sessions', 'type': 'double precision'},
-                                    {'name': 'pageviews', 'type': 'bigint'},
-                                    {'name': 'unique_pageviews', 'type': 'bigint'},
-                                    {'name': 'pageviews_per_session', 'type': 'double precision'},
-                                    {'name': 'entrances', 'type': 'bigint'},
-                                    {'name': 'bounces', 'type': 'bigint'},
-                                    {'name': 'session_duration', 'type': 'double precision'},
-                                    {'name': 'users', 'type': 'bigint'},
-                                    {'name': 'new_users', 'type': 'bigint'},
-                                ],
-                                'indexes': [
-                                    {
-                                        'name': 'ix_google_analytics_traffic',
-                                        'tablespace': 'pg_default',
-                                        'clustered': True,
-                                        'method': 'btree',
-                                        'columns': [
-                                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                            {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                                        ]
-                                    }
-                                ],
-                                'owner': 'postgres'
+                'name': 'google_analytics_traffic',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_url_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
+                    {'name': 'view_id', 'type': 'character varying', 'length': 25},
+                    {'name': 'source_medium', 'type': 'character varying', 'length': 100},
+                    {'name': 'device', 'type': 'character varying', 'length': 50},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 100},
+                    {'name': 'url', 'type': 'character varying', 'length': 500},
+                    {'name': 'sessions', 'type': 'character varying', 'length': 500},
+                    {'name': 'percent_new_sessions', 'type': 'double precision'},
+                    {'name': 'pageviews', 'type': 'bigint'},
+                    {'name': 'unique_pageviews', 'type': 'bigint'},
+                    {'name': 'pageviews_per_session', 'type': 'double precision'},
+                    {'name': 'entrances', 'type': 'bigint'},
+                    {'name': 'bounces', 'type': 'bigint'},
+                    {'name': 'session_duration', 'type': 'double precision'},
+                    {'name': 'users', 'type': 'bigint'},
+                    {'name': 'new_users', 'type': 'bigint'},
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_analytics_traffic',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'google_analytics_events',
-                            'schema': 'public',
-                            'type': 'reporting',
-                            'backfilter': build_url_backfilter_statement,
-                            'columns': [
-                                {'name': 'report_date', 'type': 'date'},
-                                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                                {'name': 'channel_grouping', 'type': 'character varying', 'length': 200},
-                                {'name': 'property', 'type': 'character varying', 'length': 100},
-                                {'name': 'service_line', 'type': 'character varying', 'length': 100},
-                                {'name': 'view_id', 'type': 'character varying', 'length': 25},
-                                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                                {'name': 'device', 'type': 'character varying', 'length': 50},
-                                {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                                {'name': 'url', 'type': 'character varying', 'length': 500},
-                                {'name': 'event_label', 'type': 'character varying', 'length': 200},
-                                {'name': 'event_action', 'type': 'character varying', 'length': 200},
-                                {'name': 'total_events', 'type': 'bigint'},
-                                {'name': 'unique_events', 'type': 'bigint'},
-                                {'name': 'event_value', 'type': 'double precision'},
+                'name': 'google_analytics_events',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_url_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 200},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
+                    {'name': 'view_id', 'type': 'character varying', 'length': 25},
+                    {'name': 'source_medium', 'type': 'character varying', 'length': 100},
+                    {'name': 'device', 'type': 'character varying', 'length': 50},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 100},
+                    {'name': 'url', 'type': 'character varying', 'length': 500},
+                    {'name': 'event_label', 'type': 'character varying', 'length': 200},
+                    {'name': 'event_action', 'type': 'character varying', 'length': 200},
+                    {'name': 'total_events', 'type': 'bigint'},
+                    {'name': 'unique_events', 'type': 'bigint'},
+                    {'name': 'event_value', 'type': 'double precision'},
 
-                            ],
-                            'indexes': [
-                                {
-                                    'name': 'ix_google_analytics_events',
-                                    'tablespace': 'pg_default',
-                                    'clustered': True,
-                                    'method': 'btree',
-                                    'columns': [
-                                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                                    ]
-                                }
-                            ],
-                            'owner': 'postgres'
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_analytics_events',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                            'name': 'google_analytics_goals',
-                            'schema': 'public',
-                            'type': 'reporting',
-                            'backfilter': build_url_backfilter_statement,
-                            'columns': [
-                                {'name': 'report_date', 'type': 'date'},
-                                {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                                {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
-                                {'name': 'property', 'type': 'character varying', 'length': 100},
-                                {'name': 'service_line', 'type': 'character varying', 'length': 100},
-                                {'name': 'view_id', 'type': 'character varying', 'length': 25},
-                                {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                                {'name': 'device', 'type': 'character varying', 'length': 50},
-                                {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                                {'name': 'url', 'type': 'character varying', 'length': 500},
-                                {'name': 'request_a_quote', 'type': 'bigint'},
-                                {'name': 'sidebar_contact_us', 'type': 'bigint'},
-                                {'name': 'contact_us_form_submission', 'type': 'bigint'},
-                                {'name': 'newsletter_signups', 'type': 'bigint'},
-                                {'name': 'dialogtech_calls', 'type': 'bigint'},
+                'name': 'google_analytics_goals',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_url_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
+                    {'name': 'view_id', 'type': 'character varying', 'length': 25},
+                    {'name': 'source_medium', 'type': 'character varying', 'length': 100},
+                    {'name': 'device', 'type': 'character varying', 'length': 50},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 100},
+                    {'name': 'url', 'type': 'character varying', 'length': 500},
+                    {'name': 'request_a_quote', 'type': 'bigint'},
+                    {'name': 'sidebar_contact_us', 'type': 'bigint'},
+                    {'name': 'contact_us_form_submission', 'type': 'bigint'},
+                    {'name': 'newsletter_signups', 'type': 'bigint'},
+                    {'name': 'dialogtech_calls', 'type': 'bigint'},
 
-                            ],
-                            'indexes': [
-                                {
-                                    'name': 'ix_google_analytics_goals',
-                                    'tablespace': 'pg_default',
-                                    'clustered': True,
-                                    'method': 'btree',
-                                    'columns': [
-                                        {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                                        {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                                    ]
-                                }
-                            ],
-                            'owner': 'postgres'
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_analytics_goals',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
             }}
 
         ]}
