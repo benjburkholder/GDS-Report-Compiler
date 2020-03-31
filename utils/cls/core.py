@@ -468,8 +468,18 @@ class Customizer:
         setattr(self, self.generate_attribute_prefix(attrib=attrib), value)
 
     def set_function_prefixes(self) -> None:
-        for func in dir(self):
-            if (callable(getattr(self, func))) and not (re.match(r'_+.*', func)):
-                if not hasattr(self, self.generate_attribute_prefix(attrib=func)):
-                    setattr(self, self.generate_attribute_prefix(attrib=func), getattr(self, func))
-
+        # get function attributes from the Customizer child instance only
+        funcs = [
+            attrib for attrib in dir(self) if (
+                (callable(getattr(self, attrib))) and not
+                (re.match(r'_+.*', attrib)) and
+                (attrib not in dir(Customizer))
+            )
+        ]
+        # set the prefixed attribute and assert the attribute holds
+        for func in funcs:
+            prefix_func = self.generate_attribute_prefix(attrib=func)
+            if not hasattr(self, prefix_func):
+                setattr(self, prefix_func, getattr(self, func))
+                assert hasattr(self, prefix_func)
+        return
