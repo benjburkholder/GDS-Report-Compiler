@@ -313,7 +313,7 @@ class Customizer:
                     {'name': 'device', 'type': 'character varying', 'length': 50},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
                     {'name': 'url', 'type': 'character varying', 'length': 500},
-                    {'name': 'sessions', 'type': 'character varying', 'length': 500},
+                    {'name': 'sessions', 'type': 'bigint'},
                     {'name': 'percent_new_sessions', 'type': 'double precision'},
                     {'name': 'pageviews', 'type': 'bigint'},
                     {'name': 'unique_pageviews', 'type': 'bigint'},

@@ -266,7 +266,9 @@ def setup(script_name: str, required_attributes: list, expedited: bool = False):
     customizer = custom.get_customizer(calling_file=script_name)
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
+
     if not expedited:
+
         # Build reporting tables
         build_reporting_tables(customizer=customizer)
 
