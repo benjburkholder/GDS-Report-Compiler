@@ -77,10 +77,11 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
     # TODO: shouldn't this be a list? In-case we have more custom columns?
     #   - Not sure what 'property' key does? is that for entity parsing perhaps?
-    custom_columns = {
-        'data_source': 'Google Analytics - Traffic',
-        'property': None
-    }
+    custom_columns = [
+        {'data_source': 'Google Analytics - Traffic'},
+        {'property': None},
+        {'service_line': None}
+    ]
 
     audit_procedure = {
         'name': 'googleanalytics_audit',
@@ -234,8 +235,9 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
-            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
-                df[key] = value
+            for row in getattr(self, f'{self.prefix}_custom_columns'):
+                for key, value in row.items():
+                    df[key] = value
 
         return df
 
@@ -268,10 +270,11 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         'eventAction',
     ]
 
-    custom_columns = {
-        'data_source': 'Google Analytics - Events',
-        'property': None
-    }
+    custom_columns = [
+        {'data_source': 'Google Analytics - Events'},
+        {'property': None},
+        {'service_line': None}
+    ]
 
     audit_procedure = {
         'name': 'googleanalytics_audit',
@@ -287,12 +290,10 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         super().__init__()
         self.set_attribute('class', True)
         self.set_attribute('debug', True)
-        self.set_attribute('historical', True)
+        self.set_attribute('historical', False)
         self.set_attribute('historical_start_date', '2020-01-01')
         self.set_attribute('historical_end_date', '2020-01-02')
-
-        setattr(self, f'{self.prefix}_table', self.prefix)  # TODO: is this necessary?
-
+        self.set_attribute('table', self.prefix)
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
 
@@ -375,15 +376,10 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
-            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
-                df[key] = value
+            for row in getattr(self, f'{self.prefix}_custom_columns'):
+                for key, value in row.items():
+                    df[key] = value
 
-        return df
-
-    def google_analytics_events_custom_column_assignment(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
-                df[key] = value
         return df
 
     def post_processing(self):
@@ -397,47 +393,55 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
 
 
 class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
-
-    def __init__(self):
-        super().__init__()
-        setattr(self, f'{self.prefix}_class', True)
-        setattr(self, f'{self.prefix}_debug', True)
-        setattr(self, f'{self.prefix}_historical', True)
-        setattr(self, f'{self.prefix}_historical_start_date', '2020-01-01')
-        setattr(self, f'{self.prefix}_historical_end_date', '2020-01-02')
-        setattr(self, f'{self.prefix}_table', 'googleanalytics_goals')
-        setattr(self, f'{self.prefix}_metrics', [
+    metrics = [
             'goal5Completions',
             'goal7Completions',
             'goal6Completions',
             'goal3Completions',
             'goal4Completions',
-        ])
-        setattr(self, f'{self.prefix}_dimensions', [
+    ]
+
+    dimensions = [
             'date',
             'channelGrouping',
             'sourceMedium',
             'deviceCategory',
             'campaign',
             'pagePath'
-        ])
+    ]
 
-        # Used to set columns which vary from data source and client vertical
-        setattr(self, f'{self.prefix}_custom_columns', {
-            'data_source': 'Google Analytics - Goals',
-            'property': None
-        })
+    custom_columns = [
+        {'data_source': 'Google Analytics - Goals'},
+        {'property': None},
+        {'service_line': None}
+    ]
 
-        # audit procedure
-        setattr(self, f'{self.prefix}_audit_procedure', {
-            'name': 'googleanalytics_audit',
-            'active': 1,
-            'code': """
+    audit_procedure = {
+        'name': 'googleanalytics_audit',
+        'active': 1,
+        'code': """
 
             """,
-            'return': 'integer',
-            'owner': 'postgres'
-        })
+        'return': 'integer',
+        'owner': 'postgres'
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.set_attribute('class', True)
+        self.set_attribute('debug', True)
+        self.set_attribute('historical', False)
+        self.set_attribute('historical_start_date', '2020-01-01')
+        self.set_attribute('historical_end_date', '2020-01-02')
+        self.set_attribute('table', self.prefix)
+        self.set_attribute('metrics', self.metrics)
+        self.set_attribute('dimensions', self.dimensions)
+
+        # Used to set columns which vary from data source and client vertical
+        self.set_attribute('custom_columns', self.custom_columns)
+
+        # audit procedure
+        self.set_attribute('audit_procedure', self.audit_procedure)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -462,7 +466,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'sourceMedium': 'source_medium',
             'deviceCategory': 'device',
             'campaign': 'campaign',
-            'pagePath': 'page',
+            'pagePath': 'url',
             'sessions': 'sessions',
             'percentNewPageviews': 'percent_new_pageviews',
             'pageviews': 'pageviews',
@@ -481,6 +485,20 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
+        df['view_id'] = df['view_id'].astype(str).str[:25]
+        # noinspection PyUnresolvedReferences
+        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
+        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
+        df['source_medium'] = df['source_medium'].astype(str).str[:100]
+        df['device'] = df['device'].astype(str).str[:50]
+        df['campaign'] = df['campaign'].astype(str).str[:255]
+        df['url'] = df['url'].astype(str).str[:1000]
+        df['request_a_quote'] = df['request_a_quote'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['sidebar_contact_us'] = df['sidebar_contact_us'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['contact_us_form_submission'] = df['contact_us_form_submission'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['newsletter_signups'] = df['newsletter_signups'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['dialogtech_calls'] = df['dialogtech_calls'].fillna('0').apply(lambda x: int(x) if x else None)
+
         # TODO: Later optimization... keeping the schema for the table in the customizer
         #   - and use it to reference typing command to df
         '''
@@ -505,8 +523,9 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
         if getattr(self, f'{self.prefix}_custom_columns'):
-            for key, value in getattr(self, f'{self.prefix}_custom_columns').items():
-                df[key] = value
+            for row in getattr(self, f'{self.prefix}_custom_columns'):
+                for key, value in row.items():
+                    df[key] = value
         return df
 
     def post_processing(self):
