@@ -6,12 +6,11 @@ import datetime
 import pandas as pd
 
 from mozpy.reporting.client.pro.seo_reporting import SEOReporting
-from utils.cls.user.moz import Moz
 from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
 
 PROCESSING_STAGES = [
-    'rename',
+    # 'rename',
     'type',
     'parse',
 ]
@@ -31,12 +30,12 @@ def main() -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=True)
 
-    accounts = Moz().pull_moz_pro_accounts(customizer=customizer)
+    accounts = grc.get_required_attribute(customizer, 'pull_moz_pro_accounts')()
 
-    if getattr(customizer, f'{customizer.prefix}_historical'):
-        report_date = getattr(customizer, f'{customizer.prefix}_historical_report_date')
+    if grc.get_required_attribute(customizer, 'historical'):
+        report_date = grc.get_required_attribute(customizer, 'historical_report_date')
 
     else:
         # automated setup - last month by default
@@ -48,10 +47,20 @@ def main() -> int:
         df = SEOReporting().get_serp_performance(report_date=report_date, campaign_id=campaign_id['campaign_id'])
 
         if df.shape[0]:
-            df['data_source'] = 'Moz Pro - SERP'
-            df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='moz_pro_serp')
-            grc.table_backfilter(customizer=customizer, calling_script=SCRIPT_NAME)
+            df = grc.run_processing(
+                df=df,
+                customizer=customizer,
+                processing_stages=PROCESSING_STAGES)
+
+            grc.run_data_ingest_rolling_dates(
+                df=df,
+                customizer=customizer,
+                date_col='report_date',
+                table=grc.get_required_attribute(customizer, 'table'))
+
+            grc.table_backfilter(
+                customizer=customizer,
+                calling_script=SCRIPT_NAME)
 
         else:
             logger.warning('No data returned for date {}.'.format(report_date))

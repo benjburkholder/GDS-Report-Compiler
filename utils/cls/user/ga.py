@@ -23,9 +23,6 @@ class GoogleAnalytics(Customizer):
 
     def __init__(self):
         super().__init__()
-        # TODO: do we still need client_name??
-        self.set_attribute('client_name', self.client)
-
         self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
 
         # TODO: is there a way to optimize this?

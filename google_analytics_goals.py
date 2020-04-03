@@ -13,6 +13,7 @@ PROCESSING_STAGES = [
     'type',
     'parse',
 ]
+
 REQUIRED_ATTRIBUTES = [
     'get_view_ids',
     'historical',

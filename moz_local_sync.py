@@ -11,7 +11,7 @@ from utils import custom, grc
 SCRIPT_NAME = grc.get_script_name(__file__)
 
 PROCESSING_STAGES = [
-    'rename',
+    # 'rename',
     'type',
     'parse',
 ]
@@ -32,13 +32,13 @@ def main() -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=True)
 
-    accounts = Moz().pull_moz_local_accounts(customizer)
+    accounts = grc.get_required_attribute(customizer, 'pull_moz_local_accounts')()
 
-    if getattr(customizer, f'{customizer.prefix}_historical'):
-        start_date = getattr(customizer, f'{customizer.prefix}_historical_start_date')
-        end_date = getattr(customizer, f'{customizer.prefix}_historical_end_date')
+    if grc.get_required_attribute(customizer, 'historical'):
+        start_date = grc.get_required_attribute(customizer, 'historical_start_date')
+        end_date = grc.get_required_attribute(customizer, 'historical_end_date')
 
     else:
         # automated setup - last week by default
@@ -58,11 +58,22 @@ def main() -> int:
             )
 
         if df.shape[0]:
-            df['data_source'] = 'Moz Local - Sync Report'
-            df = Moz().exclude_moz_directories(customizer=customizer, df=df)
-            df = grc.run_processing(df=df, customizer=customizer, processing_stages=PROCESSING_STAGES)
-            grc.run_data_ingest_rolling_dates(df=df, customizer=customizer, date_col='report_date', table='moz_local_sync_report_mdd')
-            grc.table_backfilter(customizer=customizer, calling_script=SCRIPT_NAME)
+            df = grc.get_required_attribute(customizer, 'exclude_moz_directories')(df)
+            df = grc.run_processing(
+                 df=df,
+                 customizer=customizer,
+                 processing_stages=PROCESSING_STAGES)
+
+            grc.run_data_ingest_rolling_dates(
+                df=df,
+                customizer=customizer,
+                date_col='report_date',
+                table=grc.get_required_attribute(customizer, 'table')
+            )
+
+            grc.table_backfilter(
+                customizer=customizer,
+                calling_script=SCRIPT_NAME)
 
         else:
             logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))

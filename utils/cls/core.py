@@ -147,7 +147,7 @@ class Customizer:
                 'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                'name': 'moz_local_visibility_report_mdd',
+                'name': 'moz_local_visibility',
                 'schema': 'public',
                 'type': 'reporting',
                 'backfilter': build_moz_backfilter_statement,
@@ -164,7 +164,7 @@ class Customizer:
                 ],
                 'indexes': [
                     {
-                        'name': 'ix_moz_local_directory_visibility_report',
+                        'name': 'ix_moz_local_visibility',
                         'tablespace': 'pg_default',
                         'clustered': True,
                         'method': 'btree',
@@ -178,7 +178,7 @@ class Customizer:
                 'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                'name': 'moz_local_sync_report_mdd',
+                'name': 'moz_local_sync',
                 'schema': 'public',
                 'type': 'reporting',
                 'backfilter': build_moz_backfilter_statement,
@@ -195,7 +195,7 @@ class Customizer:
                 ],
                 'indexes': [
                     {
-                        'name': 'ix_moz_local_directory_sync_report',
+                        'name': 'ix_moz_local_sync',
                         'tablespace': 'pg_default',
                         'clustered': True,
                         'method': 'btree',
@@ -217,6 +217,7 @@ class Customizer:
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
                     {'name': 'id', 'type': 'character varying', 'length': 100},
                     {'name': 'search_id', 'type': 'character varying', 'length': 100},
@@ -254,6 +255,7 @@ class Customizer:
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
                     {'name': 'id', 'type': 'character varying', 'length': 100},
                     {'name': 'search_id', 'type': 'character varying', 'length': 100},
