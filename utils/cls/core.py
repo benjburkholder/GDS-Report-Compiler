@@ -50,6 +50,19 @@ class Customizer:
 
         return [stmt, stmt2]
 
+    def build_gmb_backfilter_statement(self, target_table=None):
+        stmt = f"UPDATE public.{target_table} TARGET\n"
+        stmt += "SET property = LOOKUP.property\n"
+        stmt += f"FROM public.lookup_gmb_listingtolocation LOOKUP\n"
+        stmt += "WHERE TARGET.listing_id = LOOKUP.listing_id;\n"
+
+        stmt2 = f"UPDATE public.{target_table}\n"
+        stmt2 += "SET property = 'Non-Location Pages'\n"
+        stmt2 += "WHERE property IS NULL;\n"
+
+        return [stmt, stmt2]
+
+
     CLIENT_NAME = 'ZwirnerEquipment'
 
     CONFIGURATION_WORKBOOK = {
@@ -107,6 +120,16 @@ class Customizer:
                 'type': 'source',
                 'columns': [
                     {'name': 'view_id', 'type': 'character varying', 'length': 100},
+
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': 'GMB Account Master', 'table': {
+                'name': 'source_gmb_accountmaster',
+                'schema': 'public',
+                'type': 'source',
+                'columns': [
+                    {'name': 'account_name', 'type': 'character varying', 'length': 100},
 
                 ],
                 'owner': 'postgres'
@@ -411,6 +434,79 @@ class Customizer:
                             {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': None, 'table': {
+                'name': 'google_my_business_insights',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_gmb_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
+                    {'name': 'listing_name', 'type': 'character varying', 'length': 150},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'maps_views', 'type': 'bigint'},
+                    {'name': 'search_views', 'type': 'bigint'},
+                    {'name': 'website_click_actions', 'type': 'bigint'},
+                    {'name': 'phone_call_actions', 'type': 'bigint'},
+                    {'name': 'driving_direction_actions', 'type': 'bigint'},
+                    {'name': 'photo_views', 'type': 'bigint'},
+                    {'name': 'branded_searches', 'type': 'bigint'},
+                    {'name': 'direct_searches', 'type': 'bigint'},
+                    {'name': 'discovery_searches', 'type': 'bigint'},
+                    {'name': 'post_views_on_search', 'type': 'bigint'},
+                    {'name': 'post_cta_actions', 'type': 'bigint'},
+
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_my_business_insights',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'property', 'sort': 'asc', 'nulls_last': True}
+                        ]
+                    }
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': None, 'table': {
+                'name': 'google_my_business_reviews',
+                'schema': 'public',
+                'type': 'reporting',
+                'backfilter': build_gmb_backfilter_statement,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'service_line', 'type': 'character varying', 'length': 100},
+                    {'name': 'listing_name', 'type': 'character varying', 'length': 150},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
+                    {'name': 'average_rating', 'type': 'double precision'},
+                    {'name': 'rating', 'type': 'double precision'},
+                    {'name': 'review_count', 'type': 'double precision'},
+                    {'name': 'reviewer', 'type': 'character varying', 'length': 150},
+
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_my_business_reviews',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'listing_name', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'listing_id', 'sort': 'asc', 'nulls_last': True}
                         ]
                     }
                 ],

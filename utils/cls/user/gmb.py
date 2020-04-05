@@ -3,61 +3,273 @@ import pathlib
 import pandas as pd
 
 from utils.cls.core import Customizer
+from utils.dbms_helpers import postgres_helpers
 
 
 class GoogleMyBusiness(Customizer):
-    prefix = 'google_my_business'
 
     def __init__(self):
         super().__init__()
-        setattr(self, f'{self.prefix}_secrets_path',
-                str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
-        setattr(self, f'{self.prefix}_client_name', self.client)
+        self.set_attribute("secrets_path", str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
 
-        setattr(self, 'lookup_tables', {
-            'status': {
-                'table_type': 'gmb',
-                'active': True,
-                'refresh_status': False,
-                'lookup_source_sheet': 'GMB Listing to Property',
-                'schema': 'lookup_gmb_schema',
-                'table_name': 'lookup_gmb_listingtolocation'
-            }}),
 
-        # Schema for GMB lookup table
-        setattr(self, f'{self.prefix}_lookup_gmb_schema', {
-            'table': 'lookup_gmb_listingtolocation',
-            'schema': 'public',
-            'type': 'lookup',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'character varying', 'length': 50},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
+class GoogleMyBusinessInsights(GoogleMyBusiness):
 
-            ],
-            'owner': 'postgres'
+    custom_columns = [
+        {'data_source': 'Google My Business - Insights'},
+        {'property': None},
+        {'service_line': None}
+    ]
+
+    audit_procedure = {
+        'name': 'googlemybusiness_audit',
+        'active': 1,
+        'code': """
+
+            """,
+        'return': 'integer',
+        'owner': 'postgres'
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.set_attribute('class', True)
+        self.set_attribute('debug', True)
+        self.set_attribute('historical', False)
+        self.set_attribute('historical_start_date', '2020-01-01')
+        self.set_attribute('historical_end_date', '2020-01-02')
+        self.set_attribute('table', self.prefix)
+
+        # Used to set columns which vary from data source and client vertical
+        self.set_attribute('custom_columns', self.custom_columns)
+
+        # audit procedure
+        self.set_attribute('audit_procedure', self.audit_procedure)
+
+    # noinspection PyMethodMayBeStatic
+    def getter(self) -> str:
+        """
+        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
+        :return:
+        """
+        # TODO: with a new version of GA that accepts function pointers
+        return '{"msg": "i am json credentials"}'
+
+    # noinspection PyMethodMayBeStatic
+    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Renames columns into pg/sql friendly aliases
+        :param df:
+        :return:
+        """
+        return df.rename(columns={
+            'date': 'report_date',
+            'sourceMedium': 'source_medium',
+            'channelGrouping': 'channel_grouping',
+            'deviceCategory': 'device',
+            'pagePath': 'url',
+            'percentNewSessions': 'percent_new_sessions',
+            'percentNewPageviews': 'percent_new_pageviews',
+            'uniquePageviews': 'unique_pageviews',
+            'pageviewsPerSession': 'pageviews_per_session',
+            'sessionDuration': 'session_duration',
+            'newUsers': 'new_users'
         })
 
-        # Schema for GMB source table
-        setattr(self, f'{self.prefix}_source_gmb_schema', {
-            'table': 'source_gmb_listingtolocation',
-            'schema': 'public',
-            'type': 'source',
-            'columns': [
-                {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                {'name': 'property', 'type': 'character varying', 'length': 150},
-                {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                {'name': 'city', 'type': 'character varying', 'length': 50},
-                {'name': 'state', 'type': 'character varying', 'length': 50},
-                {'name': 'zip', 'type': 'character varying', 'length': 50},
-                {'name': 'phone', 'type': 'character varying', 'length': 25},
+    # noinspection PyMethodMayBeStatic
+    def type(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Type columns for safe storage (respecting data type and if needed, length)
+        :param df:
+        :return:
+        """
+        df['view_id'] = df['view_id'].astype(str).str[:25]
+        # noinspection PyUnresolvedReferences
+        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
+        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
+        df['source_medium'] = df['source_medium'].astype(str).str[:100]
+        df['device'] = df['device'].astype(str).str[:50]
+        df['campaign'] = df['campaign'].astype(str).str[:100]
+        df['url'] = df['url'].astype(str).str[:500]
+        df['sessions'] = df['sessions'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['percent_new_sessions'] = df['percent_new_sessions'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['pageviews'] = df['pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['unique_pageviews'] = df['unique_pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['pageviews_per_session'] = df['pageviews_per_session'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['entrances'] = df['entrances'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['bounces'] = df['bounces'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['session_duration'] = df['session_duration'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['users'] = df['users'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['new_users'] = df['new_users'].fillna('0').apply(lambda x: int(x) if x else None)
 
-            ],
-            'owner': 'postgres'
+        # TODO: Later optimization... keeping the schema for the table in the customizer
+        #   - and use it to reference typing command to df
+        '''
+        for column in self.get_attribute('schema')['columns']:
+            if column['name'] in df.columns:
+                if column['type'] == 'character varying':
+                    assert 'length' in column.keys()
+                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+                elif column['type'] == 'bigint':
+                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                elif column['type'] == 'double precision':
+                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                elif column['type'] == 'date':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'timestamp without time zone':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'datetime with time zone':
+                    # TODO(jschroeder) how better to interpret timezone data?
+                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        '''
+        return df
+
+    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
+        if getattr(self, f'{self.prefix}_custom_columns'):
+            for row in getattr(self, f'{self.prefix}_custom_columns'):
+                for key, value in row.items():
+                    df[key] = value
+
+        return df
+
+    def post_processing(self):
+        """
+        Execute UPDATE... JOIN statements against the source table of the calling class
+        :return:
+        """
+        # build engine
+        # execute statements
+        return
+
+
+class GoogleMyBusinessReviews(GoogleMyBusiness):
+
+    custom_columns = [
+        {'data_source': 'Google My Business - Reviews'},
+        {'property': None},
+        {'service_line': None}
+    ]
+
+    audit_procedure = {
+        'name': 'googlemybusiness_audit',
+        'active': 1,
+        'code': """
+
+                """,
+        'return': 'integer',
+        'owner': 'postgres'
+    }
+
+    def __init__(self):
+        super().__init__()
+        self.set_attribute('class', True)
+        self.set_attribute('debug', True)
+        self.set_attribute('historical', False)
+        self.set_attribute('historical_start_date', '2020-01-01')
+        self.set_attribute('historical_end_date', '2020-01-02')
+        self.set_attribute('table', self.prefix)
+
+        # Used to set columns which vary from data source and client vertical
+        self.set_attribute('custom_columns', self.custom_columns)
+
+        # audit procedure
+        self.set_attribute('audit_procedure', self.audit_procedure)
+
+        # noinspection PyMethodMayBeStatic
+
+    def getter(self) -> str:
+        """
+        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
+        :return:
+        """
+        # TODO: with a new version of GA that accepts function pointers
+        return '{"msg": "i am json credentials"}'
+
+        # noinspection PyMethodMayBeStatic
+
+    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Renames columns into pg/sql friendly aliases
+        :param df:
+        :return:
+        """
+        return df.rename(columns={
+            'date': 'report_date',
+            'sourceMedium': 'source_medium',
+            'channelGrouping': 'channel_grouping',
+            'deviceCategory': 'device',
+            'pagePath': 'url',
+            'percentNewSessions': 'percent_new_sessions',
+            'percentNewPageviews': 'percent_new_pageviews',
+            'uniquePageviews': 'unique_pageviews',
+            'pageviewsPerSession': 'pageviews_per_session',
+            'sessionDuration': 'session_duration',
+            'newUsers': 'new_users'
         })
 
+        # noinspection PyMethodMayBeStatic
+
+    def type(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Type columns for safe storage (respecting data type and if needed, length)
+        :param df:
+        :return:
+        """
+        df['view_id'] = df['view_id'].astype(str).str[:25]
+        # noinspection PyUnresolvedReferences
+        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
+        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
+        df['source_medium'] = df['source_medium'].astype(str).str[:100]
+        df['device'] = df['device'].astype(str).str[:50]
+        df['campaign'] = df['campaign'].astype(str).str[:100]
+        df['url'] = df['url'].astype(str).str[:500]
+        df['sessions'] = df['sessions'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['percent_new_sessions'] = df['percent_new_sessions'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['pageviews'] = df['pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['unique_pageviews'] = df['unique_pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['pageviews_per_session'] = df['pageviews_per_session'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['entrances'] = df['entrances'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['bounces'] = df['bounces'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['session_duration'] = df['session_duration'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['users'] = df['users'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['new_users'] = df['new_users'].fillna('0').apply(lambda x: int(x) if x else None)
+
+        # TODO: Later optimization... keeping the schema for the table in the customizer
+        #   - and use it to reference typing command to df
+        '''
+        for column in self.get_attribute('schema')['columns']:
+            if column['name'] in df.columns:
+                if column['type'] == 'character varying':
+                    assert 'length' in column.keys()
+                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+                elif column['type'] == 'bigint':
+                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                elif column['type'] == 'double precision':
+                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                elif column['type'] == 'date':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'timestamp without time zone':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'datetime with time zone':
+                    # TODO(jschroeder) how better to interpret timezone data?
+                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        '''
+        return df
+
+    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
+        if getattr(self, f'{self.prefix}_custom_columns'):
+            for row in getattr(self, f'{self.prefix}_custom_columns'):
+                for key, value in row.items():
+                    df[key] = value
+
+        return df
+
+    def post_processing(self):
+        """
+        Execute UPDATE... JOIN statements against the source table of the calling class
+        :return:
+        """
+        # build engine
+        # execute statements
+        return
 
