@@ -1,5 +1,6 @@
 import os
 import pathlib
+import sqlalchemy
 import pandas as pd
 
 from utils.cls.core import Customizer
@@ -11,6 +12,21 @@ class GoogleMyBusiness(Customizer):
     def __init__(self):
         super().__init__()
         self.set_attribute("secrets_path", str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+
+    def get_gmb_accounts(self) -> list:
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                """
+                SELECT DISTINCT
+                    account_name
+                FROM public.source_gmb_accountmaster;
+                """
+            )
+            results = con.execute(sql).fetchall()
+            return [
+                result['account_name'] for result in results
+            ] if results else []
 
 
 class GoogleMyBusinessInsights(GoogleMyBusiness):
