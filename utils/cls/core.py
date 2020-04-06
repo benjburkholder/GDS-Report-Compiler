@@ -62,7 +62,6 @@ class Customizer:
 
         return [stmt, stmt2]
 
-
     CLIENT_NAME = 'ZwirnerEquipment'
 
     CONFIGURATION_WORKBOOK = {
