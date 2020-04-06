@@ -279,11 +279,11 @@ def setup(script_name: str, required_attributes: list, expedited: bool = False):
         build_source_tables(customizer=customizer)
 
         # Lookup table refresh
-        print('refreshing lookup tables...')
+        print('Refreshing lookup tables...')
         refresh_lookup_tables(customizer=customizer)
 
         # Source table refresh
-        print('refreshing source tables...')
+        print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)
     return customizer
 

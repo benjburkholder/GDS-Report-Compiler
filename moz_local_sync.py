@@ -1,5 +1,5 @@
 """
-Moz Local Sync Report
+Moz Local - Sync Report
 """
 import logging
 import datetime

@@ -1,5 +1,5 @@
 """
-Google Analytics Traffic
+Google Analytics - Traffic
 """
 import logging
 import datetime

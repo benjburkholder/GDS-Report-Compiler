@@ -1,5 +1,5 @@
 """
-Moz Local Visibility Report
+Moz Local - Visibility Report
 """
 import logging
 import datetime

@@ -1,5 +1,5 @@
 """
-Google Analytics Goals
+Google Analytics - Goals
 """
 import logging
 import datetime

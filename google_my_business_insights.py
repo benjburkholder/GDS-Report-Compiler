@@ -1,5 +1,5 @@
 """
-Google My Business Insights
+Google My Business - Insights
 """
 import logging
 import datetime
@@ -95,7 +95,7 @@ def main() -> int:
                 calling_script=SCRIPT_NAME
             )
         else:
-            logger.warning('No data returned for for dates {} - {}'.format(start_date, end_date))
+            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
     return 0
 
 

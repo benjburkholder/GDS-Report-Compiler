@@ -1,5 +1,5 @@
 """
-Google Analytics Events
+Google Analytics - Events
 """
 import logging
 import datetime

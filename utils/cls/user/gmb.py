@@ -1,6 +1,7 @@
 import os
 import pathlib
 import sqlalchemy
+import numpy as np
 import pandas as pd
 
 from utils.cls.core import Customizer
@@ -27,6 +28,31 @@ class GoogleMyBusiness(Customizer):
             return [
                 result['account_name'] for result in results
             ] if results else []
+
+    def assign_average_rating(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Rather than use a rolling average
+        Compute the historical to date average
+        For each review in the dataset
+        """
+        df.sort_values(
+            by='Date',
+            ascending=False,
+            inplace=True
+        )
+        df['Average_Rating'] = None
+        first_review_date = df['Date'].unique()[-1]
+        for date in df['Date'].unique()[::-1]:
+            # get all reviews up to and including the ones on this date
+            reviews = df.loc[df['Date'] > first_review_date, ['Date', 'Rating']]
+            reviews = reviews.loc[reviews['Date'] <= date, :]
+            # compute the mean
+            average_rating = np.mean(list(reviews['Rating']))
+            # assign the mean for this date
+            df['Average_Rating'][df['Date'] == date] = average_rating
+        # round to double precision
+        df['Average_Rating'] = df['Average_Rating'].apply(lambda x: round(x, 2))
+        return df
 
 
 class GoogleMyBusinessInsights(GoogleMyBusiness):
@@ -210,17 +236,14 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         :return:
         """
         return df.rename(columns={
-            'date': 'report_date',
-            'sourceMedium': 'source_medium',
-            'channelGrouping': 'channel_grouping',
-            'deviceCategory': 'device',
-            'pagePath': 'url',
-            'percentNewSessions': 'percent_new_sessions',
-            'percentNewPageviews': 'percent_new_pageviews',
-            'uniquePageviews': 'unique_pageviews',
-            'pageviewsPerSession': 'pageviews_per_session',
-            'sessionDuration': 'session_duration',
-            'newUsers': 'new_users'
+            'Date': 'report_date',
+            'Reviewer': 'reviewer',
+            'Rating': 'rating',
+            'Review_Count': 'review_count',
+            'Average_Rating': 'average_rating',
+            'Listing_ID': 'listing_id',
+            'Listing_Name': 'listing_name'
+
         })
 
         # noinspection PyMethodMayBeStatic
@@ -231,24 +254,14 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         :param df:
         :return:
         """
-        df['view_id'] = df['view_id'].astype(str).str[:25]
         # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
-        df['source_medium'] = df['source_medium'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:50]
-        df['campaign'] = df['campaign'].astype(str).str[:100]
-        df['url'] = df['url'].astype(str).str[:500]
-        df['sessions'] = df['sessions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['percent_new_sessions'] = df['percent_new_sessions'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['pageviews'] = df['pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['unique_pageviews'] = df['unique_pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['pageviews_per_session'] = df['pageviews_per_session'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['entrances'] = df['entrances'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['bounces'] = df['bounces'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['session_duration'] = df['session_duration'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['users'] = df['users'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['new_users'] = df['new_users'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['listing_name'] = df['listing_name'].astype(str).str[:150]
+        df['listing_id'] = df['listing_id'].astype(str).str[:150]
+        df['average_rating'] = df['average_rating'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['rating'] = df['rating'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['review_count'] = df['review_count'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['reviewer'] = df['reviewer'].astype(str).str[:150]
 
         # TODO: Later optimization... keeping the schema for the table in the customizer
         #   - and use it to reference typing command to df
@@ -273,6 +286,9 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
+
+        del df['Data_Source']
+
         if getattr(self, f'{self.prefix}_custom_columns'):
             for row in getattr(self, f'{self.prefix}_custom_columns'):
                 for key, value in row.items():
