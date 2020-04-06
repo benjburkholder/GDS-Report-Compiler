@@ -79,17 +79,21 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         :return:
         """
         return df.rename(columns={
-            'date': 'report_date',
-            'sourceMedium': 'source_medium',
-            'channelGrouping': 'channel_grouping',
-            'deviceCategory': 'device',
-            'pagePath': 'url',
-            'percentNewSessions': 'percent_new_sessions',
-            'percentNewPageviews': 'percent_new_pageviews',
-            'uniquePageviews': 'unique_pageviews',
-            'pageviewsPerSession': 'pageviews_per_session',
-            'sessionDuration': 'session_duration',
-            'newUsers': 'new_users'
+            'Date': 'report_date',
+            'Listing_ID': 'listing_id',
+            'Listing_Name': 'listing_name',
+            'VIEWS_MAPS': 'maps_views',
+            'VIEWS_SEARCH': 'search_views',
+            'ACTIONS_WEBSITE': 'website_click_actions',
+            'ACTIONS_PHONE': 'phone_call_actions',
+            'ACTIONS_DRIVING_DIRECTIONS': 'driving_direction_actions',
+            'PHOTOS_VIEWS_CUSTOMERS': 'photo_views_customers',
+            'PHOTOS_VIEWS_MERCHANT': 'photo_views_merchant',
+            'QUERIES_CHAIN': 'branded_searches',
+            'QUERIES_DIRECT': 'direct_searches',
+            'QUERIES_INDIRECT': 'discovery_searches',
+            'LOCAL_POST_VIEWS_SEARCH': 'post_views_on_search',
+            # 'LOCAL_POST_ACTIONS_CALL_TO_ACTION': 'post_cta_actions'
         })
 
     # noinspection PyMethodMayBeStatic
@@ -99,24 +103,22 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         :param df:
         :return:
         """
-        df['view_id'] = df['view_id'].astype(str).str[:25]
         # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
-        df['source_medium'] = df['source_medium'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:50]
-        df['campaign'] = df['campaign'].astype(str).str[:100]
-        df['url'] = df['url'].astype(str).str[:500]
-        df['sessions'] = df['sessions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['percent_new_sessions'] = df['percent_new_sessions'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['pageviews'] = df['pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['unique_pageviews'] = df['unique_pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['pageviews_per_session'] = df['pageviews_per_session'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['entrances'] = df['entrances'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['bounces'] = df['bounces'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['session_duration'] = df['session_duration'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['users'] = df['users'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['new_users'] = df['new_users'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['listing_id'] = df['listing_id'].astype(str)
+        df['listing_name'] = df['listing_name'].astype(str).str[:50]
+        df['phone_call_actions'] = df['phone_call_actions'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['driving_direction_actions'] = df['driving_direction_actions'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['photo_views_customers'] = df['photo_views_customers'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['photo_views_merchant'] = df['photo_views_merchant'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['maps_views'] = df['maps_views'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['search_views'] = df['search_views'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['website_click_actions'] = df['website_click_actions'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['branded_searches'] = df['branded_searches'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['direct_searches'] = df['direct_searches'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['discovery_searches'] = df['discovery_searches'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['post_views_on_search'] = df['post_views_on_search'].fillna('0').apply(lambda x: int(x) if x else None)
+        # df['post_cta_actions'] = df['post_cta_actions'].fillna('0').apply(lambda x: int(x) if x else None)
 
         # TODO: Later optimization... keeping the schema for the table in the customizer
         #   - and use it to reference typing command to df
@@ -148,14 +150,12 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
 
         return df
 
-    def post_processing(self):
-        """
-        Execute UPDATE... JOIN statements against the source table of the calling class
-        :return:
-        """
-        # build engine
-        # execute statements
-        return
+    def post_processing(self, df: pd.DataFrame) -> pd.DataFrame:
+        df['photo_views'] = (df['photo_views_customers'] + df['photo_views_merchant'])
+        del df['photo_views_customers']
+        del df['photo_views_merchant']
+
+        return df
 
 
 class GoogleMyBusinessReviews(GoogleMyBusiness):
