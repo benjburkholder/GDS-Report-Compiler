@@ -178,7 +178,7 @@ class Customizer:
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 25},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
                     {'name': 'directory', 'type': 'character varying', 'length': 100},
                     {'name': 'points_reached', 'type': 'bigint'},
                     {'name': 'max_points', 'type': 'bigint'},
@@ -209,7 +209,7 @@ class Customizer:
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 25},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
                     {'name': 'directory', 'type': 'character varying', 'length': 100},
                     {'name': 'field', 'type': 'character varying', 'length': 100},
                     {'name': 'sync_status', 'type': 'bigint'},
@@ -329,14 +329,14 @@ class Customizer:
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                    {'name': 'device', 'type': 'character varying', 'length': 50},
+                    {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                    {'name': 'url', 'type': 'character varying', 'length': 500},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000},
                     {'name': 'sessions', 'type': 'bigint'},
                     {'name': 'percent_new_sessions', 'type': 'double precision'},
                     {'name': 'pageviews', 'type': 'bigint'},
@@ -371,12 +371,12 @@ class Customizer:
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 200},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                    {'name': 'device', 'type': 'character varying', 'length': 50},
+                    {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
                     {'name': 'url', 'type': 'character varying', 'length': 1000},
                     {'name': 'event_label', 'type': 'character varying', 'length': 200},
@@ -413,9 +413,9 @@ class Customizer:
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-                    {'name': 'device', 'type': 'character varying', 'length': 50},
+                    {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                    {'name': 'url', 'type': 'character varying', 'length': 500},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000},
                     {'name': 'request_a_quote', 'type': 'bigint'},
                     {'name': 'sidebar_contact_us', 'type': 'bigint'},
                     {'name': 'contact_us_form_submission', 'type': 'bigint'},
@@ -449,7 +449,7 @@ class Customizer:
                     {'name': 'property', 'type': 'character varying', 'length': 100},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'listing_name', 'type': 'character varying', 'length': 150},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 100},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
                     {'name': 'maps_views', 'type': 'bigint'},
                     {'name': 'search_views', 'type': 'bigint'},
                     {'name': 'website_click_actions', 'type': 'bigint'},
@@ -506,13 +506,36 @@ class Customizer:
                             {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'listing_name', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'listing_id', 'sort': 'asc', 'nulls_last': True}
-                        ]
+                        ],
                     }
                 ],
                 'owner': 'postgres'
-            }}
-
+            }},
         ]}
+
+    # Schema for the marketing_data table creation
+    marketing_data = {'sheet': None, 'table': {
+        'name': 'marketing_data',
+        'schema': 'public',
+        'type': 'master',
+        'columns': [
+
+        ],
+        'indexes': [
+            {
+                'name': 'ix_marketing_data',
+                'tablespace': 'pg_default',
+                'clustered': True,
+                'method': 'btree',
+                'columns': [
+                    {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                    {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
+                    {'name': 'property', 'sort': 'asc', 'nulls_last': True}
+                ]
+            }
+        ],
+        'owner': 'postgres'
+    }},
 
     supported_dbms = [
         'postgresql'

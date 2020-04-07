@@ -139,11 +139,32 @@ def build_reporting_tables(customizer) -> int:
 def build_source_tables(customizer) -> int:
     for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheet['table']['type'] == 'source':
+            print(f'Checking if {sheet["table"]["name"]} exists...')
             source_table_existence = check_table_exists(customizer, schema=sheet)
 
             if not source_table_existence:
                 print(f'{sheet["table"]["name"]} does not exist, creating...')
                 create_table_from_schema(customizer, sheet)
+
+    return 0
+
+
+def build_marketing_table(customizer) -> int:
+
+    print(f'Checking if {customizer.marketing_data[0]["table"]["name"]} exists...')
+
+    marketing_table_existence = check_table_exists(customizer, schema=customizer.marketing_data[0])
+
+    if not marketing_table_existence:
+        print(f'{customizer.marketing_data[0]["table"]["name"]} does not exist, creating...')
+
+        for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
+            if sheets['table']['type'] == 'reporting':
+                for column in sheets['table']['columns']:
+                    if column not in customizer.marketing_data[0]['table']['columns']:
+                        customizer.marketing_data[0]['table']['columns'].append(column)
+
+        create_table_from_schema(customizer, schema=customizer.marketing_data[0])
 
     return 0
 
@@ -268,6 +289,9 @@ def setup(script_name: str, required_attributes: list, expedited: bool = False):
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
 
     if not expedited:
+
+        # Build marketing data table
+        build_marketing_table(customizer=customizer)
 
         # Build reporting tables
         build_reporting_tables(customizer=customizer)
