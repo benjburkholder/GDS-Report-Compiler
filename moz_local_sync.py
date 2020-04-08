@@ -8,9 +8,10 @@ import pandas as pd
 from mozpy.reporting.client.local.llm_reporting import LLMReporting
 from utils import grc
 SCRIPT_NAME = grc.get_script_name(__file__)
-DEBUG = True
+DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
+
 PROCESSING_STAGES = [
     # 'rename',
     'type',

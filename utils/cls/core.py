@@ -232,6 +232,7 @@ class Customizer:
                     {'name': 'state', 'type': 'character varying', 'length': 50},
                     {'name': 'zip', 'type': 'character varying', 'length': 50},
                     {'name': 'phone', 'type': 'character varying', 'length': 25},
+                    {'name': 'exact', 'type': 'bigint'}
                 ],
                 'owner': 'postgres'
             }},

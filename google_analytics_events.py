@@ -7,14 +7,16 @@ import datetime
 from utils import grc
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
 SCRIPT_NAME = grc.get_script_name(__file__)
-DEBUG = True
+DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
+
 PROCESSING_STAGES = [
     'rename',
     'type',
     'parse',
 ]
+
 REQUIRED_ATTRIBUTES = [
     'get_view_ids',
     'historical',

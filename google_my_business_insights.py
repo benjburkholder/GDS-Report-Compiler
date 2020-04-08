@@ -8,15 +8,17 @@ import pandas as pd
 from utils import grc
 from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting
 SCRIPT_NAME = grc.get_script_name(__file__)
-DEBUG = True
+DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
+
 PROCESSING_STAGES = [
     'rename',
     'type',
     'parse',
     'post_processing'
 ]
+
 REQUIRED_ATTRIBUTES = [
     'historical',
     'historical_start_date',

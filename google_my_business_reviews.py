@@ -7,6 +7,9 @@ import pandas as pd
 from utils import grc
 from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting
 SCRIPT_NAME = grc.get_script_name(__file__)
+DEBUG = False
+if DEBUG:
+    print("WARN: Error reporting disabled and expedited runtime mode activated")
 
 PROCESSING_STAGES = [
     'rename',
@@ -14,6 +17,7 @@ PROCESSING_STAGES = [
     'parse',
     # 'post_processing'
 ]
+
 REQUIRED_ATTRIBUTES = [
     'historical',
     'historical_start_date',
@@ -30,7 +34,7 @@ def main() -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=DEBUG)
 
     gmb_client = GoogleMyBusinessReporting(
             secrets_path=grc.get_required_attribute(customizer, 'secrets_path')

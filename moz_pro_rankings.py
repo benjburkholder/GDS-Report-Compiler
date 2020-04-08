@@ -7,9 +7,10 @@ import datetime
 from mozpy.reporting.client.pro.seo_reporting import SEOReporting
 from utils import grc
 SCRIPT_NAME = grc.get_script_name(__file__)
-DEBUG = True
+DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
+
 PROCESSING_STAGES = [
     # 'rename',
     'type',
