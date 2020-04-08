@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/core.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -235,7 +236,14 @@
       <option name="project" value="LOCAL" />
       <updated>1585334041252</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Remove trailing comma">
+      <created>1586374039308</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1586374039308</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -249,7 +257,8 @@
     <MESSAGE value="2020-03-27: Get prefix dynamically" />
     <MESSAGE value="2020-03-27: Get prefix dynamically (build 2)" />
     <MESSAGE value="2020-03-27: Set function prefixes dynamically" />
-    <option name="LAST_COMMIT_MESSAGE" value="2020-03-27: Set function prefixes dynamically" />
+    <MESSAGE value="Remove trailing comma" />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove trailing comma" />
   </component>
   <component name="WindowStateProjectService">
     <state x="603" y="273" key="#xdebugger.XInspectDialog" timestamp="1585687801670">
@@ -260,11 +269,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="909" y="227" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1585687848570" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1585334039670">
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1586374038004">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="424" y="7" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1582923778470" />
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1585334039670" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1586374038004" />
     <state width="1899" height="374" key="GridCell.Tab.0.bottom" timestamp="1585691476760">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -306,11 +315,11 @@
     </state>
     <state x="369" y="110" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1582232162486" />
     <state x="461" y="162" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1582228085020" />
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1585334043237">
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1586374041288">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1582923786524" />
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1585334043237" />
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1586374041288" />
     <state x="581" y="298" key="com.intellij.ide.util.TipDialog" timestamp="1586373355355">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

@@ -20,6 +20,65 @@ class Customizer:
         'recipients'
     ]
 
+    def get_lookup_table_by_tablespace(self, tablespace: str) -> dict:
+        lookup_tables = [
+            table for table in self.CONFIGURATION_WORKBOOK['sheets']
+            # thisi s a lookup type table, and it shares the tablespace of the source table
+            if (table.get('type') == 'lookup') and (tablespace in table.get('tablespace', []))
+        ]
+        assert len(lookup_tables) == 1
+        return lookup_tables[0]
+
+    def get_backfilter_columns_by_table(self, table: dict) -> list:
+        return [
+            col for col in table['columns'] if col.get('backfilter')
+        ]
+
+    def create_backfilter_statement(self, table: dict, lookup_table: dict, backfilter_column: str, update_type: str):
+        if update_type == 'exact':
+            return f"""
+                UPDATE {table['schema']}.{table['name']} TARGET
+                    SET {backfilter_column} = LOOKUP.{backfilter_column}
+                FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
+                WHERE TARGET.{backfilter_column} = LOOKUP.{backfilter_column}
+                AND LOOKUP.exact = 1;
+            """
+        elif update_type == 'fuzzy':
+            return f"""
+                UPDATE {table['schema']}.{table['name']} TARGET
+                    SET {backfilter_column} = LOOKUP.{backfilter_column}
+                FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
+                WHERE TARGET.{backfilter_column} ILIKE CONCAT('%', LOOKUP.{backfilter_column}, '%')
+                AND LOOKUP.exact = 0;
+            """
+        else:
+            raise AssertionError(
+                f"GRC: Unsupported update_type, {update_type}"
+            )
+
+    def create_set_default_statements(self, table: dict) -> list:
+        default_cols = [
+            col for col in table['columns'] if 'default' in col.keys()
+        ]
+        statements = []
+        for col in default_cols:
+            statements.append(
+                f"""
+                UPDATE {table['schema']}.{table['name']}
+                SET {col['name']} = {col['default'] if col['default'] is not None else 'NULL'}
+                WHERE {col['name']} IS NULL;
+                """
+            )
+        return statements
+
+    def build_backfilter_statement(self, table: dict):
+        lookup_table = self.get_lookup_table_by_tablespace(
+            tablespace=table['prefix']
+        )
+        backfilter_columns = self.get_backfilter_columns_by_table(table=table)
+
+
+
     def build_url_backfilter_statement(self, target_table=None):
         stmt = f"UPDATE public.{target_table} TARGET\n"
         stmt += "SET property = LOOKUP.property\n"
@@ -74,6 +133,8 @@ class Customizer:
                 'name': 'lookup_urltolocation',
                 'schema': 'public',
                 'type': 'lookup',
+                'tablespace': ['moz_pro', 'google_analytics'],  # TODO: THIS IS NEW
+                'update_types': ['exact', 'fuzzy'],  # TODO: THIS IS ALSO NEW
                 'columns': [
                     {'name': 'url', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
@@ -133,9 +194,12 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
+            # TODO: EXAMPLE LOOKUP TABLE
             {'sheet': 'Moz Listing to Property', 'table': {
                 'name': 'lookup_moz_listingtolocation',
                 'schema': 'public',
+                'tablespace': ['moz_local'],  # TODO: THIS IS NEW
+                'update_types': ['exact'],  # TODO: THIS IS ALSO NEW
                 'type': 'lookup',
                 'columns': [
                     {'name': 'listing_id', 'type': 'character varying', 'length': 100},
@@ -164,25 +228,24 @@ class Customizer:
                     {'name': 'state', 'type': 'character varying', 'length': 50},
                     {'name': 'zip', 'type': 'character varying', 'length': 50},
                     {'name': 'phone', 'type': 'character varying', 'length': 25},
-
                 ],
                 'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
                 'name': 'moz_local_visibility',
                 'schema': 'public',
+                'tablespace': 'moz_local',  # TODO: THIS IS NEW
                 'type': 'reporting',
                 'backfilter': build_moz_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'default': None},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True},
                     {'name': 'directory', 'type': 'character varying', 'length': 100},
                     {'name': 'points_reached', 'type': 'bigint'},
                     {'name': 'max_points', 'type': 'bigint'},
-
                 ],
                 'indexes': [
                     {
@@ -209,7 +272,7 @@ class Customizer:
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True},
                     {'name': 'directory', 'type': 'character varying', 'length': 100},
                     {'name': 'field', 'type': 'character varying', 'length': 100},
                     {'name': 'sync_status', 'type': 'bigint'},
