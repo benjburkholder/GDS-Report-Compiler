@@ -7,7 +7,9 @@ import datetime
 from utils import grc
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
 SCRIPT_NAME = grc.get_script_name(__file__)
-
+DEBUG = True
+if DEBUG:
+    print("WARN: Error reporting disabled and expedited runtime mode activated")
 PROCESSING_STAGES = [
     'rename',
     'type',
@@ -31,7 +33,7 @@ def main() -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=DEBUG)
 
     if grc.get_required_attribute(customizer, 'historical'):
         start_date = grc.get_required_attribute(customizer, 'historical_start_date')
@@ -69,10 +71,7 @@ def main() -> int:
                 date_col='report_date',
                 table=grc.get_required_attribute(customizer, 'table')
             )
-            grc.table_backfilter(
-                customizer=customizer,
-                calling_script=SCRIPT_NAME
-            )
+            grc.table_backfilter(customizer=customizer)
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
     return 0

@@ -350,9 +350,9 @@ class MozLocalVisibilityCustomizer(Moz):
         super().__init__()
         self.set_attribute('class', True),
         self.set_attribute('debug', True),
-        self.set_attribute('historical', False)
+        self.set_attribute('historical', True)
         self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-01-02')
+        self.set_attribute('historical_end_date', '2020-04-08')
         self.set_attribute('table', self.prefix)
 
         # Used to set columns which vary from data source and client vertical

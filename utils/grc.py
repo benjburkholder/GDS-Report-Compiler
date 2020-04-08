@@ -151,18 +151,18 @@ def build_source_tables(customizer) -> int:
 
 def build_marketing_table(customizer) -> int:
 
-    print(f'Checking if {customizer.marketing_data[0]["table"]["name"]} exists...')
+    print(f'Checking if {customizer.marketing_data["table"]["name"]} exists...')
 
-    marketing_table_existence = check_table_exists(customizer, schema=customizer.marketing_data[0])
+    marketing_table_existence = check_table_exists(customizer, schema=customizer.marketing_data)
 
     if not marketing_table_existence:
-        print(f'{customizer.marketing_data[0]["table"]["name"]} does not exist, creating...')
+        print(f'{customizer.marketing_data["table"]["name"]} does not exist, creating...')
 
         for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
             if sheets['table']['type'] == 'reporting':
                 for column in sheets['table']['columns']:
-                    if column not in customizer.marketing_data[0]['table']['columns']:
-                        customizer.marketing_data[0]['table']['columns'].append(column)
+                    if column not in customizer.marketing_data['table']['columns']:
+                        customizer.marketing_data['table']['columns'].append(column)
 
         create_table_from_schema(customizer, schema=customizer.marketing_data[0])
 
@@ -342,17 +342,19 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
     return df
 
 
-def table_backfilter(customizer: custom.Customizer, calling_script):
-    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
-        if sheet['table']['type'] == 'reporting':
-            if calling_script in sheet['table']['name']:
-                print(f'Backfiltering {sheet["table"]["name"]}...')
-                engine = build_postgresql_engine(customizer=customizer)
-                with engine.connect() as con:
-                    for block in sheet['table']['backfilter'](self=customizer, target_table=sheet['table']['name']):
-                        sql = sqlalchemy.text(block)
-                        con.execute(sql)
-
+def table_backfilter(customizer: custom.Customizer):
+    engine = build_postgresql_engine(customizer=customizer)
+    target_sheets = [
+        sheet for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']
+        if sheet['table']['name'] == customizer.get_attribute('table')
+    ]
+    assert len(target_sheets) == 1
+    sheet = target_sheets[0]
+    assert sheet['table']['type'] == 'reporting'
+    statements = customizer.build_backfilter_statements()
+    with engine.connect() as con:
+        for statement in statements:
+            con.execute(statement)
     print('SUCCESS: Table Backfiltered.')
 
 

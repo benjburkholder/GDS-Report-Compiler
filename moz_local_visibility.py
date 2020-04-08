@@ -6,8 +6,10 @@ import datetime
 import pandas as pd
 
 from mozpy.reporting.client.local.llm_reporting import LLMReporting
-from utils.cls.user.moz import Moz
-from utils import custom, grc
+from utils import grc
+DEBUG = True
+if DEBUG:
+    print("WARN: Error reporting disabled and expedited runtime mode activated")
 SCRIPT_NAME = grc.get_script_name(__file__)
 
 PROCESSING_STAGES = [
@@ -32,7 +34,7 @@ def main() -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=DEBUG)
 
     accounts = grc.get_required_attribute(customizer, 'pull_moz_local_accounts')()
 
@@ -50,12 +52,15 @@ def main() -> int:
 
         # pull report from Linkmedia360 database
         listing_ids = list(df_listings['listing_id'].unique())
+        df_list = []
         for listing_id in listing_ids:
             df = LLMReporting().get_visibility_report(
                 listing_id=listing_id,
                 start_date=datetime.datetime.strptime(start_date, '%Y-%m-%d'),
                 end_date=datetime.datetime.strptime(end_date, '%Y-%m-%d')
             )
+            df_list.append(df)
+        df = pd.concat(df_list)
 
         if df.shape[0]:
             df = grc.get_required_attribute(customizer, 'exclude_moz_directories')(df)
@@ -71,9 +76,7 @@ def main() -> int:
                 table=grc.get_required_attribute(customizer, 'table')
             )
 
-            grc.table_backfilter(
-                customizer=customizer,
-                calling_script=SCRIPT_NAME)
+            grc.table_backfilter(customizer=customizer)
 
         else:
             logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))

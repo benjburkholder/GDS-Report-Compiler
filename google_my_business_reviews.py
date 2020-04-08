@@ -2,7 +2,6 @@
 Google My Business - Reviews
 """
 import logging
-import datetime
 import pandas as pd
 
 from utils import grc
@@ -65,7 +64,8 @@ def main() -> int:
             if report.shape[0]:
                 df = pd.DataFrame(report)
                 df = grc.get_required_attribute(customizer, 'assign_average_rating')(df)
-                df['Listing_ID'] = int(listing['storeCode']) if str(listing['storeCode']).isdigit() else str(listing['storeCode'])
+                df['Listing_ID'] = int(listing['storeCode']) \
+                    if str(listing['storeCode']).isdigit() else str(listing['storeCode'])
                 df['Listing_Name'] = listing['locationName']
                 df_list.append(df)
 
@@ -82,10 +82,7 @@ def main() -> int:
                 date_col='report_date',
                 table=grc.get_required_attribute(customizer, 'table')
             )
-            grc.table_backfilter(
-                customizer=customizer,
-                calling_script=SCRIPT_NAME
-            )
+            grc.table_backfilter(customizer=customizer)
         else:
             logger.warning('No data returned')
     return 0

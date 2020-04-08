@@ -20,12 +20,12 @@ class Customizer:
         'recipients'
     ]
 
-    def get_lookup_table_by_tablespace(self, tablespace: str) -> dict:
-        lookup_tables = [
-            table for table in self.CONFIGURATION_WORKBOOK['sheets']
-            # thisi s a lookup type table, and it shares the tablespace of the source table
-            if (table.get('type') == 'lookup') and (tablespace in table.get('tablespace', []))
-        ]
+    def get_lookup_table_by_tablespace(self, tablespace: list) -> dict:
+        lookup_tables = []
+        for space in tablespace:
+            for sheet in self.CONFIGURATION_WORKBOOK['sheets']:
+                if (sheet['table'].get('type') == 'lookup') and (space in sheet['table'].get('tablespace', [])):
+                    lookup_tables.append(sheet['table'])
         assert len(lookup_tables) == 1
         return lookup_tables[0]
 
@@ -34,21 +34,38 @@ class Customizer:
             col for col in table['columns'] if col.get('backfilter')
         ]
 
-    def create_backfilter_statement(self, table: dict, lookup_table: dict, backfilter_column: str, update_type: str):
+    def get_backfilter_entity_columns_by_table(self, table: dict) -> list:
+        return [
+            col for col in table['columns'] if col.get('entity_col')
+        ]
+
+    def generate_set_statement_by_entity_columns(self, entity_columns: list) -> str:
+        statement = "SET\n"
+        count = 1
+        for col in entity_columns:
+            if count == len(entity_columns):
+                statement += f"{col['name']} = LOOKUP.{col['name']}\n"
+            else:
+                statement += f"{col['name']} = LOOKUP.{col['name']},\n"
+        return statement
+
+    def create_backfilter_statement(
+            self, table: dict, lookup_table: dict, backfilter_column: dict, entity_columns: list, update_type: str):
+        set_statement = self.generate_set_statement_by_entity_columns(entity_columns=entity_columns)
         if update_type == 'exact':
             return f"""
                 UPDATE {table['schema']}.{table['name']} TARGET
-                    SET {backfilter_column} = LOOKUP.{backfilter_column}
+                    {set_statement}
                 FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
-                WHERE TARGET.{backfilter_column} = LOOKUP.{backfilter_column}
+                WHERE TARGET.{backfilter_column['name']} = LOOKUP.{backfilter_column['name']}
                 AND LOOKUP.exact = 1;
             """
         elif update_type == 'fuzzy':
             return f"""
                 UPDATE {table['schema']}.{table['name']} TARGET
-                    SET {backfilter_column} = LOOKUP.{backfilter_column}
+                    {set_statement}
                 FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
-                WHERE TARGET.{backfilter_column} ILIKE CONCAT('%', LOOKUP.{backfilter_column}, '%')
+                WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT('%', LOOKUP.{backfilter_column['name']}, '%')
                 AND LOOKUP.exact = 0;
             """
         else:
@@ -65,76 +82,60 @@ class Customizer:
             statements.append(
                 f"""
                 UPDATE {table['schema']}.{table['name']}
-                SET {col['name']} = {col['default'] if col['default'] is not None else 'NULL'}
+                SET {col['name']} = '{col['default'] if col['default'] is not None else 'NULL'}'
                 WHERE {col['name']} IS NULL;
                 """
             )
         return statements
 
-    def build_backfilter_statement(self, table: dict):
+    def get_table_dictionary_by_name(self, table_name: str) -> dict:
+        return [
+            table for table in self.CONFIGURATION_WORKBOOK['sheets']
+            if table['table']['name'] == table_name
+        ][0]['table']
+
+    def build_backfilter_statements(self) -> list:
+        table = self.get_table_dictionary_by_name(self.get_attribute('table'))
         lookup_table = self.get_lookup_table_by_tablespace(
-            tablespace=table['prefix']
+            tablespace=table['tablespace']
         )
         backfilter_columns = self.get_backfilter_columns_by_table(table=table)
+        entity_columns = self.get_backfilter_entity_columns_by_table(table=table)
 
-
-
-    def build_url_backfilter_statement(self, target_table=None):
-        stmt = f"UPDATE public.{target_table} TARGET\n"
-        stmt += "SET property = LOOKUP.property\n"
-        stmt += f"FROM public.lookup_urltolocation LOOKUP\n"
-        stmt += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%');\n"
-
-        stmt2 = f"UPDATE public.{target_table} TARGET\n"
-        stmt2 += "SET property = LOOKUP.property\n"
-        stmt2 += f"FROM public.lookup_urltolocation LOOKUP\n"
-        stmt2 += "WHERE TARGET.url ILIKE CONCAT('%', LOOKUP.url, '%')\n"
-        stmt2 += "AND LOOKUP.exact = 1;"
-
-        stmt3 = f"UPDATE public.{target_table}\n"
-        stmt3 += "SET property = 'Non-Location Pages'\n"
-        stmt3 += "WHERE property IS NULL;\n"
-
-        return [stmt, stmt2, stmt3]
-
-    def build_moz_backfilter_statement(self, target_table=None):
-        stmt = f"UPDATE public.{target_table} TARGET\n"
-        stmt += "SET property = LOOKUP.property\n"
-        stmt += f"FROM public.lookup_moz_listingtolocation LOOKUP\n"
-        stmt += "WHERE CAST(TARGET.listing_id AS character varying(25)) = CAST(LOOKUP.listing_id AS character varying(25));\n"
-
-        stmt2 = f"UPDATE public.{target_table}\n"
-        stmt2 += "SET property = 'Non-Location Pages'\n"
-        stmt2 += "WHERE property IS NULL;\n"
-
-        return [stmt, stmt2]
-
-    def build_gmb_backfilter_statement(self, target_table=None):
-        stmt = f"UPDATE public.{target_table} TARGET\n"
-        stmt += "SET property = LOOKUP.property\n"
-        stmt += f"FROM public.lookup_gmb_listingtolocation LOOKUP\n"
-        stmt += "WHERE TARGET.listing_id = LOOKUP.listing_id;\n"
-
-        stmt2 = f"UPDATE public.{target_table}\n"
-        stmt2 += "SET property = 'Non-Location Pages'\n"
-        stmt2 += "WHERE property IS NULL;\n"
-
-        return [stmt, stmt2]
+        statements = []
+        for column in backfilter_columns:
+            for update_type in lookup_table['update_types']:
+                statements.append(
+                    self.create_backfilter_statement(
+                        table=table,
+                        lookup_table=lookup_table,
+                        backfilter_column=column,
+                        entity_columns=entity_columns,
+                        update_type=update_type
+                    )
+                )
+        statements.extend(self.create_set_default_statements(table=table))
+        return statements
 
     CLIENT_NAME = 'ZwirnerEquipment'
 
+    """
+    Each table should have:
+        - backfilter - column to join on for update... join statements
+        - default - column to assign a default value to when NULL (usually an entity, below)
+        - entity - column to map data to based off the lookup table (e.g. Property, Market, etc)
+    """
     CONFIGURATION_WORKBOOK = {
         'config_sheet_name': 'Zwirner Equipment - Configuration',
         'source_refresh_dates': [1, 15],
         'lookup_refresh_status': False,
-
         'sheets': [
             {'sheet': 'URL to Property', 'table': {
                 'name': 'lookup_urltolocation',
                 'schema': 'public',
                 'type': 'lookup',
-                'tablespace': ['moz_pro', 'google_analytics'],  # TODO: THIS IS NEW
-                'update_types': ['exact', 'fuzzy'],  # TODO: THIS IS ALSO NEW
+                'tablespace': ['moz_pro', 'google_analytics'],
+                'update_types': ['exact', 'fuzzy'],
                 'columns': [
                     {'name': 'url', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
@@ -146,9 +147,9 @@ class Customizer:
                 'name': 'source_moz_procampaignmaster',
                 'schema': 'public',
                 'type': 'source',
+                'tablespace': ['moz_pro'],
                 'columns': [
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
-
                 ],
                 'owner': 'postgres'
             }},
@@ -156,6 +157,7 @@ class Customizer:
                 'name': 'source_moz_localaccountmaster',
                 'schema': 'public',
                 'type': 'source',
+                'tablespace': ['moz_local'],
                 'columns': [
                     {'name': 'account', 'type': 'character varying', 'length': 150},
                     {'name': 'label', 'type': 'character varying', 'length': 150},
@@ -167,6 +169,7 @@ class Customizer:
                 'name': 'source_moz_localaccountmaster',
                 'schema': 'public',
                 'type': 'source',
+                'tablespace': ['moz_local'],
                 'columns': [
                     {'name': 'account', 'type': 'character varying', 'length': 150},
                     {'name': 'label', 'type': 'character varying', 'length': 150},
@@ -194,12 +197,11 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
-            # TODO: EXAMPLE LOOKUP TABLE
             {'sheet': 'Moz Listing to Property', 'table': {
                 'name': 'lookup_moz_listingtolocation',
                 'schema': 'public',
-                'tablespace': ['moz_local'],  # TODO: THIS IS NEW
-                'update_types': ['exact'],  # TODO: THIS IS ALSO NEW
+                'tablespace': ['moz_local'],
+                'update_types': ['exact'],
                 'type': 'lookup',
                 'columns': [
                     {'name': 'listing_id', 'type': 'character varying', 'length': 100},
@@ -212,7 +214,7 @@ class Customizer:
                     {'name': 'state', 'type': 'character varying', 'length': 50},
                     {'name': 'zip', 'type': 'bigint'},
                     {'name': 'phone', 'type': 'character varying', 'length': 25},
-
+                    {'name': 'exact', 'type': 'bigint'}
                 ],
                 'owner': 'postgres'
             }},
@@ -220,6 +222,8 @@ class Customizer:
                 'name': 'lookup_gmb_listingtolocation',
                 'schema': 'public',
                 'type': 'lookup',
+                'tablespace': ['google_my_business'],
+                'update_types': ['exact'],
                 'columns': [
                     {'name': 'listing_id', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 150},
@@ -234,13 +238,12 @@ class Customizer:
             {'sheet': None, 'table': {
                 'name': 'moz_local_visibility',
                 'schema': 'public',
-                'tablespace': 'moz_local',  # TODO: THIS IS NEW
+                'tablespace': ['moz_local'],
                 'type': 'reporting',
-                'backfilter': build_moz_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'default': None},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100},
                     {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True},
                     {'name': 'directory', 'type': 'character varying', 'length': 100},
@@ -265,12 +268,12 @@ class Customizer:
             {'sheet': None, 'table': {
                 'name': 'moz_local_sync',
                 'schema': 'public',
+                'tablespace': ['moz_local'],
                 'type': 'reporting',
-                'backfilter': build_moz_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100},
                     {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True},
                     {'name': 'directory', 'type': 'character varying', 'length': 100},
@@ -296,12 +299,12 @@ class Customizer:
             {'sheet': None, 'table': {
                 'name': 'moz_pro_rankings',
                 'schema': 'public',
+                'tablespace': ['moz_pro'],
                 'type': 'reporting',
-                'backfilter': build_url_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
                     {'name': 'id', 'type': 'character varying', 'length': 100},
@@ -311,7 +314,7 @@ class Customizer:
                     {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'geo', 'type': 'character varying', 'length': 100},
                     {'name': 'tags', 'type': 'character varying', 'length': 250},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True},
                     {'name': 'keyword_added_at', 'type': 'timestamp with time zone'},
                     {'name': 'rank', 'type': 'bigint'},
                     {'name': 'branded', 'type': 'bigint'},
@@ -334,12 +337,12 @@ class Customizer:
             {'sheet': None, 'table': {
                 'name': 'moz_pro_serp',
                 'schema': 'public',
+                'tablespace': ['moz_pro'],
                 'type': 'reporting',
-                'backfilter': build_url_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
                     {'name': 'id', 'type': 'character varying', 'length': 100},
@@ -349,7 +352,7 @@ class Customizer:
                     {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'geo', 'type': 'character varying', 'length': 100},
                     {'name': 'tags', 'type': 'character varying', 'length': 250},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True},
                     {'name': 'keyword_added_at', 'type': 'timestamp with time zone'},
                     {'name': 'ads_bottom', 'type': 'bigint'},
                     {'name': 'ads_top', 'type': 'bigint'},
@@ -387,19 +390,19 @@ class Customizer:
             {'sheet': None, 'table': {
                 'name': 'google_analytics_traffic',
                 'schema': 'public',
+                'tablespace': ['google_analytics'],
                 'type': 'reporting',
-                'backfilter': build_url_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                     {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True},
                     {'name': 'sessions', 'type': 'bigint'},
                     {'name': 'percent_new_sessions', 'type': 'double precision'},
                     {'name': 'pageviews', 'type': 'bigint'},
@@ -429,19 +432,19 @@ class Customizer:
             {'sheet': None, 'table': {
                 'name': 'google_analytics_events',
                 'schema': 'public',
+                'tablespace': ['google_analytics'],
                 'type': 'reporting',
-                'backfilter': build_url_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                     {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True},
                     {'name': 'event_label', 'type': 'character varying', 'length': 200},
                     {'name': 'event_action', 'type': 'character varying', 'length': 200},
                     {'name': 'total_events', 'type': 'bigint'},
@@ -466,19 +469,19 @@ class Customizer:
             {'sheet': None, 'table': {
                 'name': 'google_analytics_goals',
                 'schema': 'public',
+                'tablespace': ['google_analytics'],
                 'type': 'reporting',
-                'backfilter': build_url_backfilter_statement,
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
                     {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100},
                     {'name': 'device', 'type': 'character varying', 'length': 100},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True},
                     {'name': 'request_a_quote', 'type': 'bigint'},
                     {'name': 'sidebar_contact_us', 'type': 'bigint'},
                     {'name': 'contact_us_form_submission', 'type': 'bigint'},
@@ -505,14 +508,14 @@ class Customizer:
                 'name': 'google_my_business_insights',
                 'schema': 'public',
                 'type': 'reporting',
-                'backfilter': build_gmb_backfilter_statement,
+                'tablespace': ['google_my_business'],
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'listing_name', 'type': 'character varying', 'length': 150},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True},
                     {'name': 'maps_views', 'type': 'bigint'},
                     {'name': 'search_views', 'type': 'bigint'},
                     {'name': 'website_click_actions', 'type': 'bigint'},
@@ -524,7 +527,6 @@ class Customizer:
                     {'name': 'discovery_searches', 'type': 'bigint'},
                     {'name': 'post_views_on_search', 'type': 'bigint'},
                     {'name': 'post_cta_actions', 'type': 'bigint'},
-
                 ],
                 'indexes': [
                     {
@@ -545,19 +547,18 @@ class Customizer:
                 'name': 'google_my_business_reviews',
                 'schema': 'public',
                 'type': 'reporting',
-                'backfilter': build_gmb_backfilter_statement,
+                'tablespace': ['google_my_business'],
                 'columns': [
                     {'name': 'report_date', 'type': 'date'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages'},
                     {'name': 'service_line', 'type': 'character varying', 'length': 100},
                     {'name': 'listing_name', 'type': 'character varying', 'length': 150},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True},
                     {'name': 'average_rating', 'type': 'double precision'},
                     {'name': 'rating', 'type': 'double precision'},
                     {'name': 'review_count', 'type': 'double precision'},
                     {'name': 'reviewer', 'type': 'character varying', 'length': 150},
-
                 ],
                 'indexes': [
                     {
