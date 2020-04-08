@@ -535,7 +535,7 @@ class Customizer:
             }
         ],
         'owner': 'postgres'
-    }},
+    }}
 
     supported_dbms = [
         'postgresql'
