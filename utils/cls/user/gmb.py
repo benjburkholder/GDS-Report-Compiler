@@ -60,7 +60,7 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
     custom_columns = [
         {'data_source': 'Google My Business - Insights'},
         {'property': None},
-        {'service_line': None}
+        # {'service_line': None}
     ]
 
     audit_procedure = {
@@ -189,7 +189,7 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
     custom_columns = [
         {'data_source': 'Google My Business - Reviews'},
         {'property': None},
-        {'service_line': None}
+        # {'service_line': None}
     ]
 
     audit_procedure = {

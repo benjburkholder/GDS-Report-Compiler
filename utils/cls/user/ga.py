@@ -77,7 +77,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
     custom_columns = [
         {'data_source': 'Google Analytics - Traffic'},
         {'property': None},
-        {'service_line': None}
+        # {'service_line': None}
     ]
 
     audit_procedure = {
@@ -270,7 +270,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
     custom_columns = [
         {'data_source': 'Google Analytics - Events'},
         {'property': None},
-        {'service_line': None}
+        # {'service_line': None}
     ]
 
     audit_procedure = {
@@ -410,7 +410,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
     custom_columns = [
         {'data_source': 'Google Analytics - Goals'},
         {'property': None},
-        {'service_line': None}
+        # {'service_line': None}
     ]
 
     audit_procedure = {

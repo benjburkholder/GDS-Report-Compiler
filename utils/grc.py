@@ -161,12 +161,16 @@ def build_marketing_table(customizer) -> int:
         for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
             if sheets['table']['type'] == 'reporting':
                 for column in sheets['table']['columns']:
-                    if column not in customizer.marketing_data['table']['columns']:
+                    if column['master_include']:
                         customizer.marketing_data['table']['columns'].append(column)
 
-        create_table_from_schema(customizer, schema=customizer.marketing_data[0])
+        create_table_from_schema(customizer, schema=customizer.marketing_data)
 
     return 0
+
+
+def build_ingest_procedures(customizer: custom.Customizer) -> int:
+    pass
 
 
 def reshape_lookup_data(customizer, df, sheet):
