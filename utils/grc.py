@@ -375,8 +375,6 @@ def build_ingest_procedures(customizer: custom.Customizer) -> int:
 
     ingest_procedure = customizer.create_ingest_statement(customizer, master_columns, target_sheets)
 
-
-
     return 0
 
 

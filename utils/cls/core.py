@@ -121,12 +121,19 @@ class Customizer:
         target_columns = self.__isolate_target_columns(target_sheets=target_sheets)
         delete_statement = self.__create_delete_from_statement(customizer=customizer, target_columns=target_columns)
         insert_statement = self.__create_insert_statement(customizer, master_columns=master_columns, target_columns=target_columns)
+        group_by_columns = self.__create_group_by_statement(target_sheet_columns=target_sheets)
 
-        return delete_statement
+        ingest_procedure = ''
+        ingest_procedure += delete_statement
+        ingest_procedure += insert_statement
+
+        if group_by_columns:
+            ingest_procedure += group_by_columns
+
+        return ingest_procedure
 
     def __isolate_target_columns(self, target_sheets):
-        assert len(target_sheets) == 1, "Only one client sheet should be present, " \
-                                        "check config workbook sheet name matches only one table name"
+        assert len(target_sheets) == 1, "Only one client sheet should be present, check config workbook sheet name matches only one table name"
 
         return target_sheets[0]['table']['columns']
 
@@ -142,9 +149,20 @@ class Customizer:
     # TODO finish ingest statement
     def __create_insert_statement(self, customizer, master_columns, target_columns):
 
+        # Assign NULL to unused table columns
         for col in master_columns:
             if col not in target_columns:
                 col['name'] = f"NULL AS {col['name']}"
+
+        # Assigns field aggregate type if present
+        for col in master_columns:
+            if col in target_columns:
+                if 'aggregate_type' in col:
+                    if col['aggregate_type'] == 'monthly':
+                        pass
+
+                    if col['aggregate_type'] == 'sum':
+                        col['name'] = f"SUM({col['name']})"
 
         final_ingest_columns = [col['name'] for col in master_columns]
 
@@ -158,11 +176,26 @@ class Customizer:
                 {insert_statement}
                 FROM public.{self.get_attribute('table')}
 
-
                 """
 
     def __create_group_by_statement(self, target_sheet_columns):
-        pass
+        target_columns = self.__isolate_target_columns(target_sheets=target_sheet_columns)
+        group_by_columns = [col['name'] for col in target_columns if 'group_by' in col]
+
+        group_by_statement = ''
+
+        # Check and add semicolon to last item in group by statement
+        col_count = len(group_by_columns)-1
+        for index, col in enumerate(group_by_columns):
+            if index == col_count:
+                group_by_statement += '\t' + col + ';\n\t\t\t\t'
+            else:
+                group_by_statement += '\t' + col + ',\n\t\t\t\t'
+
+        return f"""
+                GROUP BY
+                {group_by_statement}
+                """ if group_by_statement else None
 
     def __create_optional_exclusion_statement(self):
         pass
@@ -292,14 +325,14 @@ class Customizer:
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'monthly', 'group_by': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
+                    {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True, 'group_by': True},
                     {'name': 'directory', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'points_reached', 'type': 'bigint', 'master_include': True},
-                    {'name': 'max_points', 'type': 'bigint', 'master_include': True},
+                    {'name': 'points_reached', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'max_points', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
                 ],
                 'indexes': [
                     {
