@@ -169,10 +169,6 @@ def build_marketing_table(customizer) -> int:
     return 0
 
 
-def build_ingest_procedures(customizer: custom.Customizer) -> int:
-    pass
-
-
 def reshape_lookup_data(customizer, df, sheet):
 
     df.columns = map(str.lower, df.columns)
@@ -360,6 +356,28 @@ def table_backfilter(customizer: custom.Customizer):
         for statement in statements:
             con.execute(statement)
     print('SUCCESS: Table Backfiltered.')
+
+
+# TODO flesh out ingest build logic, find the rest of the logic in core.py
+def build_ingest_procedures(customizer: custom.Customizer) -> int:
+
+    master_columns = []
+
+    for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheets['table']['type'] == 'reporting':
+            for column in sheets['table']['columns']:
+                if column['master_include']:
+                    master_columns.append(column)
+
+    target_sheets = [
+        sheet for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']
+        if sheet['table']['name'] == customizer.get_attribute('table')]
+
+    ingest_procedure = customizer.create_ingest_statement(customizer, master_columns, target_sheets)
+
+
+
+    return 0
 
 
 def refresh_source_tables(customizer: custom.Customizer):

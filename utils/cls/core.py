@@ -117,6 +117,56 @@ class Customizer:
         statements.extend(self.create_set_default_statements(table=table))
         return statements
 
+    def create_ingest_statement(self, customizer, master_columns, target_sheets):
+        target_columns = self.__isolate_target_columns(target_sheets=target_sheets)
+        delete_statement = self.__create_delete_from_statement(customizer=customizer, target_columns=target_columns)
+        insert_statement = self.__create_insert_statement(customizer, master_columns=master_columns, target_columns=target_columns)
+
+        return delete_statement
+
+    def __isolate_target_columns(self, target_sheets):
+        assert len(target_sheets) == 1, "Only one client sheet should be present, " \
+                                        "check config workbook sheet name matches only one table name"
+
+        return target_sheets[0]['table']['columns']
+
+    def __create_delete_from_statement(self, customizer, target_columns):
+        ingest_indicator = [column['name'] for column in target_columns if 'ingest_indicator' in column][0]
+        assert ingest_indicator, "'ingest_indicator' attribute not assigned to table column used in ingest procedure"
+        return f"""
+                DELETE FROM public.{customizer.marketing_data['table']['name']}
+                WHERE {ingest_indicator} = '{customizer.custom_columns[0][ingest_indicator]}';
+
+                """
+
+    # TODO finish ingest statement
+    def __create_insert_statement(self, customizer, master_columns, target_columns):
+
+        for col in master_columns:
+            if col not in target_columns:
+                col['name'] = f"NULL AS {col['name']}"
+
+        final_ingest_columns = [col['name'] for col in master_columns]
+
+        insert_statement = ''
+        for col in final_ingest_columns:
+            insert_statement += '\t' + col + ',\n\t\t\t\t'
+
+        return f"""
+                INSERT INTO public.{customizer.marketing_data['table']['name']}
+                SELECT
+                {insert_statement}
+                FROM public.{self.get_attribute('table')}
+
+
+                """
+
+    def __create_group_by_statement(self, target_sheet_columns):
+        pass
+
+    def __create_optional_exclusion_statement(self):
+        pass
+
     CLIENT_NAME = 'ZwirnerEquipment'
 
     """
@@ -243,7 +293,7 @@ class Customizer:
                 'type': 'reporting',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True},
                     {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True},
