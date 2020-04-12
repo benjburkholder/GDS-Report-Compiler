@@ -372,7 +372,8 @@ def ingest_procedures(customizer: custom.Customizer):
         if sheet['table']['name'] == customizer.get_attribute('table')]
     ingest_procedure = customizer.create_ingest_statement(customizer, master_columns, target_sheets)
     with engine.connect() as con:
-        con.execute(ingest_procedure)
+        for statement in ingest_procedure:
+            con.execute(statement)
     print('SUCCESS: Table Ingested.')
 
 

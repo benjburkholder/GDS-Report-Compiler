@@ -117,20 +117,17 @@ class Customizer:
         statements.extend(self.create_set_default_statements(table=table))
         return statements
 
-    def create_ingest_statement(self, customizer, master_columns, target_sheets):
+    def create_ingest_statement(self, customizer, master_columns, target_sheets) -> list:
         target_columns = self.__isolate_target_columns(target_sheets=target_sheets)
         delete_statement = self.__create_delete_from_statement(customizer=customizer, target_columns=target_columns)
         insert_statement = self.__create_insert_statement(customizer, master_columns=master_columns, target_columns=target_columns)
         group_by_columns = self.__create_group_by_statement(target_sheet_columns=target_sheets)
 
-        ingest_procedure = ''
-        ingest_procedure += delete_statement
-        ingest_procedure += insert_statement
-
+        # Group_by statement is optional, checks if exists and appends to insert stmt if True
         if group_by_columns:
-            ingest_procedure += group_by_columns
+            insert_statement += group_by_columns
 
-        return ingest_procedure
+        return [delete_statement, insert_statement]
 
     def __isolate_target_columns(self, target_sheets):
         assert len(target_sheets) == 1, "Only one client sheet should be present, check config workbook sheet name matches only one table name"
@@ -148,26 +145,32 @@ class Customizer:
 
     def __create_insert_statement(self, customizer, master_columns, target_columns):
 
-        # Assign NULL to unused table columns
+        # Assign NULL to unused table columns in original order
         for col in master_columns:
             if col not in target_columns:
                 col['name'] = f"NULL AS {col['name']}"
 
-        # Assigns field aggregate type if present
+        # Assigns field aggregate type if present (e.g. month aggregation, sum fields)
         for col in master_columns:
             if col in target_columns:
                 if 'aggregate_type' in col:
                     if col['aggregate_type'] == 'month':
-                        col['name'] = f"date_trunc('month', {col['name']}) AS {col['name']}"
+                        col['name'] = f"date_trunc('month', {col['name']})"
 
                     if col['aggregate_type'] == 'sum':
                         col['name'] = f"SUM({col['name']})"
 
+        # Extracts name from columns for final statement creation
         final_ingest_columns = [col['name'] for col in master_columns]
 
+        # Determines which item is last in list, then uses correct ending character
         insert_statement = ''
-        for col in final_ingest_columns:
-            insert_statement += '\t' + col + ',\n\t\t\t\t'
+        col_count = len(final_ingest_columns) - 1
+        for index, col in enumerate(final_ingest_columns):
+            if index == col_count:
+                insert_statement += '\t' + col + '\n\t\t\t\t'
+            else:
+                insert_statement += '\t' + col + ',\n\t\t\t\t'
 
         return f"""
                 INSERT INTO public.{customizer.marketing_data['table']['name']}
@@ -179,6 +182,8 @@ class Customizer:
 
     def __create_group_by_statement(self, target_sheet_columns):
         target_columns = self.__isolate_target_columns(target_sheets=target_sheet_columns)
+
+        # Pulls columns (if any) to be used in group_by statement
         group_by_columns = [col['name'] for col in target_columns if 'group_by' in col]
 
         group_by_statement = ''
@@ -329,7 +334,7 @@ class Customizer:
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True, 'group_by': True},
-                    {'name': 'directory', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'directory', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'points_reached', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
                     {'name': 'max_points', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
                 ],
