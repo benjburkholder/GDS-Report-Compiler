@@ -146,7 +146,6 @@ class Customizer:
 
                 """
 
-    # TODO finish ingest statement
     def __create_insert_statement(self, customizer, master_columns, target_columns):
 
         # Assign NULL to unused table columns
@@ -158,8 +157,8 @@ class Customizer:
         for col in master_columns:
             if col in target_columns:
                 if 'aggregate_type' in col:
-                    if col['aggregate_type'] == 'monthly':
-                        pass
+                    if col['aggregate_type'] == 'month':
+                        col['name'] = f"date_trunc('month', {col['name']}) AS {col['name']}"
 
                     if col['aggregate_type'] == 'sum':
                         col['name'] = f"SUM({col['name']})"
@@ -325,7 +324,7 @@ class Customizer:
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'monthly', 'group_by': True},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},

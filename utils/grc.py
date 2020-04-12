@@ -359,23 +359,21 @@ def table_backfilter(customizer: custom.Customizer):
 
 
 # TODO flesh out ingest build logic, find the rest of the logic in core.py
-def build_ingest_procedures(customizer: custom.Customizer) -> int:
-
+def ingest_procedures(customizer: custom.Customizer):
+    engine = build_postgresql_engine(customizer=customizer)
     master_columns = []
-
     for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheets['table']['type'] == 'reporting':
             for column in sheets['table']['columns']:
                 if column['master_include']:
                     master_columns.append(column)
-
     target_sheets = [
         sheet for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']
         if sheet['table']['name'] == customizer.get_attribute('table')]
-
     ingest_procedure = customizer.create_ingest_statement(customizer, master_columns, target_sheets)
-
-    return 0
+    with engine.connect() as con:
+        con.execute(ingest_procedure)
+    print('SUCCESS: Table Ingested.')
 
 
 def refresh_source_tables(customizer: custom.Customizer):
