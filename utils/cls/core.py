@@ -146,20 +146,18 @@ class Customizer:
 
     def __create_insert_statement(self, customizer, master_columns, target_columns):
 
-        master_df = pd.DataFrame(master_columns)
-        master_columns = master_df[['name', 'aggregate_type']].drop_duplicates(keep='first').to_dict(orient='records')
-
-        target_df = pd.DataFrame(target_columns)
-        target_columns = target_df[['name', 'aggregate_type']]
+        # Converts both to dataframes for easier comparison via column selection
+        master_df = pd.DataFrame(master_columns)[['name', 'aggregate_type']].drop_duplicates(keep='first').to_dict(orient='records')
+        target_df = pd.DataFrame(target_columns)[['name', 'aggregate_type']]
 
         # Assign NULL to unused table columns in original order
-        for col in master_columns:
-            if col['name'] not in target_columns['name'].values:
+        for col in master_df:
+            if col['name'] not in target_df['name'].values:
                 col['name'] = f"NULL AS {col['name']}"
 
         # Assigns field aggregate type if present (e.g. month aggregation, sum fields)
-        for col in master_columns:
-            if col['name'] in target_columns['name'].values:
+        for col in master_df:
+            if col['name'] in target_df['name'].values:
                 if 'aggregate_type' in col:
                     if col['aggregate_type'] == 'month':
                         col['name'] = f"date_trunc('month', {col['name']})"
@@ -168,7 +166,7 @@ class Customizer:
                         col['name'] = f"SUM({col['name']})"
 
         # Extracts name from columns for final statement creation
-        final_ingest_columns = [col['name'] for col in master_columns]
+        final_ingest_columns = [col['name'] for col in master_df]
 
         # Determines which item is last in list, then uses correct ending character
         insert_statement = ''
