@@ -3,6 +3,7 @@ Custom
 
 This script is where all reporting configuration takes place
 """
+import pandas as pd
 import re
 
 
@@ -145,14 +146,20 @@ class Customizer:
 
     def __create_insert_statement(self, customizer, master_columns, target_columns):
 
+        master_df = pd.DataFrame(master_columns)
+        master_columns = master_df[['name', 'aggregate_type']].drop_duplicates(keep='first').to_dict(orient='records')
+
+        target_df = pd.DataFrame(target_columns)
+        target_columns = target_df[['name', 'aggregate_type']]
+
         # Assign NULL to unused table columns in original order
         for col in master_columns:
-            if col not in target_columns:
+            if col['name'] not in target_columns['name'].values:
                 col['name'] = f"NULL AS {col['name']}"
 
         # Assigns field aggregate type if present (e.g. month aggregation, sum fields)
         for col in master_columns:
-            if col in target_columns:
+            if col['name'] in target_columns['name'].values:
                 if 'aggregate_type' in col:
                     if col['aggregate_type'] == 'month':
                         col['name'] = f"date_trunc('month', {col['name']})"
@@ -168,9 +175,9 @@ class Customizer:
         col_count = len(final_ingest_columns) - 1
         for index, col in enumerate(final_ingest_columns):
             if index == col_count:
-                insert_statement += '\t' + col + '\n\t\t\t\t'
+                insert_statement += f'{col}'
             else:
-                insert_statement += '\t' + col + ',\n\t\t\t\t'
+                insert_statement += f'{col},'
 
         return f"""
                 INSERT INTO public.{customizer.marketing_data['table']['name']}
@@ -556,20 +563,20 @@ class Customizer:
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': False},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': False},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': False},
-                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': False},
-                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': False},
-                    {'name': 'request_a_quote', 'type': 'bigint', 'master_include': True},
-                    {'name': 'sidebar_contact_us', 'type': 'bigint', 'master_include': True},
-                    {'name': 'contact_us_form_submission', 'type': 'bigint', 'master_include': True},
-                    {'name': 'newsletter_signups', 'type': 'bigint', 'master_include': True},
-                    {'name': 'dialogtech_calls', 'type': 'bigint', 'master_include': True},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': False, 'group_by': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
+                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True, 'group_by': True},
+                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True, 'group_by': True},
+                    {'name': 'request_a_quote', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'sidebar_contact_us', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'contact_us_form_submission', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'newsletter_signups', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'dialogtech_calls', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
 
                 ],
                 'indexes': [
