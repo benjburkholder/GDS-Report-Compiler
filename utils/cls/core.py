@@ -197,9 +197,9 @@ class Customizer:
         col_count = len(group_by_columns)-1
         for index, col in enumerate(group_by_columns):
             if index == col_count:
-                group_by_statement += '\t' + col + ';\n\t\t\t\t'
+                group_by_statement += f'{col};'
             else:
-                group_by_statement += '\t' + col + ',\n\t\t\t\t'
+                group_by_statement += f'{col},'
 
         return f"""
                 GROUP BY
