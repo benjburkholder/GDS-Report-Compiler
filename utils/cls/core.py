@@ -206,7 +206,7 @@ class Customizer:
                 {group_by_statement}
                 """ if group_by_statement else None
 
-    def __create_optional_exclusion_statement(self):
+    def __create_custom_statements(self):
         pass
 
     CLIENT_NAME = 'ZwirnerEquipment'
