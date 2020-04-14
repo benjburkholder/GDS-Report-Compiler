@@ -145,26 +145,36 @@ class Customizer:
 
     def __create_insert_statement(self, customizer, master_columns, target_columns):
         # Converts both to dataframes for easier comparison via column selection
-        master_df = pd.DataFrame(master_columns)[['name', 'aggregate_type']].drop_duplicates(keep='first').to_dict(orient='records')
-        target_df = pd.DataFrame(target_columns)[['name', 'aggregate_type']]
+        master_df = pd.DataFrame(master_columns)[['name', 'aggregate_type', 'aggregate_cast']].drop_duplicates(keep='first').to_dict(orient='records')
+        target_df = pd.DataFrame(target_columns)[['name', 'aggregate_type', 'aggregate_cast']]
 
         # Assign NULL to unused table columns in original order
         for col in master_df:
             if col['name'] not in target_df['name'].values:
                 col['name'] = f"NULL AS {col['name']}"
 
-        # Assigns field aggregate type if present (e.g. month aggregation, sum fields)
+        # Assigns field aggregate type and cast if present (e.g. month aggregation, sum fields)
         for col in master_df:
             if col['name'] in target_df['name'].values:
                 if 'aggregate_type' in col:
-                    if col['aggregate_type'] == 'month':
-                        col['name'] = f"date_trunc('month', {col['name']})"
+                    if 'aggregate_cast' not in col:
+                        if col['aggregate_type'] == 'month':
+                            col['name'] = f"date_trunc('month', {col['name']})"
 
-                    if col['aggregate_type'] == 'sum':
-                        col['name'] = f"SUM({col['name']})"
+                        if col['aggregate_type'] == 'sum':
+                            col['name'] = f"SUM({col['name']})"
 
-                    if col['aggregate_type'] == 'avg':
-                        col['name'] = f"AVG({col['name']})"
+                        if col['aggregate_type'] == 'avg':
+                            col['name'] = f"AVG({col['name']})"
+
+                    elif 'aggregate_cast' in col:
+                        col['temp'] = f"CAST({col['name']} AS {col['aggregate_cast']})"
+                        if 'aggregate_type' in col:
+                            if col['aggregate_type'] == 'sum':
+                                col['name'] = f"SUM({col['temp']})"
+
+                            if col['aggregate_type'] == 'avg':
+                                col['name'] = f"AVG({col['temp']})"
 
         # Extracts name from columns for final statement creation
         final_ingest_columns = [col['name'] for col in master_df]
@@ -367,14 +377,14 @@ class Customizer:
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': False},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': False},
-                    {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': False},
-                    {'name': 'directory', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'field', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'sync_status', 'type': 'bigint', 'master_include': True},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
+                    {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True, 'group_by': True},
+                    {'name': 'directory', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'field', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'sync_status', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'avg', 'aggregate_cast': 'double precision'},
 
                 ],
                 'indexes': [
