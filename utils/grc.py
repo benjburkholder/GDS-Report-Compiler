@@ -358,7 +358,6 @@ def table_backfilter(customizer: custom.Customizer):
     print('SUCCESS: Table Backfiltered.')
 
 
-# TODO figure out how to set the 'master_include' field to False if not data_source being run
 def ingest_procedures(customizer: custom.Customizer):
     engine = build_postgresql_engine(customizer=customizer)
 

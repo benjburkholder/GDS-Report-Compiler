@@ -144,7 +144,6 @@ class Customizer:
                 """
 
     def __create_insert_statement(self, customizer, master_columns, target_columns):
-
         # Converts both to dataframes for easier comparison via column selection
         master_df = pd.DataFrame(master_columns)[['name', 'aggregate_type']].drop_duplicates(keep='first').to_dict(orient='records')
         target_df = pd.DataFrame(target_columns)[['name', 'aggregate_type']]
@@ -210,6 +209,8 @@ class Customizer:
 
     def __create_custom_statements(self):
         pass
+
+    # ~~~~~~~~~~~~~~~~ EDITABLE CLIENT SPECIFIC DATA PAST THIS POINT ~~~~~~~~~~~~~~~~
 
     CLIENT_NAME = 'ZwirnerEquipment'
 
