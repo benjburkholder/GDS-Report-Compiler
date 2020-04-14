@@ -165,6 +165,9 @@ class Customizer:
                     if col['aggregate_type'] == 'sum':
                         col['name'] = f"SUM({col['name']})"
 
+                    if col['aggregate_type'] == 'avg':
+                        col['name'] = f"AVG({col['name']})"
+
         # Extracts name from columns for final statement creation
         final_ingest_columns = [col['name'] for col in master_df]
 
@@ -484,25 +487,25 @@ class Customizer:
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': False},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': False},
-                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': False},
-                    {'name': 'sessions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'percent_new_sessions', 'type': 'double precision', 'master_include': True},
-                    {'name': 'pageviews', 'type': 'bigint', 'master_include': True},
-                    {'name': 'unique_pageviews', 'type': 'bigint', 'master_include': True},
-                    {'name': 'pageviews_per_session', 'type': 'double precision', 'master_include': True},
-                    {'name': 'entrances', 'type': 'bigint', 'master_include': True},
-                    {'name': 'bounces', 'type': 'bigint', 'master_include': True},
-                    {'name': 'session_duration', 'type': 'double precision', 'master_include': True},
-                    {'name': 'users', 'type': 'bigint', 'master_include': True},
-                    {'name': 'new_users', 'type': 'bigint', 'master_include': True},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': True, 'group_by': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
+                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True, 'group_by': True},
+                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True, 'group_by': True},
+                    {'name': 'sessions', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'percent_new_sessions', 'type': 'double precision', 'master_include': True, 'aggregate_type': 'avg'},
+                    {'name': 'pageviews', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'unique_pageviews', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'pageviews_per_session', 'type': 'double precision', 'master_include': True, 'aggregate_type': 'avg'},
+                    {'name': 'entrances', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'bounces', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'session_duration', 'type': 'double precision', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'users', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'new_users', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
                 ],
                 'indexes': [
                     {
@@ -525,20 +528,20 @@ class Customizer:
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': False},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': False},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': False},
-                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': False},
-                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': False},
-                    {'name': 'event_label', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'event_action', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'total_events', 'type': 'bigint', 'master_include': True},
-                    {'name': 'unique_events', 'type': 'bigint', 'master_include': True},
-                    {'name': 'event_value', 'type': 'double precision', 'master_include': True},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
+                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': True, 'group_by': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
+                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True, 'group_by': True},
+                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True, 'group_by': True},
+                    {'name': 'event_label', 'type': 'character varying', 'length': 200, 'master_include': True, 'group_by': True},
+                    {'name': 'event_action', 'type': 'character varying', 'length': 200, 'master_include': True, 'group_by': True},
+                    {'name': 'total_events', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'unique_events', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
+                    {'name': 'event_value', 'type': 'double precision', 'master_include': True, 'aggregate_type': 'sum'},
                 ],
                 'indexes': [
                     {
