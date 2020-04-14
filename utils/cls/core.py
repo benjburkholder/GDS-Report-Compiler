@@ -132,12 +132,11 @@ class Customizer:
 
     def __isolate_target_columns(self, target_sheets):
         assert len(target_sheets) == 1, "Only one client sheet should be present, check config workbook sheet name matches only one table name"
-
         return target_sheets[0]['table']['columns']
 
     def __create_delete_from_statement(self, customizer, target_columns):
+        assert len([col for col in target_columns if "ingest_indicator" in col]) == 1, "'ingest_indicator' attribute not assigned to table column used in ingest procedure"
         ingest_indicator = [column['name'] for column in target_columns if 'ingest_indicator' in column][0]
-        assert ingest_indicator, "'ingest_indicator' attribute not assigned to table column used in ingest procedure"
         return f"""
                 DELETE FROM public.{customizer.marketing_data['table']['name']}
                 WHERE {ingest_indicator} = '{customizer.custom_columns[0][ingest_indicator]}';
@@ -338,7 +337,7 @@ class Customizer:
                 'type': 'reporting',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, "ingest_indicator": True, 'group_by': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True, 'group_by': True},
