@@ -145,8 +145,18 @@ class Customizer:
 
     def __create_insert_statement(self, customizer, master_columns, target_columns):
         # Converts both to dataframes for easier comparison via column selection
-        master_df = pd.DataFrame(master_columns)[['name', 'aggregate_type', 'aggregate_cast']].drop_duplicates(keep='first').to_dict(orient='records')
-        target_df = pd.DataFrame(target_columns)[['name', 'aggregate_type', 'aggregate_cast']]
+
+        optional_columns = []
+        for col in target_columns:
+            if 'name' in col:
+                optional_columns.append('name')
+            if 'aggregate_type' in col:
+                optional_columns.append('aggregate_type')
+            if 'aggregate_cast' in col:
+                optional_columns.append('aggregate_cast')
+
+        master_df = pd.DataFrame(master_columns)[list(set(optional_columns))].drop_duplicates(keep='first').to_dict(orient='records')
+        target_df = pd.DataFrame(target_columns)[list(set(optional_columns))]
 
         # Assign NULL to unused table columns in original order
         for col in master_df:
@@ -166,6 +176,9 @@ class Customizer:
 
                         if col['aggregate_type'] == 'avg':
                             col['name'] = f"AVG({col['name']})"
+
+                        if col['aggregate_type'] == '1 month interval':
+                            col['name'] = f"date_trunc('month', {col['name']} - interval '1 month')"
 
                     elif 'aggregate_cast' in col:
                         col['temp'] = f"CAST({col['name']} AS {col['aggregate_cast']})"
@@ -408,8 +421,8 @@ class Customizer:
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': False},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False},
+                    {'name': 'report_date', 'type': 'date', 'master_include': False, 'aggregate_type': '1 month interval'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False, 'ingest_indicator': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': False},
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100, 'master_include': True},
                     {'name': 'id', 'type': 'character varying', 'length': 100, 'master_include': True},
