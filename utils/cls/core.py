@@ -143,20 +143,26 @@ class Customizer:
 
                 """
 
+    def __compile_target_keys(self, target_columns):
+
+        target_keys = []
+        for col in target_columns:
+            if 'name' in col:
+                target_keys.append('name')
+            if 'aggregate_type' in col:
+                target_keys.append('aggregate_type')
+            if 'aggregate_cast' in col:
+                target_keys.append('aggregate_cast')
+
+        return list(set(target_keys))
+
     def __create_insert_statement(self, customizer, master_columns, target_columns):
         # Converts both to dataframes for easier comparison via column selection
 
-        optional_columns = []
-        for col in target_columns:
-            if 'name' in col:
-                optional_columns.append('name')
-            if 'aggregate_type' in col:
-                optional_columns.append('aggregate_type')
-            if 'aggregate_cast' in col:
-                optional_columns.append('aggregate_cast')
+        target_column_keys = self.__compile_target_keys(target_columns=target_columns)
 
-        master_df = pd.DataFrame(master_columns)[list(set(optional_columns))].drop_duplicates(keep='first').to_dict(orient='records')
-        target_df = pd.DataFrame(target_columns)[list(set(optional_columns))]
+        master_df = pd.DataFrame(master_columns)[target_column_keys].drop_duplicates(keep='first', subset='name').to_dict(orient='records')
+        target_df = pd.DataFrame(target_columns)[target_column_keys]
 
         # Assign NULL to unused table columns in original order
         for col in master_df:
@@ -166,6 +172,7 @@ class Customizer:
         # Assigns field aggregate type and cast if present (e.g. month aggregation, sum fields)
         for col in master_df:
             if col['name'] in target_df['name'].values:
+                col.update(target_df.loc[target_df['name'] == col['name']].to_dict(orient='records')[0])
                 if 'aggregate_type' in col:
                     if 'aggregate_cast' not in col:
                         if col['aggregate_type'] == 'month':
@@ -421,9 +428,9 @@ class Customizer:
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': False, 'aggregate_type': '1 month interval'},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': False},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100, 'master_include': True},
                     {'name': 'id', 'type': 'character varying', 'length': 100, 'master_include': True},
                     {'name': 'search_id', 'type': 'character varying', 'length': 100, 'master_include': True},
@@ -458,19 +465,19 @@ class Customizer:
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': False},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': False},
-                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'id', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'search_id', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'keyword', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'search_engine', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'geo', 'type': 'character varying', 'length': 100, 'master_include': False},
-                    {'name': 'tags', 'type': 'character varying', 'length': 250, 'master_include': False},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': False},
-                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone', 'master_include': False},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
+                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'id', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'search_id', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'keyword', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'search_engine', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'geo', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'tags', 'type': 'character varying', 'length': 250, 'master_include': True},
+                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True},
+                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone', 'master_include': True},
                     {'name': 'ads_bottom', 'type': 'bigint', 'master_include': True},
                     {'name': 'ads_top', 'type': 'bigint', 'master_include': True},
                     {'name': 'featured_snippet', 'type': 'bigint', 'master_include': True},
@@ -487,7 +494,7 @@ class Customizer:
                     {'name': 'site_links', 'type': 'bigint', 'master_include': True},
                     {'name': 'tweet', 'type': 'bigint', 'master_include': True},
                     {'name': 'video', 'type': 'bigint', 'master_include': True},
-                    {'name': 'branded', 'type': 'bigint', 'master_include': False},
+                    {'name': 'branded', 'type': 'bigint', 'master_include': True},
 
                 ],
                 'indexes': [
