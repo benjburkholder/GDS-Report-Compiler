@@ -343,7 +343,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         df['device'] = df['device'].astype(str).str[:50]
         df['campaign'] = df['campaign'].astype(str).str[:255]
         df['url'] = df['url'].astype(str).str[:1000]
-        df['event_label'] = df['event_label'].astype(str).str[:1000]
+        df['event_label'] = df['event_label'].astype(str).str[:200]
         df['event_action'] = df['event_action'].astype(str).str[:255]
         df['total_events'] = df['total_events'].fillna('0').apply(lambda x: int(x) if x else None)
         df['unique_events'] = df['total_events'].fillna('0').apply(lambda x: int(x) if x else None)

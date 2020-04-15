@@ -263,7 +263,7 @@ class Customizer:
         if score:
             print('PASS: {}, {}'.format(index_column, cadence))
             print('SUCCESS: Audit Automation Complete.')
-            
+
         else:
             fail_list.append({index_column: cadence})
         # if the fail list has entries, send the error notification
@@ -617,7 +617,7 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
-                'cadence': 'weekly',
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
