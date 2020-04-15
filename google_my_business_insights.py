@@ -96,6 +96,8 @@ def main() -> int:
                 table=grc.get_required_attribute(customizer, 'table')
             )
             grc.table_backfilter(customizer=customizer)
+            grc.ingest_procedures(customizer=customizer)
+
         else:
             logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
     return 0
