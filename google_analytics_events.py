@@ -74,6 +74,7 @@ def main() -> int:
             )
             grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
+            grc.audit_automation(customizer=customizer)
 
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))

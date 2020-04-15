@@ -3,6 +3,7 @@ Custom
 
 This script is where all reporting configuration takes place
 """
+from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
 import pandas as pd
 import re
 
@@ -240,6 +241,60 @@ class Customizer:
     def __create_custom_statements(self):
         pass
 
+    def audit_automation_procedure(self, index_column, cadence):
+        engine = build_postgresql_engine(customizer=self)
+        fail_list = []
+        if cadence.lower() == 'daily':
+            # if daily, there should be 7 days in week query
+            days = self.__run_audit_query(how='week', quan=1, engine=engine, source=index_column)
+            score = self.__score_days(days=days, min_days=7)
+        elif cadence.lower() == 'weekly':
+            # if weekly, there should be 1 day in week query
+            days = self.__run_audit_query(how='week', quan=1, engine=engine, source=index_column)
+            score = self.__score_days(days=days, min_days=1)
+        elif cadence.lower() == 'monthly':
+            # if monthly, there should be 1 day in 61 day query
+            days = self.__run_audit_query(how='month', quan=2, engine=engine, source=index_column)
+            score = self.__score_days(days=days, min_days=1)
+        else:
+            raise AssertionError(
+                "Invalid cadence provided. Must be one of ('daily', 'weekly', 'monthly'). {}".format(cadence))
+        # score the source and store for error reporting if needed
+        if score:
+            print('PASS: {}, {}'.format(index_column, cadence))
+            print('SUCCESS: Audit Automation Complete.')
+            
+        else:
+            fail_list.append({index_column: cadence})
+        # if the fail list has entries, send the error notification
+        if len(fail_list):
+            raise AssertionError("""
+                The following sources are not properly updating:
+                {}
+                """.format(fail_list))
+        return 0
+
+    def __score_days(self, days: list, min_days: int) -> bool:
+        if days is None:
+            return False
+        elif len(days) < min_days:
+            return False
+        else:
+            return True
+
+    def __run_audit_query(self, how: str, quan: int, engine, source: str) -> list:
+        sql = """
+        SELECT DISTINCT report_date
+        FROM public.{marketing_table}
+        WHERE 
+            report_date >= ((NOW() - INTERVAL '2 day') - INTERVAL '{quan} {how}')
+            AND data_source = '{source}';
+        """.format(quan=quan, how=how.lower(), source=source, marketing_table=self.marketing_data['table']['name'])
+        print(sql)
+        with engine.connect() as con:
+            results = con.execute(sql).fetchall()
+        return [item[0] for item in results] if results else None
+
     # ~~~~~~~~~~~~~~~~ EDITABLE CLIENT SPECIFIC DATA PAST THIS POINT ~~~~~~~~~~~~~~~~
 
     CLIENT_NAME = 'ZwirnerEquipment'
@@ -366,9 +421,10 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, "ingest_indicator": True, 'group_by': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True, 'group_by': True},
@@ -396,6 +452,7 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -427,6 +484,7 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
@@ -464,6 +522,7 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
@@ -516,6 +575,7 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -557,6 +617,7 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
+                'cadence': 'weekly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -593,6 +654,7 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -630,6 +692,7 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['google_my_business'],
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
@@ -668,6 +731,7 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['google_my_business'],
+                'cadence': 'monthly',
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},

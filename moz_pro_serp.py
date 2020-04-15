@@ -62,6 +62,7 @@ def main() -> int:
 
             grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
+            grc.audit_automation(customizer=customizer)
 
         else:
             logger.warning('No data returned for date {}.'.format(report_date))
