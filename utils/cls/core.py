@@ -224,9 +224,9 @@ class Customizer:
 
                 """
 
-    # TODO pass calling script table to extract the ingest column defaults
     def __get_ingest_defaults(self, target_sheet):
         assert len(target_sheet) == 1, "Only one client sheet should be present, check config workbook sheet name matches only one table name"
+
         return target_sheet[0]['table']['ingest_defaults'] if 'ingest_defaults' in target_sheet[0]['table'] else None
 
     def __create_group_by_statement(self, target_sheet_columns):
