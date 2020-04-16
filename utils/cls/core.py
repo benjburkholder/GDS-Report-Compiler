@@ -120,9 +120,10 @@ class Customizer:
         return statements
 
     def create_ingest_statement(self, customizer, master_columns, target_sheets) -> list:
+        default_ingest_statements = self.__get_ingest_defaults(target_sheet=target_sheets)
         target_columns = self.__isolate_target_columns(target_sheets=target_sheets)
         delete_statement = self.__create_delete_from_statement(customizer=customizer, target_columns=target_columns)
-        insert_statement = self.__create_insert_statement(customizer, master_columns=master_columns, target_columns=target_columns)
+        insert_statement = self.__create_insert_statement(customizer, master_columns=master_columns, target_columns=target_columns, ingest_defaults=default_ingest_statements)
         group_by_columns = self.__create_group_by_statement(target_sheet_columns=target_sheets)
 
         # Group_by statement is optional, checks if exists and appends to insert stmt if True
@@ -157,7 +158,7 @@ class Customizer:
 
         return list(set(target_keys))
 
-    def __create_insert_statement(self, customizer, master_columns, target_columns):
+    def __create_insert_statement(self, customizer, master_columns, target_columns, ingest_defaults):
         # Converts both to dataframes for easier comparison via column selection
 
         target_column_keys = self.__compile_target_keys(target_columns=target_columns)
@@ -169,6 +170,12 @@ class Customizer:
         for col in master_df:
             if col['name'] not in target_df['name'].values:
                 col['name'] = f"NULL AS {col['name']}"
+
+                if ingest_defaults:
+                    for item in ingest_defaults:
+                        for key in item:
+                            if col['name'] == f"NULL AS {key}":
+                                col['name'] = f"'{item[key]}' AS {key}"
 
         # Assigns field aggregate type and cast if present (e.g. month aggregation, sum fields)
         for col in master_df:
@@ -217,6 +224,11 @@ class Customizer:
 
                 """
 
+    # TODO pass calling script table to extract the ingest column defaults
+    def __get_ingest_defaults(self, target_sheet):
+        assert len(target_sheet) == 1, "Only one client sheet should be present, check config workbook sheet name matches only one table name"
+        return target_sheet[0]['table']['ingest_defaults'] if 'ingest_defaults' in target_sheet[0]['table'] else None
+
     def __create_group_by_statement(self, target_sheet_columns):
         target_columns = self.__isolate_target_columns(target_sheets=target_sheet_columns)
 
@@ -238,6 +250,7 @@ class Customizer:
                 {group_by_statement}
                 """ if group_by_statement else None
 
+    # TODO create logic to handle custom ingest logic (where statements etc.)
     def __create_custom_statements(self):
         pass
 
@@ -422,6 +435,7 @@ class Customizer:
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
                 'cadence': 'monthly',
+                'ingest_defaults': [{'medium': 'Organic Search'}, {'device': 'Desktop'}],
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
@@ -485,6 +499,7 @@ class Customizer:
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
                 'cadence': 'monthly',
+                'ingest_defaults': [{'medium': 'Organic Search'}],
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
@@ -523,6 +538,7 @@ class Customizer:
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
                 'cadence': 'monthly',
+                'ingest_defaults': [{'medium': 'Organic Search'}],
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
