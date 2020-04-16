@@ -80,58 +80,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         # {'service_line': None}
     ]
 
-    audit_procedure = {
-        'name': 'googleanalytics_audit',
-        'active': 1,
-        'code': """
-
-        """,
-        'return': 'integer',
-        'owner': 'postgres'
-    }
-
-    schema = {
-        'table': 'google_analytics_traffic',
-        'schema': 'public',
-        'type': 'reporting',
-        'columns': [
-            {'name': 'report_date', 'type': 'date'},
-            {'name': 'data_source', 'type': 'character varying', 'length': 100},
-            {'name': 'channel_grouping', 'type': 'character varying', 'length': 100},
-            {'name': 'property', 'type': 'character varying', 'length': 100},
-            {'name': 'service_line', 'type': 'character varying', 'length': 100},
-            {'name': 'view_id', 'type': 'character varying', 'length': 25},
-            {'name': 'source_medium', 'type': 'character varying', 'length': 100},
-            {'name': 'device', 'type': 'character varying', 'length': 50},
-            {'name': 'campaign', 'type': 'character varying', 'length': 100},
-            {'name': 'page', 'type': 'character varying', 'length': 500},
-            {'name': 'sessions', 'type': 'character varying', 'length': 500},
-            {'name': 'percent_new_sessions', 'type': 'double precision'},
-            {'name': 'pageviews', 'type': 'bigint'},
-            {'name': 'unique_pageviews', 'type': 'bigint'},
-            {'name': 'pageviews_per_session', 'type': 'double precision'},
-            {'name': 'entrances', 'type': 'bigint'},
-            {'name': 'bounces', 'type': 'bigint'},
-            {'name': 'session_duration', 'type': 'double precision'},
-            {'name': 'users', 'type': 'bigint'},
-            {'name': 'new_users', 'type': 'bigint'},
-        ],
-        'indexes': [
-            {
-                'name': 'ix_google_analytics_traffic',
-                'tablespace': 'pg_default',
-                'clustered': True,
-                'method': 'btree',
-                'columns': [
-                    {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                    {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                    {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                ]
-            }
-        ],
-        'owner': 'postgres'
-    }
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -145,12 +93,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('custom_columns', self.custom_columns)
-
-        # audit procedure
-        self.set_attribute('audit_procedure', self.audit_procedure)
-
-        # reporting model
-        self.set_attribute('schema', self.schema)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -171,7 +113,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         return df.rename(columns={
             'date': 'report_date',
             'sourceMedium': 'source_medium',
-            'channelGrouping': 'channel_grouping',
+            'channelGrouping': 'medium',
             'deviceCategory': 'device',
             'pagePath': 'url',
             'percentNewSessions': 'percent_new_sessions',
@@ -192,7 +134,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         df['view_id'] = df['view_id'].astype(str).str[:25]
         # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
+        df['medium'] = df['medium'].astype(str).str[:100]
         df['source_medium'] = df['source_medium'].astype(str).str[:100]
         df['device'] = df['device'].astype(str).str[:50]
         df['campaign'] = df['campaign'].astype(str).str[:100]
@@ -273,16 +215,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         # {'service_line': None}
     ]
 
-    audit_procedure = {
-        'name': 'googleanalytics_audit',
-        'active': 1,
-        'code': """
-
-        """,
-        'return': 'integer',
-        'owner': 'postgres'
-    }
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -296,9 +228,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
 
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('custom_columns', self.custom_columns)
-
-        # audit procedure
-        self.set_attribute('audit_procedure', self.audit_procedure)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -317,7 +246,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         """
         return df.rename(columns={
             'date': 'report_date',
-            'channelGrouping': 'channel_grouping',
+            'channelGrouping': 'medium',
             'sourceMedium': 'source_medium',
             'deviceCategory': 'device',
             'pagePath': 'url',
@@ -338,7 +267,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         df['view_id'] = df['view_id'].astype(str).str[:25]
         # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
+        df['medium'] = df['medium'].astype(str).str[:100]
         df['source_medium'] = df['source_medium'].astype(str).str[:100]
         df['device'] = df['device'].astype(str).str[:50]
         df['campaign'] = df['campaign'].astype(str).str[:255]
@@ -413,16 +342,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         # {'service_line': None}
     ]
 
-    audit_procedure = {
-        'name': 'googleanalytics_audit',
-        'active': 1,
-        'code': """
-
-            """,
-        'return': 'integer',
-        'owner': 'postgres'
-    }
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -436,9 +355,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
 
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('custom_columns', self.custom_columns)
-
-        # audit procedure
-        self.set_attribute('audit_procedure', self.audit_procedure)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -459,7 +375,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         return df.rename(columns={
             'date': 'report_date',
             'view_id': 'view_id',
-            'channelGrouping': 'channel_grouping',
+            'channelGrouping': 'medium',
             'sourceMedium': 'source_medium',
             'deviceCategory': 'device',
             'campaign': 'campaign',
@@ -485,7 +401,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         df['view_id'] = df['view_id'].astype(str).str[:25]
         # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['channel_grouping'] = df['channel_grouping'].astype(str).str[:100]
+        df['medium'] = df['medium'].astype(str).str[:100]
         df['source_medium'] = df['source_medium'].astype(str).str[:100]
         df['device'] = df['device'].astype(str).str[:50]
         df['campaign'] = df['campaign'].astype(str).str[:255]

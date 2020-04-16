@@ -162,7 +162,8 @@ def build_marketing_table(customizer) -> int:
             if sheets['table']['type'] == 'reporting':
                 for column in sheets['table']['columns']:
                     if column['master_include']:
-                        customizer.marketing_data['table']['columns'].append(column)
+                        if not any(column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']):
+                            customizer.marketing_data['table']['columns'].append(column)
 
         create_table_from_schema(customizer, schema=customizer.marketing_data)
 

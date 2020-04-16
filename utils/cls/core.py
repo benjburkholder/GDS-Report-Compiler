@@ -579,9 +579,9 @@ class Customizer:
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': True, 'group_by': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True, 'group_by': True},
+                    {'name': 'medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
@@ -621,9 +621,9 @@ class Customizer:
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': True, 'group_by': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True, 'group_by': True},
+                    {'name': 'medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
@@ -658,9 +658,9 @@ class Customizer:
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150, 'master_include': False, 'group_by': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True, 'group_by': True},
+                    {'name': 'medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},

@@ -63,16 +63,6 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         # {'service_line': None}
     ]
 
-    audit_procedure = {
-        'name': 'googlemybusiness_audit',
-        'active': 1,
-        'code': """
-
-            """,
-        'return': 'integer',
-        'owner': 'postgres'
-    }
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -84,9 +74,6 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
 
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('custom_columns', self.custom_columns)
-
-        # audit procedure
-        self.set_attribute('audit_procedure', self.audit_procedure)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -192,16 +179,6 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         # {'service_line': None}
     ]
 
-    audit_procedure = {
-        'name': 'googlemybusiness_audit',
-        'active': 1,
-        'code': """
-
-                """,
-        'return': 'integer',
-        'owner': 'postgres'
-    }
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -213,9 +190,6 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
 
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('custom_columns', self.custom_columns)
-
-        # audit procedure
-        self.set_attribute('audit_procedure', self.audit_procedure)
 
         # noinspection PyMethodMayBeStatic
 
