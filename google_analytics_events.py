@@ -4,8 +4,11 @@ Google Analytics - Events
 import logging
 import datetime
 
-from utils import grc
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
+from utils.email_manager import EmailClient
+from utils.cls.core import Customizer
+from utils import grc
+
 SCRIPT_NAME = grc.get_script_name(__file__)
 DEBUG = False
 if DEBUG:
@@ -82,4 +85,14 @@ def main() -> int:
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as error:
+        if not DEBUG:
+            EmailClient().send_error_email(
+                to=Customizer.recipients,
+                script_name=SCRIPT_NAME,
+                error=error,
+                client=Customizer.client
+            )
+        raise
