@@ -1,9 +1,9 @@
 """
 Google My Business - Insights
 """
-import logging
-import datetime
 import pandas as pd
+import datetime
+import logging
 import sys
 
 from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting

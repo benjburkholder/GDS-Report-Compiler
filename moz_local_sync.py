@@ -1,9 +1,9 @@
 """
 Moz Local - Sync Report
 """
-import logging
-import datetime
 import pandas as pd
+import datetime
+import logging
 import sys
 
 from mozpy.reporting.client.local.llm_reporting import LLMReporting

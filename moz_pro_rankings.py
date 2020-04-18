@@ -1,8 +1,8 @@
 """
 Moz Pro - Rankings
 """
-import logging
 import datetime
+import logging
 import sys
 
 from mozpy.reporting.client.pro.seo_reporting import SEOReporting

@@ -1,8 +1,8 @@
 """
 Google Analytics - Events
 """
-import logging
 import datetime
+import logging
 import sys
 
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics

@@ -1,8 +1,8 @@
 """
 Google My Business - Reviews
 """
-import logging
 import pandas as pd
+import logging
 import sys
 
 from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting

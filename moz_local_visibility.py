@@ -1,9 +1,9 @@
 """
 Moz Local - Visibility Report
 """
-import logging
-import datetime
 import pandas as pd
+import datetime
+import logging
 import sys
 
 
