@@ -10,5 +10,5 @@ for sheets in Customizer.CONFIGURATION_WORKBOOK['sheets']:
         indicator = [file for file in os.listdir('./') if sheets['table']['name'] in file]
 
         if indicator:
-            subprocess.call(['python', f"{sheets['table']['name']}.py", f"{expedited}"])
+            subprocess.call(['python', f"{sheets['table']['name']}.py", f"{expedited}"], shell=True)
             expedited = 'skip'
