@@ -3,6 +3,7 @@ Google Analytics - Traffic
 """
 import logging
 import datetime
+import sys
 
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
 from utils.email_manager import EmailClient
@@ -10,6 +11,7 @@ from utils.cls.core import Customizer
 from utils import grc
 
 SCRIPT_NAME = grc.get_script_name(__file__)
+
 DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
@@ -31,13 +33,13 @@ logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
 
-def main() -> int:
+def main(refresh_indicator) -> int:
     # run startup global checks
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=PROCESSING_STAGES, label='PROCESSING_STAGES')
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, expedited=DEBUG)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
 
     if grc.get_required_attribute(customizer, 'historical'):
         start_date = grc.get_required_attribute(customizer, 'historical_start_date')
@@ -87,7 +89,7 @@ def main() -> int:
 
 if __name__ == '__main__':
     try:
-        main()
+        main(refresh_indicator=sys.argv)
     except Exception as error:
         if not DEBUG:
             EmailClient().send_error_email(

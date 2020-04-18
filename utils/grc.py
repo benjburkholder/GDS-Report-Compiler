@@ -4,6 +4,7 @@ Platform
 import os
 import pandas as pd
 import datetime
+import sys
 
 from utils.dbms_helpers import postgres_helpers
 import sqlalchemy
@@ -272,7 +273,7 @@ def create_table_from_schema(customizer, schema) -> int:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def setup(script_name: str, required_attributes: list, expedited: bool = False):
+def setup(script_name: str, required_attributes: list, refresh_indicator, expedited: bool = False):
     """
     Before allowing any root-level script to execute
     Get the Customizer instance configured for script_name
@@ -288,6 +289,13 @@ def setup(script_name: str, required_attributes: list, expedited: bool = False):
     customizer = custom.get_customizer(calling_file=script_name)
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
+
+    if len(refresh_indicator) == 2:
+        if 'run' in refresh_indicator:
+            expedited = False
+
+        else:
+            expedited = True
 
     if not expedited:
 
@@ -310,6 +318,10 @@ def setup(script_name: str, required_attributes: list, expedited: bool = False):
         # Source table refresh
         print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)
+
+    if len(refresh_indicator) == 2:
+        del refresh_indicator[1]
+
     return customizer
 
 
