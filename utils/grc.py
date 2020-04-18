@@ -290,10 +290,14 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
 
+    # check if command there are more than one command line argument
     if len(refresh_indicator) == 2:
+
+        # 'Run' means it's the first script being run
         if 'run' in refresh_indicator:
             expedited = False
 
+        # Else skip the table checks
         else:
             expedited = True
 
@@ -319,6 +323,7 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
         print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)
 
+    # Delete extra argument (necessary for GMB API)
     if len(refresh_indicator) == 2:
         del refresh_indicator[1]
 

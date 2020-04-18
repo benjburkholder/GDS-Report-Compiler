@@ -4,7 +4,6 @@ import subprocess
 import os
 
 expedited = 'run'
-
 for sheets in Customizer.CONFIGURATION_WORKBOOK['sheets']:
 
     if sheets['table']['type'] == 'reporting':
