@@ -747,7 +747,7 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['google_my_business'],
-                'cadence': 'monthly',
+                'cadence': None,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
