@@ -310,8 +310,6 @@ class Customizer:
 
     # ~~~~~~~~~~~~~~~~ EDITABLE CLIENT SPECIFIC DATA PAST THIS POINT ~~~~~~~~~~~~~~~~
 
-    CLIENT_NAME = 'ZwirnerEquipment'
-
     """
     Each table should have:
         - backfilter - column to join on for update... join statements
@@ -812,7 +810,7 @@ class Customizer:
 
     # ### START EDITING HERE ###
     dbms = 'postgresql'
-    client = 'ZwirnerEquipment'
+    client = ''  # Enter in camel case
     project = '<PROJECT>'
     version = '<VERSION>'
     recipients = [
@@ -821,7 +819,7 @@ class Customizer:
         'bburkholder@linkmedia360.com'
     ]
     db = {
-        'DATABASE': 'zwirnerequipment_omnilocal',
+        'DATABASE': '',
         'USERNAME': 'python-2',
         'PASSWORD': 'pythonpipelines',
         'SERVER': '35.222.11.147'
