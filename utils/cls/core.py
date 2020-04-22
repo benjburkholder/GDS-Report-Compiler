@@ -329,6 +329,7 @@ class Customizer:
                 'type': 'lookup',
                 'tablespace': ['moz_pro', 'google_analytics'],
                 'update_types': ['exact', 'fuzzy'],
+                'active': True,
                 'columns': [
                     {'name': 'url', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
@@ -341,6 +342,7 @@ class Customizer:
                 'schema': 'public',
                 'type': 'source',
                 'tablespace': ['moz_pro'],
+                'active': False,
                 'columns': [
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
                 ],
@@ -351,18 +353,7 @@ class Customizer:
                 'schema': 'public',
                 'type': 'source',
                 'tablespace': ['moz_local'],
-                'columns': [
-                    {'name': 'account', 'type': 'character varying', 'length': 150},
-                    {'name': 'label', 'type': 'character varying', 'length': 150},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'Moz Local Account Master', 'table': {
-                'name': 'source_moz_localaccountmaster',
-                'schema': 'public',
-                'type': 'source',
-                'tablespace': ['moz_local'],
+                'active': False,
                 'columns': [
                     {'name': 'account', 'type': 'character varying', 'length': 150},
                     {'name': 'label', 'type': 'character varying', 'length': 150},
@@ -374,6 +365,7 @@ class Customizer:
                 'name': 'source_ga_views',
                 'schema': 'public',
                 'type': 'source',
+                'active': True,
                 'columns': [
                     {'name': 'view_id', 'type': 'character varying', 'length': 100},
 
@@ -384,6 +376,7 @@ class Customizer:
                 'name': 'source_gmb_accountmaster',
                 'schema': 'public',
                 'type': 'source',
+                'active': True,
                 'columns': [
                     {'name': 'account_name', 'type': 'character varying', 'length': 100},
 
@@ -396,6 +389,7 @@ class Customizer:
                 'tablespace': ['moz_local'],
                 'update_types': ['exact'],
                 'type': 'lookup',
+                'active': True,
                 'columns': [
                     {'name': 'listing_id', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 150},
@@ -417,6 +411,7 @@ class Customizer:
                 'type': 'lookup',
                 'tablespace': ['google_my_business'],
                 'update_types': ['exact'],
+                'active': True,
                 'columns': [
                     {'name': 'listing_id', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 150},
@@ -436,6 +431,7 @@ class Customizer:
                 'type': 'reporting',
                 'cadence': 'monthly',
                 'ingest_defaults': [{'medium': 'Organic Search'}, {'device': 'Desktop'}],
+                'active': True,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
@@ -467,6 +463,7 @@ class Customizer:
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
                 'cadence': 'monthly',
+                'active': True,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -500,6 +497,7 @@ class Customizer:
                 'type': 'reporting',
                 'cadence': 'monthly',
                 'ingest_defaults': [{'medium': 'Organic Search'}],
+                'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
@@ -539,6 +537,7 @@ class Customizer:
                 'type': 'reporting',
                 'cadence': 'monthly',
                 'ingest_defaults': [{'medium': 'Organic Search'}],
+                'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
@@ -592,6 +591,7 @@ class Customizer:
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
                 'cadence': 'monthly',
+                'active': True,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -634,6 +634,7 @@ class Customizer:
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
                 'cadence': 'monthly',
+                'active': True,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -671,6 +672,7 @@ class Customizer:
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
                 'cadence': 'monthly',
+                'active': True,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
@@ -709,6 +711,7 @@ class Customizer:
                 'type': 'reporting',
                 'tablespace': ['google_my_business'],
                 'cadence': 'monthly',
+                'active': True,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
@@ -748,6 +751,7 @@ class Customizer:
                 'type': 'reporting',
                 'tablespace': ['google_my_business'],
                 'cadence': None,
+                'active': True,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},

@@ -115,11 +115,12 @@ def run_data_ingest_rolling_dates(df, customizer, table, date_col='report_date')
 def build_lookup_tables(customizer) -> int:
     for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheet['table']['type'] == 'lookup':
-            lookup_table_existence = check_table_exists(customizer, schema=sheet)
+            if sheet['table']['active']:
+                lookup_table_existence = check_table_exists(customizer, schema=sheet)
 
-            if not lookup_table_existence:
-                print(f'{sheet["table"]["name"]} does not exist, creating...')
-                create_table_from_schema(customizer, sheet)
+                if not lookup_table_existence:
+                    print(f'{sheet["table"]["name"]} does not exist, creating...')
+                    create_table_from_schema(customizer, sheet)
 
     return 0
 
@@ -127,12 +128,13 @@ def build_lookup_tables(customizer) -> int:
 def build_reporting_tables(customizer) -> int:
     for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheet['table']['type'] == 'reporting':
-            print(f'Checking if {sheet["table"]["name"]} exists...')
-            reporting_table_existence = check_table_exists(customizer, schema=sheet)
+            if sheet['table']['active']:
+                print(f'Checking if {sheet["table"]["name"]} exists...')
+                reporting_table_existence = check_table_exists(customizer, schema=sheet)
 
-            if not reporting_table_existence:
-                print(f'{sheet["table"]["name"]} does not exist, creating...')
-                create_table_from_schema(customizer, sheet)
+                if not reporting_table_existence:
+                    print(f'{sheet["table"]["name"]} does not exist, creating...')
+                    create_table_from_schema(customizer, sheet)
 
     return 0
 
@@ -140,12 +142,13 @@ def build_reporting_tables(customizer) -> int:
 def build_source_tables(customizer) -> int:
     for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheet['table']['type'] == 'source':
-            print(f'Checking if {sheet["table"]["name"]} exists...')
-            source_table_existence = check_table_exists(customizer, schema=sheet)
+            if sheet['table']['active']:
+                print(f'Checking if {sheet["table"]["name"]} exists...')
+                source_table_existence = check_table_exists(customizer, schema=sheet)
 
-            if not source_table_existence:
-                print(f'{sheet["table"]["name"]} does not exist, creating...')
-                create_table_from_schema(customizer, sheet)
+                if not source_table_existence:
+                    print(f'{sheet["table"]["name"]} does not exist, creating...')
+                    create_table_from_schema(customizer, sheet)
 
     return 0
 
@@ -161,10 +164,11 @@ def build_marketing_table(customizer) -> int:
 
         for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
             if sheets['table']['type'] == 'reporting':
-                for column in sheets['table']['columns']:
-                    if column['master_include']:
-                        if not any(column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']):
-                            customizer.marketing_data['table']['columns'].append(column)
+                if sheets['table']['active']:
+                    for column in sheets['table']['columns']:
+                        if column['master_include']:
+                            if not any(column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']):
+                                customizer.marketing_data['table']['columns'].append(column)
 
         create_table_from_schema(customizer, schema=customizer.marketing_data)
 
@@ -233,12 +237,13 @@ def refresh_lookup_tables(customizer) -> int:
     if customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] is False:
         for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
             if sheet['table']['type'] == 'lookup':
-                raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
+                if sheet['table']['active']:
+                    raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
                                                                                                worksheet_name=sheet['sheet'])
 
-                clear_lookup_table_data(customizer=customizer, sheet=sheet)
-                df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
-                insert_other_data(customizer, df=df, sheet=sheet)
+                    clear_lookup_table_data(customizer=customizer, sheet=sheet)
+                    df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
+                    insert_other_data(customizer, df=df, sheet=sheet)
 
     # Once one script refreshed lookup tables, set global status to True to bypass with following scripts
     customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] = True
@@ -410,13 +415,14 @@ def refresh_source_tables(customizer: custom.Customizer):
     if today.day in customizer.CONFIGURATION_WORKBOOK['source_refresh_dates']:
         for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
             if sheet['table']['type'] == 'source':
-                raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'], worksheet_name=sheet['sheet'])
+                if sheet['table']['active']:
+                    raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'], worksheet_name=sheet['sheet'])
 
-                clear_source_table_data(customizer=customizer, sheet=sheet)
-                df = reshape_source_table_data(customizer=customizer, df=raw_source_data, sheet=sheet)
-                insert_other_data(customizer, df=df, sheet=sheet)
+                    clear_source_table_data(customizer=customizer, sheet=sheet)
+                    df = reshape_source_table_data(customizer=customizer, df=raw_source_data, sheet=sheet)
+                    insert_other_data(customizer, df=df, sheet=sheet)
 
-                print(f"SUCCESS: {sheet['table']['name']} Refreshed.")
+                    print(f"SUCCESS: {sheet['table']['name']} Refreshed.")
     else:
         print('Not listed refresh day.')
 
