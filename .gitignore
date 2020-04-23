@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+secrets
 
 # C extensions
 *.so
@@ -133,3 +134,5 @@ dmypy.json
 
 # pytype static type analyzer
 .pytype/
+
+secrets/

@@ -3,7 +3,7 @@ Check Models
 
 System script to check if tables need to be built, or are recommended to be re-built
 """
-from utils import custom, platform
+from utils import custom, grc
 
 
 def main() -> None:
@@ -12,7 +12,7 @@ def main() -> None:
     # for each table
     for customizer, schema in schemas:
         # check that it exists in the data base
-        check = platform.check_table_exists(
+        check = grc.check_table_exists(
             customizer=customizer,
             schema=schema
         )
@@ -23,7 +23,7 @@ def main() -> None:
             pass
         else:
             # if not, create it using platform
-            platform.create_table_from_schema(customizer=customizer, schema=schema)
+            grc.create_table_from_schema(customizer=customizer, schema=schema)
     return
 
 
@@ -37,7 +37,7 @@ def get_all_schemas():
     cls_members = custom.get_customizers()
     for cls in cls_members:
         ini_class = cls[1]()
-        schema = platform.get_optional_attribute(ini_class, 'schema')
+        schema = grc.get_optional_attribute(ini_class, 'schema')
         if schema:
             schemas.append((ini_class, schema))
     return schemas

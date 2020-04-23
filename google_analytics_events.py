@@ -1,5 +1,5 @@
 """
-Google Analytics - Traffic
+Google Analytics - Events
 """
 import datetime
 import logging
@@ -51,17 +51,17 @@ def main(refresh_indicator) -> int:
         end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
     ga_client = GoogleAnalytics(
-        client_name=customizer.client,
-        secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
-        )
+            client_name=customizer.client,
+            secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
+            )
 
     for view_id in grc.get_required_attribute(customizer, 'get_view_ids')():
         df = ga_client.query(
-             view_id=view_id,
-             raw_dimensions=grc.get_required_attribute(customizer, 'dimensions'),
-             raw_metrics=grc.get_required_attribute(customizer, 'metrics'),
-             start_date=start_date,
-             end_date=end_date
+            view_id=view_id,
+            raw_dimensions=grc.get_required_attribute(customizer, 'dimensions'),
+            raw_metrics=grc.get_required_attribute(customizer, 'metrics'),
+            start_date=start_date,
+            end_date=end_date
         )
 
         if df.shape[0]:
@@ -69,21 +69,20 @@ def main(refresh_indicator) -> int:
             df = grc.run_processing(
                 df=df,
                 customizer=customizer,
-                processing_stages=PROCESSING_STAGES)
-
+                processing_stages=PROCESSING_STAGES
+            )
             grc.run_data_ingest_rolling_dates(
                 df=df,
                 customizer=customizer,
                 date_col='report_date',
-                table=grc.get_required_attribute(customizer, 'table'))
-
+                table=grc.get_required_attribute(customizer, 'table')
+            )
             grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
             grc.audit_automation(customizer=customizer)
 
         else:
             logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
-
     return 0
 
 
