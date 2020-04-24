@@ -787,6 +787,44 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
+            {'sheet': None, 'table': {
+                'name': 'google_search_console_monthly',
+                'schema': 'public',
+                'type': 'reporting',
+                'tablespace': ['google_search_console'],
+                'cadence': None,
+                'active': True,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date', 'master_include': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
+                     'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
+                     'default': 'Non-Location Pages', 'master_include': True},
+                    {'name': 'property_url', 'type': 'character varying', 'length': 150, 'master_include': True},
+                    {'name': 'device', 'type': 'character varying', 'length': 150, 'backfilter': True,
+                     'master_include': True},
+                    {'name': 'page', 'type': 'double precision', 'master_include': True},
+                    {'name': 'query', 'type': 'double precision', 'master_include': True},
+                    {'name': 'impressions', 'type': 'double precision', 'master_include': True},
+                    {'name': 'clicks', 'type': 'character varying', 'length': 150, 'master_include': True},
+                    {'name': 'ctr', 'type': 'character varying', 'length': 150, 'master_include': True},
+                    {'name': 'position', 'type': 'character varying', 'length': 150, 'master_include': True},
+
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_search_console_monthly',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'device', 'sort': 'asc', 'nulls_last': True},
+                        ],
+                    }
+                ],
+                'owner': 'postgres'
+            }},
         ]}
 
     # Schema for the marketing_data table creation
