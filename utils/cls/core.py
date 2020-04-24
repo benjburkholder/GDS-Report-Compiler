@@ -325,7 +325,7 @@ class Customizer:
                 'name': 'lookup_urltolocation',
                 'schema': 'public',
                 'type': 'lookup',
-                'tablespace': ['moz_pro', 'google_analytics'],
+                'tablespace': ['moz_pro', 'google_analytics', 'google_search_console'],
                 'update_types': ['exact', 'fuzzy'],
                 'active': True,
                 'columns': [
@@ -430,6 +430,21 @@ class Customizer:
                     {'name': 'zip', 'type': 'character varying', 'length': 50},
                     {'name': 'phone', 'type': 'character varying', 'length': 25},
                     {'name': 'exact', 'type': 'bigint'}
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': 'DT Phone Label to Property', 'table': {
+                'name': 'lookup_dt_phonelabeltoproperty',
+                'schema': 'public',
+                'type': 'lookup',
+                'tablespace': ['dialogtech'],
+                'update_types': ['exact'],
+                'active': False,
+                'columns': [
+                        {'name': 'phone_label', 'type': 'character varying', 'length': 150},
+                        {'name': 'medium', 'type': 'character varying', 'length': 150},
+                        {'name': 'property', 'type': 'character varying', 'length': 150},
+
                 ],
                 'owner': 'postgres'
             }},
@@ -820,6 +835,48 @@ class Customizer:
                         'columns': [
                             {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'device', 'sort': 'asc', 'nulls_last': True},
+                        ],
+                    }
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': None, 'table': {
+                'name': 'dialogtech_calldetail',
+                'schema': 'public',
+                'type': 'reporting',
+                'tablespace': ['dialogtech'],
+                'cadence': None,
+                'active': False,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date', 'master_include': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
+                     'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
+                     'default': 'Non-Location Pages', 'master_include': True},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 150, 'master_include': True},
+                    {'name': 'medium', 'type': 'character varying', 'length': 150, 'backfilter': True,
+                     'master_include': True},
+                    {'name': 'number_dialed', 'type': 'character_varying', 'length': 25, 'master_include': True},
+                    {'name': 'caller_id', 'type': 'character_varying', 'length': 25, 'master_include': True},
+                    {'name': 'call_duration', 'type': 'double precision', 'master_include': True},
+                    {'name': 'transfer_to_number', 'type': 'character varying', 'length': 25, 'master_include': True},
+                    {'name': 'phone_label', 'type': 'character varying', 'length': 150, 'master_include': True},
+                    {'name': 'call_transfer_status', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'client_id', 'type': 'character varying', 'length': 150,
+                     'master_include': True},
+
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_dialogtech_call_detail',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'number_dialed', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'caller_id', 'sort': 'asc', 'nulls_last': True},
+
                         ],
                     }
                 ],

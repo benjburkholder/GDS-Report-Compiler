@@ -2,15 +2,13 @@
 Platform
 """
 import pandas as pd
-import sqlalchemy
 import datetime
-import sys
 import os
 
+from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
+from utils.gs_manager import GoogleSheetsManager
 from utils.dbms_helpers import postgres_helpers
 from utils import custom, stdlib
-from utils.gs_manager import GoogleSheetsManager
-from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
 
 
 def get_script_name(file):

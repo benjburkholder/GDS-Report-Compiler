@@ -20,13 +20,25 @@ class DialogTech(Customizer):
         }
         self.set_attribute('drop_columns', drop_columns)
 
+    def pull_dialogtech_labels(self):
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                """
+                SELECT DISTINCT *
+                FROM public.lookup_dt_phonelabeltoproperty;
+                """
+            )
+            results = con.execute(sql).fetchall()
+            return [
+                result for result in results
+            ] if results else []
+
 
 class DialogTechCallDetail(DialogTech):
 
-    # TODO: shouldn't this be a list? In-case we have more custom columns?
-    #   - Not sure what 'property' key does? is that for entity parsing perhaps?
     custom_columns = [
-        {'data_source': 'Google Analytics - Traffic'},
+        {'data_source': 'DialogTech - Call Details'},
         {'property': None},
         # {'service_line': None}
     ]

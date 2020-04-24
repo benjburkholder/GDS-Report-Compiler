@@ -3,8 +3,8 @@ import pathlib
 import sqlalchemy
 import pandas as pd
 
-from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer
 
 
 class GoogleAnalytics(Customizer):
