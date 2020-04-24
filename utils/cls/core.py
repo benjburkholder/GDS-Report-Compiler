@@ -381,6 +381,17 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
+            {'sheet': 'GSC Property Master', 'table': {
+                'name': 'source_gsc_propertymaster',
+                'schema': 'public',
+                'type': 'source',
+                'active': True,
+                'columns': [
+                    {'name': 'property_url', 'type': 'character varying', 'length': 150},
+
+                ],
+                'owner': 'postgres'
+            }},
             {'sheet': 'Moz Listing to Property', 'table': {
                 'name': 'lookup_moz_listingtolocation',
                 'schema': 'public',
