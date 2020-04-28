@@ -1,16 +1,18 @@
 """
 Google Ads - Campaign Automation
 """
+from pathlib import Path
 import datetime
 import logging
 import sys
 
-from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
+from googleadspy.reporting.client.reporting import GoogleAdsReporting
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
 
 SCRIPT_NAME = grc.get_script_name(__file__)
+yaml_path = Path('secrets')
 
 DEBUG = False
 if DEBUG:
@@ -50,17 +52,17 @@ def main(refresh_indicator) -> int:
         start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
         end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
-    for view_id in grc.get_required_attribute(customizer, 'get_account_ids')():
-        df = ga_client.query(
-            view_id=view_id,
-            raw_dimensions=grc.get_required_attribute(customizer, 'dimensions'),
-            raw_metrics=grc.get_required_attribute(customizer, 'metrics'),
+    gads = GoogleAdsReporting(yaml_path=yaml_path, customer_id='9664678140')
+
+    for account_id in grc.get_required_attribute(customizer, 'get_account_ids')():
+        df = gads.campaign_performance(
+            customer_id=account_id,
             start_date=start_date,
             end_date=end_date
         )
 
         if df.shape[0]:
-            df['view_id'] = view_id
+            df['account_id'] = account_id
             df = grc.run_processing(
                 df=df,
                 customizer=customizer,
@@ -77,7 +79,7 @@ def main(refresh_indicator) -> int:
             grc.audit_automation(customizer=customizer)
 
         else:
-            logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
+            logger.warning('No data returned for account id {} for dates {} - {}'.format(account_id, start_date, end_date))
     return 0
 
 
