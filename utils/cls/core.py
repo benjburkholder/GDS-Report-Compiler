@@ -459,6 +459,21 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
+            {'sheet': 'GAds Campaign Mapping', 'table': {
+                'name': 'lookup_gads_mapping',
+                'schema': 'public',
+                'type': 'lookup',
+                'tablespace': ['google_ads'],
+                'update_types': ['exact'],
+                'active': False,
+                'columns': [
+                    {'name': 'campaign_id', 'type': 'character varying', 'length': 150},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 150},
+                    {'name': 'property', 'type': 'character varying', 'length': 150},
+
+                ],
+                'owner': 'postgres'
+            }},
             {'sheet': None, 'table': {
                 'name': 'moz_local_visibility',
                 'schema': 'public',
@@ -888,6 +903,52 @@ class Customizer:
                             {'name': 'number_dialed', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'caller_id', 'sort': 'asc', 'nulls_last': True},
 
+                        ],
+                    }
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': None, 'table': {
+                'name': 'google_ads_campaign',
+                'schema': 'public',
+                'type': 'reporting',
+                'tablespace': ['google_ads'],
+                'cadence': None,
+                'active': True,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date', 'master_include': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
+                     'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
+                     'default': 'Non-Location Pages', 'master_include': True},
+                    {'name': 'account_id', 'type': 'character varying', 'length': 25, 'master_include': True},
+                    {'name': 'advertising_channel_type', 'type': 'character varying', 'length': 100, 'master_include': True},
+                    {'name': 'device', 'type': 'character varying', 'length': 50, 'master_include': True},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 250, 'backfilter': True, 'master_include': True},
+                    {'name': 'campaign_id', 'type': 'character varying', 'length': 25, 'master_include': True},
+                    {'name': 'cost', 'type': 'double precision', 'master_include': True},
+                    {'name': 'clicks', 'type': 'bigint', 'master_include': True},
+                    {'name': 'impressions', 'type': 'bigint', 'master_include': True},
+                    {'name': 'search_available_impressions', 'type': 'double precision', 'master_include': True},
+                    {'name': 'search_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'search_budget_lost_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'search_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'content_available_impressions', 'type': 'double precision', 'master_include': True},
+                    {'name': 'content_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'content_budget_lost_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'content_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
+
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_ads_campaign',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'campaign_id', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
                         ],
                     }
                 ],

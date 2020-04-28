@@ -37,7 +37,7 @@ class GoogleAds(Customizer):
             ] if results else []
 
 
-class GoogleAdsCampaignAutomation(GoogleAds):
+class GoogleAdsCampaign(GoogleAds):
 
     # TODO: shouldn't this be a list? In-case we have more custom columns?
     #   - Not sure what 'property' key does? is that for entity parsing perhaps?
@@ -153,7 +153,7 @@ class GoogleAdsCampaignAutomation(GoogleAds):
         # execute statements
         return
 
-    class GoogleAdsKeywordAutomation(GoogleAds):
+    class GoogleAdsKeyword(GoogleAds):
 
         # TODO: shouldn't this be a list? In-case we have more custom columns?
         #   - Not sure what 'property' key does? is that for entity parsing perhaps?
