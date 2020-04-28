@@ -317,7 +317,7 @@ class Customizer:
         - entity - column to map data to based off the lookup table (e.g. Property, Market, etc)
     """
     CONFIGURATION_WORKBOOK = {
-        'config_sheet_name': 'Zwirner Equipment - Configuration',
+        'config_sheet_name': '<CONFIG SHEET NAME>',
         'source_refresh_dates': [1, 15],
         'lookup_refresh_status': False,
         'sheets': [
