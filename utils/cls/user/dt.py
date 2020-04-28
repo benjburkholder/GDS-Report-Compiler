@@ -26,7 +26,7 @@ class DialogTech(Customizer):
             sql = sqlalchemy.text(
                 """
                 SELECT DISTINCT *
-                FROM public.lookup_dt_phonelabeltoproperty;
+                FROM public.lookup_dt_mapping;
                 """
             )
             results = con.execute(sql).fetchall()

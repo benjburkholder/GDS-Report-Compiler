@@ -392,8 +392,19 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
-            {'sheet': 'Moz Listing to Property', 'table': {
-                'name': 'lookup_moz_listingtolocation',
+            {'sheet': 'GAds Account Master', 'table': {
+                'name': 'source_gads_accountmaster',
+                'schema': 'public',
+                'type': 'source',
+                'active': False,
+                'columns': [
+                    {'name': 'account_id', 'type': 'character varying', 'length': 150},
+
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': 'Moz Listing Mapping', 'table': {
+                'name': 'lookup_moz_mapping',
                 'schema': 'public',
                 'tablespace': ['moz_local'],
                 'update_types': ['exact'],
@@ -414,8 +425,8 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
-            {'sheet': 'GMB Listing to Property', 'table': {
-                'name': 'lookup_gmb_listingtolocation',
+            {'sheet': 'GMB Listing Mapping', 'table': {
+                'name': 'lookup_gmb_mapping',
                 'schema': 'public',
                 'type': 'lookup',
                 'tablespace': ['google_my_business'],
@@ -433,8 +444,8 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
-            {'sheet': 'DT Phone Label to Property', 'table': {
-                'name': 'lookup_dt_phonelabeltoproperty',
+            {'sheet': 'DT Phone Label Mapping', 'table': {
+                'name': 'lookup_dt_mapping',
                 'schema': 'public',
                 'type': 'lookup',
                 'tablespace': ['dialogtech'],
