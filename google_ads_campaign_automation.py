@@ -2,6 +2,7 @@
 Google Ads - Campaign Automation
 """
 from pathlib import Path
+import pandas as pd
 import datetime
 import logging
 import sys
@@ -54,6 +55,7 @@ def main(refresh_indicator) -> int:
 
     gads = GoogleAdsReporting(yaml_path=yaml_path, customer_id='9664678140')
 
+    df_list = []
     for account_id in grc.get_required_attribute(customizer, 'get_account_ids')():
         df = gads.campaign_performance(
             customer_id=account_id,
@@ -63,23 +65,29 @@ def main(refresh_indicator) -> int:
 
         if df.shape[0]:
             df['account_id'] = account_id
-            df = grc.run_processing(
-                df=df,
-                customizer=customizer,
-                processing_stages=PROCESSING_STAGES
-            )
-            grc.run_data_ingest_rolling_dates(
-                df=df,
-                customizer=customizer,
-                date_col='report_date',
-                table=grc.get_required_attribute(customizer, 'table')
-            )
-            grc.table_backfilter(customizer=customizer)
-            grc.ingest_procedures(customizer=customizer)
-            grc.audit_automation(customizer=customizer)
+            df_list.append(df)
 
-        else:
-            logger.warning('No data returned for account id {} for dates {} - {}'.format(account_id, start_date, end_date))
+    df = pd.concat(df_list)
+
+    if df.shape[0]:
+        df = grc.run_processing(
+            df=df,
+            customizer=customizer,
+            processing_stages=PROCESSING_STAGES
+        )
+        grc.run_data_ingest_rolling_dates(
+            df=df,
+            customizer=customizer,
+            date_col='report_date',
+            table=grc.get_required_attribute(customizer, 'table')
+        )
+        grc.table_backfilter(customizer=customizer)
+        grc.ingest_procedures(customizer=customizer)
+        grc.audit_automation(customizer=customizer)
+
+    else:
+        logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+
     return 0
 
 
