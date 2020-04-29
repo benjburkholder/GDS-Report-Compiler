@@ -1,16 +1,19 @@
 """
-Google Analytics - Events
+Google Ads - Campaign Automation
 """
+from pathlib import Path
+import pandas as pd
 import datetime
 import logging
 import sys
 
-from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
+from googleadspy.reporting.client.reporting import GoogleAdsReporting
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
 
 SCRIPT_NAME = grc.get_script_name(__file__)
+yaml_path = Path('secrets')
 
 DEBUG = False
 if DEBUG:
@@ -27,12 +30,12 @@ PROCESSING_STAGES = [
 ]
 
 REQUIRED_ATTRIBUTES = [
-    'get_view_ids',
     'historical',
     'historical_start_date',
     'historical_end_date',
     'table'
 ]
+
 logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
@@ -56,39 +59,40 @@ def main(refresh_indicator) -> int:
             start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
             end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
-        ga_client = GoogleAnalytics(
-                client_name=customizer.client,
-                secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
-                )
+        gads = GoogleAdsReporting(yaml_path=yaml_path, customer_id='<ENTER ID>')
 
-        for view_id in grc.get_required_attribute(customizer, 'get_view_ids')():
-            df = ga_client.query(
-                view_id=view_id,
-                raw_dimensions=grc.get_required_attribute(customizer, 'dimensions'),
-                raw_metrics=grc.get_required_attribute(customizer, 'metrics'),
+        df_list = []
+        for account_id in grc.get_required_attribute(customizer, 'get_account_ids')():
+            df = gads.campaign_performance(
+                customer_id=account_id,
                 start_date=start_date,
                 end_date=end_date
             )
 
             if df.shape[0]:
-                df['view_id'] = view_id
-                df = grc.run_processing(
-                    df=df,
-                    customizer=customizer,
-                    processing_stages=PROCESSING_STAGES
-                )
-                grc.run_data_ingest_rolling_dates(
-                    df=df,
-                    customizer=customizer,
-                    date_col='report_date',
-                    table=grc.get_required_attribute(customizer, 'table')
-                )
-                grc.table_backfilter(customizer=customizer)
-                grc.ingest_procedures(customizer=customizer)
-                grc.audit_automation(customizer=customizer)
+                df['account_id'] = account_id
+                df_list.append(df)
 
-            else:
-                logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
+        df = pd.concat(df_list)
+
+        if df.shape[0]:
+            df = grc.run_processing(
+                df=df,
+                customizer=customizer,
+                processing_stages=PROCESSING_STAGES
+            )
+            grc.run_data_ingest_rolling_dates(
+                df=df,
+                customizer=customizer,
+                date_col='report_date',
+                table=grc.get_required_attribute(customizer, 'table')
+            )
+            grc.table_backfilter(customizer=customizer)
+            grc.ingest_procedures(customizer=customizer)
+            grc.audit_automation(customizer=customizer)
+
+        else:
+            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
 
     else:
         if BACK_FILTER_ONLY:

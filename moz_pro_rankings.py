@@ -16,6 +16,10 @@ DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
+# Toggle for manually running ingest and backfilter procedures
+INGEST_ONLY = False
+BACK_FILTER_ONLY = False
+
 PROCESSING_STAGES = [
     # 'rename',
     'type',
@@ -39,38 +43,49 @@ def main(refresh_indicator) -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
 
-    accounts = grc.get_required_attribute(customizer, 'pull_moz_pro_accounts')()
+    if not INGEST_ONLY or BACK_FILTER_ONLY:
 
-    if grc.get_required_attribute(customizer, 'historical'):
-        report_date = grc.get_required_attribute(customizer, 'historical_report_date')
+        accounts = grc.get_required_attribute(customizer, 'pull_moz_pro_accounts')()
 
-    else:
-        # automated setup - last month by default
-        today = datetime.date.today()
-        report_date = datetime.date(today.year, today.month, 1)
-
-    for campaign_id in accounts:
-        # pull report from Linkmedia360 database
-        df = SEOReporting().get_ranking_performance(report_date=report_date, campaign_id=campaign_id['campaign_id'])
-
-        if df.shape[0]:
-            df = grc.run_processing(
-                df=df,
-                customizer=customizer,
-                processing_stages=PROCESSING_STAGES)
-
-            grc.run_data_ingest_rolling_dates(
-                df=df,
-                customizer=customizer,
-                date_col='report_date',
-                table=grc.get_required_attribute(customizer, 'table'))
-
-            grc.table_backfilter(customizer=customizer)
-            grc.ingest_procedures(customizer=customizer)
-            grc.audit_automation(customizer=customizer)
+        if grc.get_required_attribute(customizer, 'historical'):
+            report_date = grc.get_required_attribute(customizer, 'historical_report_date')
 
         else:
-            logger.warning('No data returned for date {}.'.format(report_date))
+            # automated setup - last month by default
+            today = datetime.date.today()
+            report_date = datetime.date(today.year, today.month, 1)
+
+        for campaign_id in accounts:
+            # pull report from Linkmedia360 database
+            df = SEOReporting().get_ranking_performance(report_date=report_date, campaign_id=campaign_id['campaign_id'])
+
+            if df.shape[0]:
+                df = grc.run_processing(
+                    df=df,
+                    customizer=customizer,
+                    processing_stages=PROCESSING_STAGES)
+
+                grc.run_data_ingest_rolling_dates(
+                    df=df,
+                    customizer=customizer,
+                    date_col='report_date',
+                    table=grc.get_required_attribute(customizer, 'table'))
+
+                grc.table_backfilter(customizer=customizer)
+                grc.ingest_procedures(customizer=customizer)
+                grc.audit_automation(customizer=customizer)
+
+            else:
+                logger.warning('No data returned for date {}.'.format(report_date))
+
+    else:
+        if BACK_FILTER_ONLY:
+            print('Running manual backfilter...')
+            grc.table_backfilter(customizer=customizer)
+
+        if INGEST_ONLY:
+            print('Running manual ingest...')
+            grc.ingest_procedures(customizer=customizer)
 
     return 0
 

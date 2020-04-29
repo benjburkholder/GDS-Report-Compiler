@@ -17,6 +17,10 @@ DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
+# Toggle for manually running ingest and backfilter procedures
+INGEST_ONLY = False
+BACK_FILTER_ONLY = False
+
 PROCESSING_STAGES = [
     # 'rename',
     'type',
@@ -41,51 +45,62 @@ def main(refresh_indicator) -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
 
-    accounts = grc.get_required_attribute(customizer, 'pull_moz_local_accounts')()
+    if not INGEST_ONLY or BACK_FILTER_ONLY:
 
-    if grc.get_required_attribute(customizer, 'historical'):
-        start_date = grc.get_required_attribute(customizer, 'historical_start_date')
-        end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+        accounts = grc.get_required_attribute(customizer, 'pull_moz_local_accounts')()
 
-    else:
-        # automated setup - last week by default
-        start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
-        end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
-
-    for account in accounts:
-        df_listings = LLMReporting().get_listings(account_label=account['account'], client_label=account['label'])
-
-        # pull report from Linkmedia360 database
-        listing_ids = list(df_listings['listing_id'].unique())
-        df_list = []
-        for listing_id in listing_ids:
-            df = LLMReporting().get_sync_report(
-                listing_id=listing_id,
-                start_date=datetime.datetime.strptime(start_date, '%Y-%m-%d'),
-                end_date=datetime.datetime.strptime(end_date, '%Y-%m-%d')
-            )
-            df_list.append(df)
-        df = pd.concat(df_list)
-        if df.shape[0]:
-            df = grc.get_required_attribute(customizer, 'exclude_moz_directories')(df)
-            df = grc.run_processing(
-                 df=df,
-                 customizer=customizer,
-                 processing_stages=PROCESSING_STAGES)
-
-            grc.run_data_ingest_rolling_dates(
-                df=df,
-                customizer=customizer,
-                date_col='report_date',
-                table=grc.get_required_attribute(customizer, 'table')
-            )
-
-            grc.table_backfilter(customizer=customizer)
-            grc.ingest_procedures(customizer=customizer)
-            grc.audit_automation(customizer=customizer)
+        if grc.get_required_attribute(customizer, 'historical'):
+            start_date = grc.get_required_attribute(customizer, 'historical_start_date')
+            end_date = grc.get_required_attribute(customizer, 'historical_end_date')
 
         else:
-            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+            # automated setup - last week by default
+            start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
+            end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
+
+        for account in accounts:
+            df_listings = LLMReporting().get_listings(account_label=account['account'], client_label=account['label'])
+
+            # pull report from Linkmedia360 database
+            listing_ids = list(df_listings['listing_id'].unique())
+            df_list = []
+            for listing_id in listing_ids:
+                df = LLMReporting().get_sync_report(
+                    listing_id=listing_id,
+                    start_date=datetime.datetime.strptime(start_date, '%Y-%m-%d'),
+                    end_date=datetime.datetime.strptime(end_date, '%Y-%m-%d')
+                )
+                df_list.append(df)
+            df = pd.concat(df_list)
+            if df.shape[0]:
+                df = grc.get_required_attribute(customizer, 'exclude_moz_directories')(df)
+                df = grc.run_processing(
+                     df=df,
+                     customizer=customizer,
+                     processing_stages=PROCESSING_STAGES)
+
+                grc.run_data_ingest_rolling_dates(
+                    df=df,
+                    customizer=customizer,
+                    date_col='report_date',
+                    table=grc.get_required_attribute(customizer, 'table')
+                )
+
+                grc.table_backfilter(customizer=customizer)
+                grc.ingest_procedures(customizer=customizer)
+                grc.audit_automation(customizer=customizer)
+
+            else:
+                logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+
+    else:
+        if BACK_FILTER_ONLY:
+            print('Running manual backfilter...')
+            grc.table_backfilter(customizer=customizer)
+
+        if INGEST_ONLY:
+            print('Running manual ingest...')
+            grc.ingest_procedures(customizer=customizer)
 
     return 0
 

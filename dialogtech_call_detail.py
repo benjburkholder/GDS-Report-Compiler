@@ -18,6 +18,10 @@ DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
+# Toggle for manually running ingest and backfilter procedures
+INGEST_ONLY = False
+BACK_FILTER_ONLY = False
+
 PROCESSING_STAGES = [
     'rename',
     'type',
@@ -44,47 +48,59 @@ def main(refresh_indicator) -> int:
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES,
                            refresh_indicator=refresh_indicator, expedited=DEBUG)
 
-    if grc.get_required_attribute(customizer, 'historical'):
-        start_date = grc.get_required_attribute(customizer, 'historical_start_date')
-        end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+    if not INGEST_ONLY or BACK_FILTER_ONLY:
+
+        if grc.get_required_attribute(customizer, 'historical'):
+            start_date = grc.get_required_attribute(customizer, 'historical_start_date')
+            end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+
+        else:
+            # automated setup - last week by default
+            start_date = (datetime.datetime.today() - datetime.timedelta(540)).strftime('%Y-%m-%d')
+            end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
+
+        dialog_tech = CallDetailReporting(vertical='')
+
+        df_list = []
+        for phone_label in grc.get_required_attribute(customizer, 'pull_dialogtech_labels')():
+            df = dialog_tech.get_call_detail_report(
+                start_date=start_date,
+                end_date=end_date,
+                phone_label=phone_label['Label']
+            )
+            if df.shape[0]:
+                df['medium'] = phone_label['Medium']
+                df_list.append(df)
+
+        if len(df_list):
+            df = pd.concat(df_list)
+            df = grc.run_processing(
+                df=df,
+                customizer=customizer,
+                processing_stages=PROCESSING_STAGES
+            )
+            grc.run_data_ingest_rolling_dates(
+                df=df,
+                customizer=customizer,
+                date_col='report_date',
+                table=grc.get_required_attribute(customizer, 'table')
+            )
+            grc.table_backfilter(customizer=customizer)
+            grc.ingest_procedures(customizer=customizer)
+            grc.audit_automation(customizer=customizer)
+
+        else:
+            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
 
     else:
-        # automated setup - last week by default
-        start_date = (datetime.datetime.today() - datetime.timedelta(540)).strftime('%Y-%m-%d')
-        end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
+        if BACK_FILTER_ONLY:
+            print('Running manual backfilter...')
+            grc.table_backfilter(customizer=customizer)
 
-    dialog_tech = CallDetailReporting(vertical='')
+        if INGEST_ONLY:
+            print('Running manual ingest...')
+            grc.ingest_procedures(customizer=customizer)
 
-    df_list = []
-    for phone_label in grc.get_required_attribute(customizer, 'pull_dialogtech_labels')():
-        df = dialog_tech.get_call_detail_report(
-            start_date=start_date,
-            end_date=end_date,
-            phone_label=phone_label['Label']
-        )
-        if df.shape[0]:
-            df['medium'] = phone_label['Medium']
-            df_list.append(df)
-
-    if len(df_list):
-        df = pd.concat(df_list)
-        df = grc.run_processing(
-            df=df,
-            customizer=customizer,
-            processing_stages=PROCESSING_STAGES
-        )
-        grc.run_data_ingest_rolling_dates(
-            df=df,
-            customizer=customizer,
-            date_col='report_date',
-            table=grc.get_required_attribute(customizer, 'table')
-        )
-        grc.table_backfilter(customizer=customizer)
-        grc.ingest_procedures(customizer=customizer)
-        grc.audit_automation(customizer=customizer)
-
-    else:
-        logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
     return 0
 
 
