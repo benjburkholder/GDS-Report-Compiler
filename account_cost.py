@@ -1,13 +1,10 @@
 """
-DialogTech - Call Details
+Account - Cost
 """
-import pandas as pd
 import datetime
-import calendar
 import logging
 import sys
 
-from dialogtech.reporting.client.call_detail import CallDetailReporting
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
@@ -20,7 +17,6 @@ if DEBUG:
 
 # Toggle for manually running ingest and backfilter procedures
 INGEST_ONLY = False
-BACK_FILTER_ONLY = False
 
 PROCESSING_STAGES = [
     'rename',
@@ -30,9 +26,9 @@ PROCESSING_STAGES = [
 ]
 
 REQUIRED_ATTRIBUTES = [
-    'historical',
-    'historical_start_date',
-    'historical_end_date',
+    # 'historical',
+    # 'historical_start_date',
+    # 'historical_end_date',
     'table'
 ]
 logger = logging.getLogger(__file__)
@@ -45,35 +41,15 @@ def main(refresh_indicator) -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES,
-                           refresh_indicator=refresh_indicator, expedited=DEBUG)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
 
-    if not INGEST_ONLY or BACK_FILTER_ONLY:
+    if not INGEST_ONLY:
 
-        if grc.get_required_attribute(customizer, 'historical'):
-            start_date = grc.get_required_attribute(customizer, 'historical_start_date')
-            end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+        # Pull all account cost data
+        cost_data = grc.get_required_attribute(customizer, 'pull_account_cost')()
+        df = grc.get_required_attribute(customizer, 'get_account_cost_meta_data')(cost_data)
 
-        else:
-            # automated setup - last week by default
-            start_date = (datetime.datetime.today() - datetime.timedelta(540))
-            end_date = (datetime.datetime.today() - datetime.timedelta(1))
-
-        dialog_tech = CallDetailReporting(vertical='<ENTER VERTICAL>')
-
-        df_list = []
-        for phone_label in grc.get_required_attribute(customizer, 'pull_dialogtech_labels')():
-            df = dialog_tech.get_call_detail_report(
-                start_date=start_date,
-                end_date=end_date,
-                phone_label=phone_label[0]
-            )
-            if df.shape[0]:
-                df['medium'] = phone_label[1]
-                df_list.append(df)
-
-        if len(df_list):
-            df = pd.concat(df_list)
+        if df.shape[0]:
             df = grc.run_processing(
                 df=df,
                 customizer=customizer,
@@ -85,18 +61,12 @@ def main(refresh_indicator) -> int:
                 date_col='report_date',
                 table=grc.get_required_attribute(customizer, 'table')
             )
-            grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
-            grc.audit_automation(customizer=customizer)
 
         else:
-            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+            logger.warning('No Account Cost data.')
 
     else:
-        if BACK_FILTER_ONLY:
-            print('Running manual backfilter...')
-            grc.table_backfilter(customizer=customizer)
-
         if INGEST_ONLY:
             print('Running manual ingest...')
             grc.ingest_procedures(customizer=customizer)

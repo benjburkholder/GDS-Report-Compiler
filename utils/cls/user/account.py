@@ -1,5 +1,6 @@
 import pandas as pd
 import sqlalchemy
+import calendar
 import datetime
 import pathlib
 import os
@@ -8,7 +9,13 @@ from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
 
 
-class DialogTech(Customizer):
+class AccountCost(Customizer):
+
+    custom_columns = [
+        {'data_source': 'Account - Cost'},
+        # {'property': None},
+        # {'service_line': None}
+    ]
 
     def __init__(self):
         super().__init__()
@@ -19,15 +26,20 @@ class DialogTech(Customizer):
             'status': False,
             'columns': ['zip', 'phone']
         }
-        self.set_attribute('drop_columns', drop_columns)
 
-    def pull_dialogtech_labels(self):
+        # Used to set columns which vary from data source and client vertical
+        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('drop_columns', drop_columns)
+        self.set_attribute('table', self.prefix)
+        self.set_attribute('class', True)
+
+    def pull_account_cost(self):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
             sql = sqlalchemy.text(
                 """
-                SELECT DISTINCT *
-                FROM public.lookup_dt_mapping;
+                SELECT *
+                FROM public.source_account_cost;
                 """
             )
             results = con.execute(sql).fetchall()
@@ -36,26 +48,33 @@ class DialogTech(Customizer):
                 result for result in results
             ] if results else []
 
+    def get_account_cost_meta_data(self, cost_data):
+        data = []
+        for row in cost_data:
+            start_date = row[0]
+            mapped_location = row[2]
+            end_date = row[1]
+            medium = row[5]
+            total_cost = float(row[4].replace('$', '').replace(',', ''))
 
-class DialogtechCallDetail(DialogTech):
+            if end_date is None:
+                end_date = ''
 
-    custom_columns = [
-        {'data_source': 'DialogTech - Call Details'},
-        {'property': None},
-        # {'service_line': None}
-    ]
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
-        self.set_attribute('historical_end_date', datetime.date(2020, 2, 1))
-        self.set_attribute('table', self.prefix)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+            if end_date == '':
+                end_date = datetime.date.today().strftime('%Y-%m-%d')
+            # historical, iterate over a range of dates
+            for iter_date in pd.date_range(start_date, end_date):
+                month = iter_date.month
+                year = iter_date.year
+                max_days = calendar.monthrange(year=year, month=month)[1]
+                daily_cost = (total_cost / max_days)
+                data.append({
+                    'Date': iter_date,
+                    'Property': mapped_location,
+                    'Medium': medium,
+                    'Daily_Cost': daily_cost
+                })
+        return pd.DataFrame(data)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -74,8 +93,10 @@ class DialogtechCallDetail(DialogTech):
         :return:
         """
         return df.rename(columns={
-            'call_date': 'report_date',
-
+                'Date': 'report_date',
+                'Property': 'property',
+                'Medium': 'medium',
+                'Daily_Cost': 'daily_cost'
         })
 
     # noinspection PyMethodMayBeStatic
@@ -87,16 +108,9 @@ class DialogtechCallDetail(DialogTech):
         """
         # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['campaign'] = df['campaign'].astype(str).str[:150]
-        df['medium'] = df['medium'].astype(str).str[:150]
-        df['number_dialed'] = df['number_dialed'].astype(str).str[:25]
-        df['caller_id'] = df['caller_id'].astype(str).str[:25]
-        df['call_duration'] = df['call_duration'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['transfer_to_number'] = df['transfer_to_number'].astype(str).str[:25]
-        df['phone_label'] = df['phone_label'].astype(str).str[:150]
-        df['call_transfer_status'] = df['call_transfer_status'].astype(str).str[:100]
-        df['client_id'] = df['client_id'].astype(str).str[:150]
-
+        df['property'] = df['property'].astype(str).str[:100]
+        df['medium'] = df['medium'].astype(str).str[:50]
+        df['daily_cost'] = df['daily_cost'].fillna('0').apply(lambda x: float(x) if x else None)
 
         # TODO: Later optimization... keeping the schema for the table in the customizer
         #   - and use it to reference typing command to df
@@ -136,19 +150,8 @@ class DialogtechCallDetail(DialogTech):
         # build engine
         # execute statements
 
-        df = df[[
-            'report_date',
-            'data_source',
-            'property',
-            'campaign',
-            'medium',
-            'number_dialed',  # call tracking number
-            'caller_id',
-            'call_duration',
-            'transfer_to_number',  # terminating number
-            'phone_label',
-            'call_transfer_status',
-            'client_id'
-        ]]
+        # float dtypes
+        df['daily_cost'] = df['daily_cost'].astype(float)
+        df['daily_cost'] = df['daily_cost'].apply(lambda x: round(x, 2))
 
         return df

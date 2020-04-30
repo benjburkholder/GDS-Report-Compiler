@@ -403,6 +403,23 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
+            {'sheet': 'Account Cost', 'table': {
+                'name': 'source_account_cost',
+                'schema': 'public',
+                'type': 'source',
+                'active': False,
+                'columns': [
+                    {'name': 'date_start', 'type': 'date'},
+                    {'name': 'date_end', 'type': 'date'},
+                    {'name': 'property', 'type': 'character varying', 'length': 100},
+                    {'name': 'tactic', 'type': 'character varying', 'length': 100},
+                    {'name': 'cost', 'type': 'character varying', 'length': 25},
+                    {'name': 'channel', 'type': 'character varying', 'length': 150},
+                    {'name': 'notes', 'type': 'character varying', 'length': 100},
+
+                ],
+                'owner': 'postgres'
+            }},
             {'sheet': 'Moz Listing Mapping', 'table': {
                 'name': 'lookup_moz_mapping',
                 'schema': 'public',
@@ -695,8 +712,8 @@ class Customizer:
                     {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
                     {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True, 'group_by': True},
-                    {'name': 'event_label', 'type': 'character varying', 'length': 200, 'master_include': True, 'group_by': True},
-                    {'name': 'event_action', 'type': 'character varying', 'length': 200, 'master_include': True, 'group_by': True},
+                    {'name': 'event_label', 'type': 'character varying', 'length': 300, 'master_include': True, 'group_by': True},
+                    {'name': 'event_action', 'type': 'character varying', 'length': 300, 'master_include': True, 'group_by': True},
                     {'name': 'total_events', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
                     {'name': 'unique_events', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
                     {'name': 'event_value', 'type': 'double precision', 'master_include': True, 'aggregate_type': 'sum'},
@@ -867,7 +884,7 @@ class Customizer:
                 'owner': 'postgres'
             }},
             {'sheet': None, 'table': {
-                'name': 'dialogtech_calldetail',
+                'name': 'dialogtech_call_detail',
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['dialogtech'],
@@ -882,8 +899,8 @@ class Customizer:
                     {'name': 'campaign', 'type': 'character varying', 'length': 150, 'master_include': True},
                     {'name': 'medium', 'type': 'character varying', 'length': 150, 'backfilter': True,
                      'master_include': True},
-                    {'name': 'number_dialed', 'type': 'character_varying', 'length': 25, 'master_include': True},
-                    {'name': 'caller_id', 'type': 'character_varying', 'length': 25, 'master_include': True},
+                    {'name': 'number_dialed', 'type': 'character varying', 'length': 25, 'master_include': True},
+                    {'name': 'caller_id', 'type': 'character varying', 'length': 25, 'master_include': True},
                     {'name': 'call_duration', 'type': 'double precision', 'master_include': True},
                     {'name': 'transfer_to_number', 'type': 'character varying', 'length': 25, 'master_include': True},
                     {'name': 'phone_label', 'type': 'character varying', 'length': 150, 'master_include': True},
@@ -951,6 +968,36 @@ class Customizer:
                             {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'campaign_id', 'sort': 'asc', 'nulls_last': True},
                             {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                        ],
+                    }
+                ],
+                'owner': 'postgres'
+            }},
+            {'sheet': None, 'table': {
+                'name': 'account_cost',
+                'schema': 'public',
+                'type': 'reporting',
+                'tablespace': ['account'],
+                'cadence': None,
+                'active': False,
+                'columns': [
+                    {'name': 'report_date', 'type': 'date', 'master_include': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
+                     'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
+                     'default': 'Non-Location Pages', 'master_include': True},
+                    {'name': 'medium', 'type': 'character varying', 'length': 150, 'master_include': True},
+                    {'name': 'daily_cost', 'type': 'double precision', 'master_include': True},
+
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_account_cost',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
                         ],
                     }
                 ],
