@@ -385,9 +385,10 @@ def ingest_procedures(customizer: custom.Customizer):
     master_columns = []
     for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheets['table']['type'] == 'reporting':
-            for column in sheets['table']['columns']:
-                if column['master_include']:
-                    master_columns.append(column)
+            if sheets['table']['active']:
+                for column in sheets['table']['columns']:
+                    if column['master_include']:
+                        master_columns.append(column)
     target_sheets = [
         sheet for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']
         if sheet['table']['name'] == customizer.get_attribute('table')]
