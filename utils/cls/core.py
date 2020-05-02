@@ -321,13 +321,13 @@ class Customizer:
         'source_refresh_dates': [1, 15],
         'lookup_refresh_status': False,
         'sheets': [
-            {'sheet': 'URL to Property', 'table': {
+            {'sheet': 'URL Mapping', 'table': {
                 'name': 'lookup_urltolocation',
                 'schema': 'public',
                 'type': 'lookup',
                 'tablespace': ['moz_pro', 'google_analytics', 'google_search_console'],
                 'update_types': ['exact', 'fuzzy'],
-                'active': True,
+                'active': False,
                 'columns': [
                     {'name': 'url', 'type': 'character varying', 'length': 100},
                     {'name': 'property', 'type': 'character varying', 'length': 100},
