@@ -402,10 +402,10 @@ def ingest_procedures(customizer: custom.Customizer):
 def audit_automation(customizer: custom.Customizer):
     for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheets['table']['type'] == 'reporting':
-            if sheets['table']['cadence']:
+            if sheets['table']['audit_cadence']:
                 if sheets['table']['name'] == customizer.get_attribute('table'):
                     audit_automation_indicator = [column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column][0]
-                    customizer.audit_automation_procedure(index_column=customizer.custom_columns[0][audit_automation_indicator], cadence=sheets['table']['cadence'])
+                    customizer.audit_automation_procedure(index_column=customizer.custom_columns[0][audit_automation_indicator], cadence=sheets['table']['audit_cadence'])
 
 
 def refresh_source_tables(customizer: custom.Customizer):

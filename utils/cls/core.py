@@ -506,7 +506,8 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'ingest_defaults': [{'medium': 'Organic Search'}, {'device': 'Desktop'}],
                 'active': False,
                 'columns': [
@@ -539,7 +540,8 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_local'],
                 'type': 'reporting',
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
@@ -572,7 +574,8 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'ingest_defaults': [{'medium': 'Organic Search'}],
                 'active': False,
                 'columns': [
@@ -612,7 +615,8 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['moz_pro'],
                 'type': 'reporting',
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'ingest_defaults': [{'medium': 'Organic Search'}],
                 'active': False,
                 'columns': [
@@ -667,7 +671,8 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
@@ -710,7 +715,8 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
@@ -748,7 +754,8 @@ class Customizer:
                 'schema': 'public',
                 'tablespace': ['google_analytics'],
                 'type': 'reporting',
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
@@ -787,7 +794,8 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['google_my_business'],
-                'cadence': 'monthly',
+                'audit_cadence': 'monthly',
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval', 'group_by': True},
@@ -827,7 +835,8 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['google_my_business'],
-                'cadence': None,
+                'audit_cadence': False,
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
@@ -860,7 +869,8 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['google_search_console'],
-                'cadence': None,
+                'audit_cadence': False,
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
@@ -898,7 +908,8 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['dialogtech'],
-                'cadence': None,
+                'audit_cadence': False,
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
@@ -940,7 +951,8 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['google_ads'],
-                'cadence': None,
+                'audit_cadence': False,
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
@@ -988,7 +1000,8 @@ class Customizer:
                 'schema': 'public',
                 'type': 'reporting',
                 'tablespace': ['account'],
-                'cadence': None,
+                'audit_cadence': False,
+                'backfilter_cadence': False,
                 'active': False,
                 'columns': [
                     {'name': 'report_date', 'type': 'date', 'master_include': True},
