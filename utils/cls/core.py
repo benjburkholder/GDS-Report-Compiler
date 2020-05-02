@@ -420,6 +420,16 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
+            {'sheet': 'Moz Directory Exclusions', 'table': {
+                'name': 'source_moz_directoryexclusions',
+                'schema': 'public',
+                'type': 'source',
+                'active': False,
+                'columns': [
+                    {'name': 'exclusions', 'type': 'character varying', 'length': 100},
+                ],
+                'owner': 'postgres'
+            }},
             {'sheet': 'Moz Listing Mapping', 'table': {
                 'name': 'lookup_moz_mapping',
                 'schema': 'public',
