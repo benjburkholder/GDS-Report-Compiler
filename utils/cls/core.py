@@ -798,7 +798,7 @@ class Customizer:
                 'backfilter_cadence': False,
                 'active': False,
                 'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval', 'group_by': True},
+                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
                     {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
                     {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
                     {'name': 'listing_name', 'type': 'character varying', 'length': 150, 'master_include': True, 'group_by': True},
