@@ -482,6 +482,7 @@ class Customizer:
                         {'name': 'phone_label', 'type': 'character varying', 'length': 150},
                         {'name': 'medium', 'type': 'character varying', 'length': 150},
                         {'name': 'property', 'type': 'character varying', 'length': 150},
+                        {'name': 'exact', 'type': 'bigint'}
 
                 ],
                 'owner': 'postgres'
@@ -497,6 +498,7 @@ class Customizer:
                     {'name': 'campaign_id', 'type': 'character varying', 'length': 150},
                     {'name': 'campaign', 'type': 'character varying', 'length': 150},
                     {'name': 'property', 'type': 'character varying', 'length': 150},
+                    {'name': 'exact', 'type': 'bigint'}
 
                 ],
                 'owner': 'postgres'
