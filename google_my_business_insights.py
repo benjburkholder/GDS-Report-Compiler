@@ -46,7 +46,7 @@ def main(refresh_indicator) -> int:
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
 
-    if not INGEST_ONLY or BACK_FILTER_ONLY:
+    if not INGEST_ONLY and not BACK_FILTER_ONLY:
 
         if grc.get_required_attribute(customizer, 'historical'):
             start_date = grc.get_required_attribute(customizer, 'historical_start_date')
