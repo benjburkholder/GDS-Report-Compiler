@@ -275,7 +275,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         df['event_label'] = df['event_label'].astype(str).str[:200]
         df['event_action'] = df['event_action'].astype(str).str[:255]
         df['total_events'] = df['total_events'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['unique_events'] = df['total_events'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['unique_events'] = df['unique_events'].fillna('0').apply(lambda x: int(x) if x else None)
         df['event_value'] = df['event_value'].fillna('0').apply(lambda x: float(x) if x else None)
 
         # TODO: Later optimization... keeping the schema for the table in the customizer
