@@ -9,6 +9,7 @@ from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
+import pandas as pd
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 
@@ -61,6 +62,7 @@ def main(refresh_indicator) -> int:
                 secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
                 )
 
+        master_list = []
         for view_id in grc.get_required_attribute(customizer, 'get_view_ids')():
             df = ga_client.query(
                 view_id=view_id,
@@ -77,18 +79,20 @@ def main(refresh_indicator) -> int:
                     customizer=customizer,
                     processing_stages=PROCESSING_STAGES
                 )
-                grc.run_data_ingest_rolling_dates(
-                    df=df,
-                    customizer=customizer,
-                    date_col='report_date',
-                    table=grc.get_required_attribute(customizer, 'table')
-                )
-                grc.table_backfilter(customizer=customizer)
-                grc.ingest_procedures(customizer=customizer)
-                grc.audit_automation(customizer=customizer)
+                master_list.append(df)
 
             else:
                 logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
+
+        grc.run_data_ingest_rolling_dates(
+            df=pd.concat(master_list),
+            customizer=customizer,
+            date_col='report_date',
+            table=grc.get_required_attribute(customizer, 'table')
+        )
+        grc.table_backfilter(customizer=customizer)
+        grc.ingest_procedures(customizer=customizer)
+        grc.audit_automation(customizer=customizer)
 
     else:
         if BACK_FILTER_ONLY:
