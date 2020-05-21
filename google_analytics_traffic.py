@@ -92,7 +92,7 @@ def main(refresh_indicator) -> int:
         grc.table_backfilter(customizer=customizer)
         grc.ingest_procedures(customizer=customizer)
         grc.audit_automation(customizer=customizer)
-        
+
     else:
         if BACK_FILTER_ONLY:
             print('Running manual backfilter...')

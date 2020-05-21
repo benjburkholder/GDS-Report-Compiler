@@ -9,6 +9,7 @@ from mozpy.reporting.client.pro.seo_reporting import SEOReporting
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
+import pandas as pd
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 
@@ -55,6 +56,7 @@ def main(refresh_indicator) -> int:
             today = datetime.date.today()
             report_date = datetime.date(today.year, today.month, 1)
 
+        master_list = []
         for campaign_id in accounts:
             # pull report from Linkmedia360 database
             df = SEOReporting().get_ranking_performance(report_date=report_date, campaign_id=campaign_id['campaign_id'])
@@ -64,19 +66,20 @@ def main(refresh_indicator) -> int:
                     df=df,
                     customizer=customizer,
                     processing_stages=PROCESSING_STAGES)
-
-                grc.run_data_ingest_rolling_dates(
-                    df=df,
-                    customizer=customizer,
-                    date_col='report_date',
-                    table=grc.get_required_attribute(customizer, 'table'))
-
-                grc.table_backfilter(customizer=customizer)
-                grc.ingest_procedures(customizer=customizer)
-                grc.audit_automation(customizer=customizer)
+                master_list.append(df)
 
             else:
                 logger.warning('No data returned for date {}.'.format(report_date))
+
+        grc.run_data_ingest_rolling_dates(
+            df=pd.concat(master_list),
+            customizer=customizer,
+            date_col='report_date',
+            table=grc.get_required_attribute(customizer, 'table'))
+
+        grc.table_backfilter(customizer=customizer)
+        grc.ingest_procedures(customizer=customizer)
+        grc.audit_automation(customizer=customizer)
 
     else:
         if BACK_FILTER_ONLY:

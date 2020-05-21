@@ -59,6 +59,7 @@ def main(refresh_indicator) -> int:
             start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
             end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
+        master_list = []
         for account in accounts:
             df_listings = LLMReporting().get_listings(account_label=account['account'], client_label=account['label'])
 
@@ -80,20 +81,21 @@ def main(refresh_indicator) -> int:
                      df=df,
                      customizer=customizer,
                      processing_stages=PROCESSING_STAGES)
-
-                grc.run_data_ingest_rolling_dates(
-                    df=df,
-                    customizer=customizer,
-                    date_col='report_date',
-                    table=grc.get_required_attribute(customizer, 'table')
-                )
-
-                grc.table_backfilter(customizer=customizer)
-                grc.ingest_procedures(customizer=customizer)
-                grc.audit_automation(customizer=customizer)
+                master_list.append(df)
 
             else:
                 logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+
+        grc.run_data_ingest_rolling_dates(
+            df=pd.concat(master_list),
+            customizer=customizer,
+            date_col='report_date',
+            table=grc.get_required_attribute(customizer, 'table')
+        )
+
+        grc.table_backfilter(customizer=customizer)
+        grc.ingest_procedures(customizer=customizer)
+        grc.audit_automation(customizer=customizer)
 
     else:
         if BACK_FILTER_ONLY:
