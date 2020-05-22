@@ -93,25 +93,25 @@ def main(refresh_indicator) -> int:
                     df['Listing_Name'] = listing['locationName']
                     df_list.append(df)
 
-            if df_list:
-                df = pd.concat(df_list)
-                df = grc.run_processing(
-                    df=df,
-                    customizer=customizer,
-                    processing_stages=PROCESSING_STAGES
-                )
-                grc.run_data_ingest_rolling_dates(
-                    df=df,
-                    customizer=customizer,
-                    date_col='report_date',
-                    table=grc.get_required_attribute(customizer, 'table')
-                )
-                grc.table_backfilter(customizer=customizer)
-                grc.ingest_procedures(customizer=customizer)
-                grc.audit_automation(customizer=customizer)
-
             else:
                 logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+
+        if df_list:
+            df = pd.concat(df_list)
+            df = grc.run_processing(
+                df=df,
+                customizer=customizer,
+                processing_stages=PROCESSING_STAGES
+            )
+            grc.run_data_ingest_rolling_dates(
+                df=df,
+                customizer=customizer,
+                date_col='report_date',
+                table=grc.get_required_attribute(customizer, 'table')
+            )
+            grc.table_backfilter(customizer=customizer)
+            grc.ingest_procedures(customizer=customizer)
+            grc.audit_automation(customizer=customizer)
 
     else:
         if BACK_FILTER_ONLY:
