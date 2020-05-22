@@ -37,7 +37,7 @@ class GoogleSearchConsole(Customizer):
             ] if results else []
 
 
-class GoogleSearchConsoleAnalyticsMonthly(GoogleSearchConsole):
+class GoogleSearchConsoleMonthly(GoogleSearchConsole):
 
     # TODO: shouldn't this be a list? In-case we have more custom columns?
     #   - Not sure what 'property' key does? is that for entity parsing perhaps?
@@ -75,11 +75,11 @@ class GoogleSearchConsoleAnalyticsMonthly(GoogleSearchConsole):
         :return:
         """
         return df.rename(columns={
-            'date': 'report_date',
+            # 'date': 'report_date',
             'sourceMedium': 'source_medium',
             'channelGrouping': 'medium',
             'deviceCategory': 'device',
-            'pagePath': 'url',
+            'page': 'url',
             'percentNewSessions': 'percent_new_sessions',
             'percentNewPageviews': 'percent_new_pageviews',
             'uniquePageviews': 'unique_pageviews',
@@ -95,24 +95,17 @@ class GoogleSearchConsoleAnalyticsMonthly(GoogleSearchConsole):
         :param df:
         :return:
         """
-        df['view_id'] = df['view_id'].astype(str).str[:25]
+
         # noinspection PyUnresolvedReferences
         df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['medium'] = df['medium'].astype(str).str[:100]
-        df['source_medium'] = df['source_medium'].astype(str).str[:100]
+        df['property_url'] = df['property_url'].astype(str).str[:250]
         df['device'] = df['device'].astype(str).str[:50]
-        df['campaign'] = df['campaign'].astype(str).str[:100]
-        df['url'] = df['url'].astype(str).str[:500]
-        df['sessions'] = df['sessions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['percent_new_sessions'] = df['percent_new_sessions'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['pageviews'] = df['pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['unique_pageviews'] = df['unique_pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['pageviews_per_session'] = df['pageviews_per_session'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['entrances'] = df['entrances'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['bounces'] = df['bounces'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['session_duration'] = df['session_duration'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['users'] = df['users'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['new_users'] = df['new_users'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['page'] = df['page'].astype(str).str[:250]
+        df['query'] = df['query'].astype(str).str[:250]
+        df['impressions'] = df['impressions'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['clicks'] = df['clicks'].fillna('0').apply(lambda x: int(x) if x else None)
+        df['ctr'] = df['ctr'].fillna('0').apply(lambda x: float(x) if x else None)
+        df['position'] = df['position'].fillna('0').apply(lambda x: float(x) if x else None)
 
         # TODO: Later optimization... keeping the schema for the table in the customizer
         #   - and use it to reference typing command to df

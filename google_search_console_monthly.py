@@ -23,16 +23,17 @@ INGEST_ONLY = False
 BACK_FILTER_ONLY = False
 
 PROCESSING_STAGES = [
-    'rename',
+    # 'rename',
     'type',
     'parse',
-    'post_processing'
+    # 'post_processing'
 ]
 
 REQUIRED_ATTRIBUTES = [
     'historical',
-    'historical_start_date',
-    'historical_end_date',
+    # 'historical_start_date',
+    # 'historical_end_date',
+    'historical_report_date',
     'table'
 ]
 logger = logging.getLogger(__file__)

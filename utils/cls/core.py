@@ -883,12 +883,12 @@ class Customizer:
                     {'name': 'property_url', 'type': 'character varying', 'length': 150, 'master_include': True},
                     {'name': 'device', 'type': 'character varying', 'length': 150, 'backfilter': True,
                      'master_include': True},
-                    {'name': 'page', 'type': 'double precision', 'master_include': True},
-                    {'name': 'query', 'type': 'double precision', 'master_include': True},
-                    {'name': 'impressions', 'type': 'double precision', 'master_include': True},
-                    {'name': 'clicks', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'ctr', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'position', 'type': 'character varying', 'length': 150, 'master_include': True},
+                    {'name': 'page', 'type': 'character varying', 'length': 250, 'master_include': True},
+                    {'name': 'query', 'type': 'character varying', 'length': 250, 'master_include': True},
+                    {'name': 'impressions', 'type': 'bigint', 'master_include': True},
+                    {'name': 'clicks', 'type': 'bigint', 'master_include': True},
+                    {'name': 'ctr', 'type': 'double precision', 'master_include': True},
+                    {'name': 'position', 'type': 'double precision', 'master_include': True},
 
                 ],
                 'indexes': [
