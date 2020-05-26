@@ -89,7 +89,8 @@ class MozProRankingsCustomizer(Moz):
         self.set_attribute('class', True),
         self.set_attribute('debug', True),
         self.set_attribute('historical', False)
-        self.set_attribute('historical_report_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
         self.set_attribute('table', self.prefix)
 
         # Used to set columns which vary from data source and client vertical
@@ -193,7 +194,8 @@ class MozProSerpCustomizer(Moz):
         self.set_attribute('class', True),
         self.set_attribute('debug', True),
         self.set_attribute('historical', False)
-        self.set_attribute('historical_report_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
         self.set_attribute('table', self.prefix)
 
         # Used to set columns which vary from data source and client vertical

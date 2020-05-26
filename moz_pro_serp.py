@@ -29,7 +29,8 @@ PROCESSING_STAGES = [
 
 REQUIRED_ATTRIBUTES = [
     'historical',
-    'historical_report_date',
+    'historical_start_date',
+    'historical_end_date',
     'table'
 ]
 logger = logging.getLogger(__file__)
@@ -49,7 +50,10 @@ def main(refresh_indicator) -> int:
         accounts = grc.get_required_attribute(customizer, 'pull_moz_pro_accounts')()
 
         if grc.get_required_attribute(customizer, 'historical'):
-            report_date = grc.get_required_attribute(customizer, 'historical_report_date')
+            start_date = grc.get_required_attribute(customizer, 'historical_start_date')
+            end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+
+            date_range = pd.date_range(start=start_date, end=end_date, freq='M')
 
         else:
             # automated setup - last month by default
@@ -57,19 +61,39 @@ def main(refresh_indicator) -> int:
             report_date = datetime.date(today.year, today.month, 1)
 
         master_list = []
-        for campaign_id in accounts:
-            # pull report from Linkmedia360 database
-            df = SEOReporting().get_serp_performance(report_date=report_date, campaign_id=campaign_id['campaign_id'])
+        if grc.get_required_attribute(customizer, 'historical'):
+            for campaign_id in accounts:
+                for date in date_range:
+                    report_date = datetime.date(date.year, date.month, 1)
 
-            if df.shape[0]:
-                df = grc.run_processing(
-                    df=df,
-                    customizer=customizer,
-                    processing_stages=PROCESSING_STAGES)
-                master_list.append(df)
+                    # pull report from Linkmedia360 database
+                    print(f'Pulling data for: {report_date}...')
+                    df = SEOReporting().get_serp_performance(report_date=report_date, campaign_id=campaign_id['id'])
 
-            else:
-                logger.warning('No data returned for date {}.'.format(report_date))
+                    if df.shape[0]:
+                        df = grc.run_processing(
+                            df=df,
+                            customizer=customizer,
+                            processing_stages=PROCESSING_STAGES)
+                        master_list.append(df)
+
+                    else:
+                        logger.warning('No data returned for date {}.'.format(report_date))
+
+        else:
+            for campaign_id in accounts:
+                # pull report from Linkmedia360 database
+                df = SEOReporting().get_serp_performance(report_date=report_date, campaign_id=campaign_id['id'])
+
+                if df.shape[0]:
+                    df = grc.run_processing(
+                        df=df,
+                        customizer=customizer,
+                        processing_stages=PROCESSING_STAGES)
+                    master_list.append(df)
+
+                else:
+                    logger.warning('No data returned for date {}.'.format(report_date))
 
         grc.run_data_ingest_rolling_dates(
             df=pd.concat(master_list),
