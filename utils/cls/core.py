@@ -1030,6 +1030,13 @@ class Customizer:
             }},
         ]}
 
+    # Custom columns (will be appended to end of marketing_data table)
+    custom_map_columns = {'sheet': None, 'table': {
+        'columns': [
+
+        ]
+    }}
+
     # Schema for the marketing_data table creation
     marketing_data = {'sheet': None, 'table': {
         'name': 'marketing_data',
