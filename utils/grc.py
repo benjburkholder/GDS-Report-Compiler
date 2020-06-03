@@ -247,6 +247,8 @@ def refresh_lookup_tables(customizer) -> int:
                     df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
                     insert_other_data(customizer, df=df, sheet=sheet)
 
+                    print(f"SUCCESS: {sheet['table']['name']} Refreshed.")
+
     # Once one script refreshed lookup tables, set global status to True to bypass with following scripts
     customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] = True
 
