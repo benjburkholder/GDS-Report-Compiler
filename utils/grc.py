@@ -169,8 +169,9 @@ def build_marketing_table(customizer) -> int:
                                 customizer.marketing_data['table']['columns'].append(column)
 
         # Add custom columns to end of marketing table
-        if customizer.custom_map_columns['table']['columns']:
-            customizer.marketing_data['table']['columns'].append(customizer.custom_map_columns['table']['columns'])
+        if customizer.custom_map_columns['table']['active']:
+            if customizer.custom_map_columns['table']['columns']:
+                customizer.marketing_data['table']['columns'].append(customizer.custom_map_columns['table']['columns'])
 
         create_table_from_schema(customizer, schema=customizer.marketing_data)
 
