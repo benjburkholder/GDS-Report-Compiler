@@ -1,11 +1,11 @@
 """
 Moz Local - Visibility Report
 """
+import subprocess
 import pandas as pd
 import datetime
 import logging
 import sys
-
 
 from mozpy.reporting.client.local.llm_reporting import LLMReporting
 from utils.email_manager import EmailClient
@@ -59,41 +59,50 @@ def main(refresh_indicator) -> int:
             start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
             end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
-        master_list = []
-        for account in accounts:
-            df_listings = LLMReporting().get_listings(account_label=account['account'], client_label=account['label'])
+        moz = LLMReporting(account_label_pairs=accounts)
+        df_listings = moz.get_listings()
 
-            # pull report from Linkmedia360 database
-            listing_ids = list(df_listings['listing_id'].unique())
-            df_list = []
-            for listing_id in listing_ids:
-                df = LLMReporting().get_visibility_report(
-                    listing_id=listing_id,
-                    start_date=datetime.datetime.strptime(start_date, '%Y-%m-%d'),
-                    end_date=datetime.datetime.strptime(end_date, '%Y-%m-%d')
-                )
-                df_list.append(df)
-            df = pd.concat(df_list)
+        # pull report from Linkmedia360 database
+        listing_ids = df_listings.loc[:, ['listing_id', 'account_name']].drop_duplicates().to_dict(orient='records')
+        count = 1
+        total = len(listing_ids)
+        for listing_id in listing_ids:
+            df = moz.get_visibility_report(listing_id=listing_id['listing_id'], account_name=listing_id['account_name'])
 
             if df.shape[0]:
+                # add data source
+                df['data_source'] = 'Moz Local - Visibility Report'
+
+                df['listing_id'] = df['listing_id'].astype(int)
+
+                # drop duplicate data
+                df.drop_duplicates(inplace=True)
+
                 df = grc.get_required_attribute(customizer, 'exclude_moz_directories')(df)
                 df = grc.run_processing(
-                     df=df,
-                     customizer=customizer,
-                     processing_stages=PROCESSING_STAGES)
-                master_list.append(df)
+                    df=df,
+                    customizer=customizer,
+                    processing_stages=PROCESSING_STAGES)
+
+                # set index
+                # noinspection PyUnresolvedReferences
+                df['report_date'] = pd.to_datetime(df['report_date']).dt.date
+                df.set_index(df['report_date'], drop=True, inplace=True)
+                del df['report_date']
+
+                grc.get_required_attribute(customizer, 'clear_moz_local')(listing_id)
+                grc.get_required_attribute(customizer, 'push_moz_local')(df)
+
+                print('INFO: Ingest complete.')
 
             else:
-                logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+                print(f'INFO: No data returned for listing id {listing_id}')
 
-        grc.run_data_ingest_rolling_dates(
-            df=pd.concat(master_list),
-            customizer=customizer,
-            date_col='report_date',
-            table=grc.get_required_attribute(customizer, 'table')
-        )
+            print(listing_id, count, total)
+            count += 1
 
-        grc.table_backfilter(customizer=customizer)
+        # grc.table_backfilter(customizer=customizer)
+        subprocess.call(['python', 'custom_post_processing_reporting_tables.py'])
         grc.ingest_procedures(customizer=customizer)
         grc.audit_automation(customizer=customizer)
 
@@ -104,6 +113,7 @@ def main(refresh_indicator) -> int:
 
         if INGEST_ONLY:
             print('Running manual ingest...')
+            subprocess.call(['python', 'custom_post_processing_reporting_tables.py'])
             grc.ingest_procedures(customizer=customizer)
 
     return 0

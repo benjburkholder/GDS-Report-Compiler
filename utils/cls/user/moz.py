@@ -49,6 +49,30 @@ class Moz(Customizer):
 
             return campaign_ids
 
+    def clear_moz_local(self, listing_id):
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                """
+                DELETE
+                FROM public.moz_local_visibility
+                WHERE listing_id = :listing_id;
+                """
+            )
+            con.execute(sql,
+                        listing_id=str(listing_id['listing_id']))
+
+    def push_moz_local(self, df):
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            df.to_sql(
+                'moz_local_visibility',
+                con=con,
+                if_exists='append',
+                index=True,
+                index_label='report_date'
+            )
+
     def exclude_moz_directories(self, df):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
