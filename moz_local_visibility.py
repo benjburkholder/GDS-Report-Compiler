@@ -101,8 +101,7 @@ def main(refresh_indicator) -> int:
             print(listing_id, count, total)
             count += 1
 
-        # grc.table_backfilter(customizer=customizer)
-        subprocess.call(['python', 'custom_post_processing_reporting_tables.py'])
+        grc.table_backfilter(customizer=customizer)
         grc.ingest_procedures(customizer=customizer)
         grc.audit_automation(customizer=customizer)
 
@@ -113,7 +112,6 @@ def main(refresh_indicator) -> int:
 
         if INGEST_ONLY:
             print('Running manual ingest...')
-            subprocess.call(['python', 'custom_post_processing_reporting_tables.py'])
             grc.ingest_procedures(customizer=customizer)
 
     return 0

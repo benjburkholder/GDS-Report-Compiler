@@ -101,8 +101,9 @@ class Moz(Customizer):
 
 class MozProRankingsCustomizer(Moz):
 
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
-
         {'data_source': 'Moz Pro - Rankings'},
         {'property': None},
         # {'service_line': None}
@@ -206,8 +207,9 @@ class MozProRankingsCustomizer(Moz):
 
 class MozProSerpCustomizer(Moz):
 
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
-
         {'data_source': 'Moz Pro - SERP'},
         {'property': None},
         # {'service_line': None}
@@ -326,8 +328,9 @@ class MozProSerpCustomizer(Moz):
 
 class MozLocalVisibilityCustomizer(Moz):
 
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
-
         {'data_source': 'Moz Local - Visibility Report'},
         {'property': None},
         # {'service_line': None}
@@ -427,6 +430,8 @@ class MozLocalVisibilityCustomizer(Moz):
 
 class MozLocalSyncCustomizer(Moz):
 
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
 
         {'data_source': 'Moz Local - Sync Report'},

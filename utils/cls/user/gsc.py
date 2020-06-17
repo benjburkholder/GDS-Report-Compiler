@@ -39,8 +39,8 @@ class GoogleSearchConsole(Customizer):
 
 class GoogleSearchConsoleMonthly(GoogleSearchConsole):
 
-    # TODO: shouldn't this be a list? In-case we have more custom columns?
-    #   - Not sure what 'property' key does? is that for entity parsing perhaps?
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
         {'data_source': 'Google Search Console - Analytics'},
         {'property': None},

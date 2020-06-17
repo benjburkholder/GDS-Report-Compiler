@@ -39,6 +39,8 @@ class DialogTech(Customizer):
 
 class DialogtechCallDetail(DialogTech):
 
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
         {'data_source': 'DialogTech - Call Details'},
         {'property': None},

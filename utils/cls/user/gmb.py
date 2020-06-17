@@ -57,6 +57,8 @@ class GoogleMyBusiness(Customizer):
 
 class GoogleMyBusinessInsights(GoogleMyBusiness):
 
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
         {'data_source': 'Google My Business - Insights'},
         {'property': None},
@@ -173,6 +175,8 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
 
 class GoogleMyBusinessReviews(GoogleMyBusiness):
 
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
     custom_columns = [
         {'data_source': 'Google My Business - Reviews'},
         {'property': None},
