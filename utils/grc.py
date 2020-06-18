@@ -415,7 +415,7 @@ def audit_automation(customizer: custom.Customizer):
             if sheets['table']['audit_cadence']:
                 if sheets['table']['name'] == customizer.get_attribute('table'):
                     audit_automation_indicator = [column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column][0]
-                    customizer.audit_automation_procedure(index_column=customizer.get_attribute('data_source'), cadence=sheets['table']['audit_cadence'])
+                    customizer.audit_automation_procedure(index_column=customizer.get_attribute(audit_automation_indicator), cadence=sheets['table']['audit_cadence'])
 
 
 def refresh_source_tables(customizer: custom.Customizer):
