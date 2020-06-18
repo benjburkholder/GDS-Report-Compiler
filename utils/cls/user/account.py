@@ -140,18 +140,31 @@ class AccountCost(Customizer):
                 for key, value in row.items():
                     df[key] = value
 
-        return df
-
-    def post_processing(self, df):
-        """
-        Execute UPDATE... JOIN statements against the source table of the calling class
-        :return:
-        """
-        # build engine
-        # execute statements
-
         # float dtypes
         df['daily_cost'] = df['daily_cost'].astype(float)
         df['daily_cost'] = df['daily_cost'].apply(lambda x: round(x, 2))
 
         return df
+
+    def post_processing(self) -> None:
+        """
+        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        :return:
+        """
+
+        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
+        sql = """ CUSTOM SQL HERE """
+
+        sql2 = """ CUSTOM SQL HERE """
+
+        custom_sql = [
+            sql,
+            sql2
+        ]
+
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            for query in custom_sql:
+                con.execute(query)
+
+        return

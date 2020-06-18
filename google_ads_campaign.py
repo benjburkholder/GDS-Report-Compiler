@@ -27,6 +27,7 @@ PROCESSING_STAGES = [
     'rename',
     'type',
     'parse',
+    # 'post_processing'
 ]
 
 REQUIRED_ATTRIBUTES = [

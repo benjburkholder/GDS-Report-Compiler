@@ -366,7 +366,10 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
         print(f'Checking for processing stage {stage}...')
         if get_optional_attribute(cls=customizer, attribute=stage):
             print(f'\tNow processing stage {stage}')
-            df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
+            if stage == 'post_processing':
+                get_optional_attribute(cls=customizer, attribute=stage)()
+            else:
+                df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
     return df
 
 

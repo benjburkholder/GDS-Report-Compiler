@@ -163,14 +163,34 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
                 for key, value in row.items():
                     df[key] = value
 
-        return df
-
-    def post_processing(self, df: pd.DataFrame) -> pd.DataFrame:
         df['photo_views'] = (df['photo_views_customers'] + df['photo_views_merchant'])
         del df['photo_views_customers']
         del df['photo_views_merchant']
 
         return df
+
+    def post_processing(self) -> None:
+        """
+        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        :return:
+        """
+
+        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
+        sql = """ CUSTOM SQL HERE """
+
+        sql2 = """ CUSTOM SQL HERE """
+
+        custom_sql = [
+            sql,
+            sql2
+        ]
+
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            for query in custom_sql:
+                con.execute(query)
+
+        return
 
 
 class GoogleMyBusinessReviews(GoogleMyBusiness):
@@ -274,12 +294,26 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
 
         return df
 
-    def post_processing(self):
+    def post_processing(self) -> None:
         """
-        Execute UPDATE... JOIN statements against the source table of the calling class
+        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
         :return:
         """
-        # build engine
-        # execute statements
+
+        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
+        sql = """ CUSTOM SQL HERE """
+
+        sql2 = """ CUSTOM SQL HERE """
+
+        custom_sql = [
+            sql,
+            sql2
+        ]
+
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            for query in custom_sql:
+                con.execute(query)
+
         return
 
