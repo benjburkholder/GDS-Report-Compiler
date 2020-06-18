@@ -365,12 +365,19 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
     for stage in processing_stages:
         print(f'Checking for processing stage {stage}...')
         if get_optional_attribute(cls=customizer, attribute=stage):
-            print(f'\tNow processing stage {stage}')
-            if stage == 'post_processing':
-                get_optional_attribute(cls=customizer, attribute=stage)()
-            else:
+            if stage != 'post_processing':
+                print(f'\tNow processing stage {stage}')
                 df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
     return df
+
+
+def run_post_processing(customizer: custom.Customizer, processing_stages: list):
+    for stage in processing_stages:
+        print(f'Checking for processing stage {stage}...')
+        if get_optional_attribute(cls=customizer, attribute=stage):
+            if stage == 'post_processing':
+                print(f'\tNow processing stage {stage}')
+                get_optional_attribute(cls=customizer, attribute=stage)()
 
 
 def table_backfilter(customizer: custom.Customizer):

@@ -80,6 +80,7 @@ def main(refresh_indicator) -> int:
                 df.drop_duplicates(inplace=True)
 
                 df = grc.get_required_attribute(customizer, 'exclude_moz_directories')(df)
+
                 df = grc.run_processing(
                     df=df,
                     customizer=customizer,
@@ -101,6 +102,9 @@ def main(refresh_indicator) -> int:
 
             print(listing_id, count, total)
             count += 1
+
+        # Executes post_processing stage after all data is pulled and ingested
+        grc.run_post_processing(customizer=customizer, processing_stages=PROCESSING_STAGES)
 
         grc.table_backfilter(customizer=customizer)
         grc.ingest_procedures(customizer=customizer)

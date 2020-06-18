@@ -81,12 +81,17 @@ def main(refresh_indicator) -> int:
                 customizer=customizer,
                 processing_stages=PROCESSING_STAGES
             )
+
             grc.run_data_ingest_rolling_dates(
                 df=df,
                 customizer=customizer,
                 date_col='report_date',
                 table=grc.get_required_attribute(customizer, 'table')
             )
+
+            # Executes post_processing stage after all data is pulled and ingested
+            grc.run_post_processing(customizer=customizer, processing_stages=PROCESSING_STAGES)
+
             grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
             grc.audit_automation(customizer=customizer)

@@ -63,6 +63,10 @@ def main(refresh_indicator) -> int:
                 date_col='report_date',
                 table=grc.get_required_attribute(customizer, 'table')
             )
+
+            # Executes post_processing stage after all data is pulled and ingested
+            grc.run_post_processing(customizer=customizer, processing_stages=PROCESSING_STAGES)
+
             grc.ingest_procedures(customizer=customizer)
 
         else:
