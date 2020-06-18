@@ -11,12 +11,6 @@ from utils.dbms_helpers import postgres_helpers
 
 class AccountCost(Customizer):
 
-    custom_columns = [
-        {'data_source': 'Account - Cost'},
-        # {'property': None},
-        # {'service_line': None}
-    ]
-
     def __init__(self):
         super().__init__()
         self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
@@ -28,7 +22,7 @@ class AccountCost(Customizer):
         }
 
         # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Account - Cost')
         self.set_attribute('drop_columns', drop_columns)
         self.set_attribute('table', self.prefix)
         self.set_attribute('class', True)
@@ -135,10 +129,6 @@ class AccountCost(Customizer):
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
 
         # float dtypes
         df['daily_cost'] = df['daily_cost'].astype(float)

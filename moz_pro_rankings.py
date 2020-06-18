@@ -24,7 +24,7 @@ BACK_FILTER_ONLY = False
 PROCESSING_STAGES = [
     # 'rename',
     'type',
-    'parse',
+    # 'parse',
     # 'post_processing'
 ]
 
@@ -72,6 +72,10 @@ def main(refresh_indicator) -> int:
                     df = SEOReporting().get_ranking_performance(report_date=report_date, campaign_id=campaign_id['id'])
 
                     if df.shape[0]:
+
+                        df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
+                        df['property'] = None
+
                         df = grc.run_processing(
                             df=df,
                             customizer=customizer,
@@ -87,6 +91,10 @@ def main(refresh_indicator) -> int:
                 df = SEOReporting().get_ranking_performance(report_date=report_date, campaign_id=campaign_id['id'])
 
                 if df.shape[0]:
+
+                    df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
+                    df['property'] = None
+
                     df = grc.run_processing(
                         df=df,
                         customizer=customizer,

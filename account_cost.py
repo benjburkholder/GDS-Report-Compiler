@@ -22,7 +22,7 @@ PROCESSING_STAGES = [
     'rename',
     'type',
     'parse',
-    'post_processing'
+    # 'post_processing'
 ]
 
 REQUIRED_ATTRIBUTES = [
@@ -50,6 +50,8 @@ def main(refresh_indicator) -> int:
         df = grc.get_required_attribute(customizer, 'get_account_cost_meta_data')(cost_data)
 
         if df.shape[0]:
+            df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
+
             df = grc.run_processing(
                 df=df,
                 customizer=customizer,

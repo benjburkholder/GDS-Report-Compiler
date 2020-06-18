@@ -25,7 +25,7 @@ BACK_FILTER_ONLY = False
 PROCESSING_STAGES = [
     # 'rename',
     'type',
-    'parse',
+    # 'parse',
     # 'post_processing'
 ]
 
@@ -72,7 +72,8 @@ def main(refresh_indicator) -> int:
 
             if df.shape[0]:
                 # add data source
-                df['data_source'] = 'Moz Local - Visibility Report'
+                df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
+                df['property'] = None
 
                 df['listing_id'] = df['listing_id'].astype(int)
 

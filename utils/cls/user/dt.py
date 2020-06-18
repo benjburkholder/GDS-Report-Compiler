@@ -39,14 +39,6 @@ class DialogTech(Customizer):
 
 class DialogtechCallDetail(DialogTech):
 
-    # Area for adding key / value pairs for columns which vary client to client
-    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
-    custom_columns = [
-        {'data_source': 'DialogTech - Call Details'},
-        {'property': None},
-        # {'service_line': None}
-    ]
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -55,9 +47,7 @@ class DialogtechCallDetail(DialogTech):
         self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
         self.set_attribute('historical_end_date', datetime.date(2020, 2, 1))
         self.set_attribute('table', self.prefix)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'DialogTech - Call Details')
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -123,10 +113,6 @@ class DialogtechCallDetail(DialogTech):
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
 
         df = df[[
             'report_date',

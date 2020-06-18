@@ -26,7 +26,7 @@ PROCESSING_STAGES = [
     'rename',
     'type',
     'parse',
-    'post_processing'
+    # 'post_processing'
 ]
 
 REQUIRED_ATTRIBUTES = [
@@ -69,6 +69,8 @@ def main(refresh_indicator) -> int:
                 phone_label=phone_label[0]
             )
             if df.shape[0]:
+                df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
+                df['property'] = None
                 df['medium'] = phone_label[1]
                 df_list.append(df)
 

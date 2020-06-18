@@ -72,14 +72,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         'pagePath',
     ]
 
-    # Area for adding key / value pairs for columns which vary client to client
-    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
-    custom_columns = [
-        {'data_source': 'Google Analytics - Traffic'},
-        {'property': None},
-        # {'service_line': None}
-    ]
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -90,9 +82,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         self.set_attribute('table', self.prefix)
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Google Analytics - Traffic')
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -173,10 +163,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
 
         return df
 
@@ -223,14 +209,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         'eventAction',
     ]
 
-    # Area for adding key / value pairs for columns which vary client to client
-    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
-    custom_columns = [
-        {'data_source': 'Google Analytics - Events'},
-        {'property': None},
-        # {'service_line': None}
-    ]
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -241,9 +219,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         self.set_attribute('table', self.prefix)
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Google Analytics - Events')
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -317,10 +293,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
 
         return df
 
@@ -366,14 +338,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'pagePath'
     ]
 
-    # Area for adding key / value pairs for columns which vary client to client
-    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
-    custom_columns = [
-        {'data_source': 'Google Analytics - Goals'},
-        {'property': None},
-        # {'service_line': None}
-    ]
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True)
@@ -384,9 +348,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         self.set_attribute('table', self.prefix)
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Google Analytics - Goals')
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -467,10 +429,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
+
         return df
 
     def post_processing(self) -> None:
