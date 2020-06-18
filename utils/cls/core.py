@@ -1031,7 +1031,8 @@ class Customizer:
         ]}
 
     # Custom columns (will be appended to end of marketing_data table)
-    custom_map_columns = {'sheet': None, 'table': {
+    # Typically used for columns existing solely in marketing_data
+    custom_marketing_data_columns = {'sheet': None, 'table': {
         'active': False,
         'columns': [
 
