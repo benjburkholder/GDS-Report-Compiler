@@ -48,6 +48,7 @@ class DialogtechCallDetail(DialogTech):
         self.set_attribute('historical_end_date', datetime.date(2020, 2, 1))
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'DialogTech - Call Details')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -77,22 +78,7 @@ class DialogtechCallDetail(DialogTech):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['campaign'] = df['campaign'].astype(str).str[:150]
-        df['medium'] = df['medium'].astype(str).str[:150]
-        df['number_dialed'] = df['number_dialed'].astype(str).str[:25]
-        df['caller_id'] = df['caller_id'].astype(str).str[:25]
-        df['call_duration'] = df['call_duration'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['transfer_to_number'] = df['transfer_to_number'].astype(str).str[:25]
-        df['phone_label'] = df['phone_label'].astype(str).str[:150]
-        df['call_transfer_status'] = df['call_transfer_status'].astype(str).str[:100]
-        df['client_id'] = df['client_id'].astype(str).str[:150]
 
-
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -109,7 +95,7 @@ class DialogtechCallDetail(DialogTech):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:

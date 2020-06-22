@@ -221,7 +221,6 @@ class Customizer:
                 SELECT
                 {insert_statement}
                 FROM public.{self.get_attribute('table')}
-
                 """
 
     def __get_ingest_defaults(self, target_sheet):
@@ -249,10 +248,6 @@ class Customizer:
                 GROUP BY
                 {group_by_statement}
                 """ if group_by_statement else None
-
-    # TODO create logic to handle custom ingest logic (where statements etc.)
-    def __create_custom_statements(self):
-        pass
 
     def audit_automation_procedure(self, index_column, cadence):
         engine = build_postgresql_engine(customizer=self)

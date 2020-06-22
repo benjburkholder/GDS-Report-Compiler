@@ -380,6 +380,12 @@ def run_post_processing(customizer: custom.Customizer, processing_stages: list):
                 get_optional_attribute(cls=customizer, attribute=stage)()
 
 
+def dynamic_typing(customizer: custom.Customizer):
+    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['name'] == customizer.get_attribute('table'):
+            customizer.get_attribute('schema')['columns'].append(sheet['table']['columns'])
+
+
 def table_backfilter(customizer: custom.Customizer):
     engine = build_postgresql_engine(customizer=customizer)
     target_sheets = [

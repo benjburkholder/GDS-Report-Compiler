@@ -18,6 +18,7 @@ class EnquireMapHistories(EnquireMAP):
         self.set_attribute('historical_start_date', '2020-01-01')
         self.set_attribute('historical_end_date', '2020-01-02')
         self.set_attribute('table', self.prefix)
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -110,6 +111,7 @@ class EnquireMapEmailPerformanceSummary(EnquireMAP):
         self.set_attribute('historical_start_date', '2020-01-01')
         self.set_attribute('historical_end_date', '2020-01-02')
         self.set_attribute('table', self.prefix)
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:

@@ -16,6 +16,7 @@ class InquiryGoals(Customizer):
         self.set_attribute('table', self.prefix)
         self.set_attribute('class', True)
         self.set_attribute('data_source', 'Goals - Web Inquiries')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -49,17 +50,7 @@ class InquiryGoals(Customizer):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['property'] = df['property'].astype(str).str[:100]
-        df['community'] = df['community'].astype(str).str[:100]
-        df['ownership_group'] = df['ownership_group'].astype(str).str[:100]
-        df['region'] = df['region'].astype(str).str[:100]
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['inquiry_goal'] = df['inquiry_goal'].fillna('0').apply(lambda x: float(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -76,7 +67,7 @@ class InquiryGoals(Customizer):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:

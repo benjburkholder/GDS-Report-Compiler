@@ -5,6 +5,7 @@ import datetime
 import pathlib
 import os
 
+from utils import grc
 from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
 
@@ -26,6 +27,7 @@ class AccountCost(Customizer):
         self.set_attribute('drop_columns', drop_columns)
         self.set_attribute('table', self.prefix)
         self.set_attribute('class', True)
+        self.set_attribute('schema', {'columns': []})
 
     def pull_account_cost(self):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -100,15 +102,9 @@ class AccountCost(Customizer):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['property'] = df['property'].astype(str).str[:100]
-        df['medium'] = df['medium'].astype(str).str[:50]
-        df['daily_cost'] = df['daily_cost'].fillna('0').apply(lambda x: float(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
+        grc.dynamic_typing(customizer=self)
+
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -125,7 +121,7 @@ class AccountCost(Customizer):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:

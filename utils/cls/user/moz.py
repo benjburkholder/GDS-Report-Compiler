@@ -4,8 +4,9 @@ import datetime
 import pathlib
 import os
 
-from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer
+from utils import grc
 
 
 class Moz(Customizer):
@@ -110,6 +111,7 @@ class MozProRankingsCustomizer(Moz):
         self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Moz Pro - Rankings')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -141,24 +143,9 @@ class MozProRankingsCustomizer(Moz):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['campaign_id'] = df['campaign_id'].astype(str).str[:100]
-        df['id'] = df['id'].astype(str).str[:100]
-        df['search_id'] = df['search_id'].astype(str).str[:100]
-        df['keyword'] = df['keyword'].astype(str).str[:100]
-        df['search_engine'] = df['search_engine'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:100]
-        df['geo'] = df['geo'].astype(str).str[:100]
-        df['tags'] = df['tags'].astype(str).str[:250]
-        df['url'] = df['url'].astype(str).str[:1000]
-        # df['keyword_added_at'] = df['keyword_added_at'].dt.date
-        df['rank'] = df['rank'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['branded'] = df['branded'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
+        grc.dynamic_typing(customizer=self)
+
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -175,7 +162,7 @@ class MozProRankingsCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -217,6 +204,7 @@ class MozProSerpCustomizer(Moz):
         self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Moz Pro - SERP')
+        self.set_attribute('schema', {'columns': []})
 
         # noinspection PyMethodMayBeStatic
 
@@ -249,38 +237,9 @@ class MozProSerpCustomizer(Moz):
         :param df:
         :return:
         """
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['campaign_id'] = df['campaign_id'].astype(str).str[:100]
-        df['id'] = df['id'].astype(str).str[:100]
-        df['search_id'] = df['search_id'].astype(str).str[:100]
-        df['keyword'] = df['keyword'].astype(str).str[:100]
-        df['search_engine'] = df['search_engine'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:100]
-        df['geo'] = df['geo'].astype(str).str[:100]
-        df['tags'] = df['tags'].astype(str).str[:250]
-        df['url'] = df['url'].astype(str).str[:1000]
-        # df['keyword_added_at'] = df['keyword_added_at'].dt.date
-        df['ads_bottom'] = df['ads_bottom'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['ads_top'] = df['ads_top'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['featured_snippet'] = df['featured_snippet'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['image_pack'] = df['image_pack'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['in_depth_articles'] = df['in_depth_articles'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['knowledge_card'] = df['knowledge_card'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['knowledge_panel'] = df['knowledge_panel'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['local_pack'] = df['local_pack'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['local_teaser'] = df['local_teaser'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['news_pack'] = df['news_pack'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['related_questions'] = df['related_questions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['shopping_results'] = df['shopping_results'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['site_links'] = df['site_links'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['tweet'] = df['tweet'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['video'] = df['video'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['branded'] = df['branded'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
+        grc.dynamic_typing(customizer=self)
 
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -297,7 +256,7 @@ class MozProSerpCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -339,6 +298,7 @@ class MozLocalVisibilityCustomizer(Moz):
         self.set_attribute('historical_end_date', '2020-04-08')
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Moz Local - Visibility Report')
+        self.set_attribute('schema', {'columns': []})
 
         # noinspection PyMethodMayBeStatic
 
@@ -373,17 +333,9 @@ class MozLocalVisibilityCustomizer(Moz):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['account_name'] = df['account_name'].astype(str).str[:100]
-        df['listing_id'] = df['listing_id'].astype(str).str[:25]
-        df['directory'] = df['directory'].astype(str).str[:100]
-        df['points_reached'] = df['points_reached'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['max_points'] = df['max_points'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
+        grc.dynamic_typing(customizer=self)
+
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -400,7 +352,7 @@ class MozLocalVisibilityCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -442,6 +394,7 @@ class MozLocalSyncCustomizer(Moz):
         self.set_attribute('historical_end_date', '2020-01-02')
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Moz Local - Sync Report')
+        self.set_attribute('schema', {'columns': []})
 
         # noinspection PyMethodMayBeStatic
 
@@ -474,16 +427,9 @@ class MozLocalSyncCustomizer(Moz):
         :param df:
         :return:
         """
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['account_name'] = df['account_name'].astype(str).str[:100]
-        df['listing_id'] = df['listing_id'].astype(str).str[:25]
-        df['directory'] = df['directory'].astype(str).str[:100]
-        df['field'] = df['field'].astype(str).str[:100]
-        df['sync_status'] = df['sync_status'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
+        grc.dynamic_typing(customizer=self)
+
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -500,7 +446,7 @@ class MozLocalSyncCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:

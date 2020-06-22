@@ -47,6 +47,7 @@ class GoogleSearchConsoleMonthly(GoogleSearchConsole):
         self.set_attribute('historical_report_date', datetime.date(2020, 1, 1))
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Google Search Console - Analytics')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -86,20 +87,6 @@ class GoogleSearchConsoleMonthly(GoogleSearchConsole):
         :return:
         """
 
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['property_url'] = df['property_url'].astype(str).str[:250]
-        df['device'] = df['device'].astype(str).str[:50]
-        df['page'] = df['page'].astype(str).str[:250]
-        df['query'] = df['query'].astype(str).str[:250]
-        df['impressions'] = df['impressions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['clicks'] = df['clicks'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['ctr'] = df['ctr'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['position'] = df['position'].fillna('0').apply(lambda x: float(x) if x else None)
-
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -116,7 +103,7 @@ class GoogleSearchConsoleMonthly(GoogleSearchConsole):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:

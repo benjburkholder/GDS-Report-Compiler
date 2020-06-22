@@ -48,6 +48,7 @@ class GoogleAdsCampaign(GoogleAds):
         self.set_attribute('historical_end_date', '2018-04-22')
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Google Ads - Campaign')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -89,25 +90,7 @@ class GoogleAdsCampaign(GoogleAds):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['campaign_id'] = df['campaign_id'].astype(str).str[:100]
-        df['clicks'] = df['clicks'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['cost'] = df['cost'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['campaign'] = df['campaign'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:100]
-        df['advertising_channel_type'] = df['advertising_channel_type'].astype(str).str[:100]
-        df['impressions'] = df['impressions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['search_impression_share'] = df['search_impression_share'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['search_budget_lost_impression_share'] = df['search_budget_lost_impression_share'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['search_rank_lost_impression_share'] = df['search_rank_lost_impression_share'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['content_impression_share'] = df['content_impression_share'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['content_budget_lost_impression_share'] = df['content_budget_lost_impression_share'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['content_rank_lost_impression_share'] = df['content_rank_lost_impression_share'].fillna('0').apply(lambda x: float(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -124,7 +107,7 @@ class GoogleAdsCampaign(GoogleAds):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -173,6 +156,7 @@ class GoogleAdsKeyword(GoogleAds):
         self.set_attribute('historical_start_date', '2018-01-01')
         self.set_attribute('historical_end_date', '2018-04-22')
         self.set_attribute('table', self.prefix)
+        self.set_attribute('schema', {'columns': []})
 
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('custom_columns', self.custom_columns)
@@ -214,29 +198,7 @@ class GoogleAdsKeyword(GoogleAds):
         :param df:
         :return:
         """
-        df['view_id'] = df['view_id'].astype(str).str[:25]
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['medium'] = df['medium'].astype(str).str[:100]
-        df['source_medium'] = df['source_medium'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:50]
-        df['campaign'] = df['campaign'].astype(str).str[:100]
-        df['url'] = df['url'].astype(str).str[:500]
-        df['sessions'] = df['sessions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['percent_new_sessions'] = df['percent_new_sessions'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['pageviews'] = df['pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['unique_pageviews'] = df['unique_pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['pageviews_per_session'] = df['pageviews_per_session'].fillna('0').apply(
-            lambda x: float(x) if x else None)
-        df['entrances'] = df['entrances'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['bounces'] = df['bounces'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['session_duration'] = df['session_duration'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['users'] = df['users'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['new_users'] = df['new_users'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -253,7 +215,7 @@ class GoogleAdsKeyword(GoogleAds):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:

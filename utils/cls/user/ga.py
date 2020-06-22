@@ -83,6 +83,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
         self.set_attribute('data_source', 'Google Analytics - Traffic')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -121,28 +122,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        df['view_id'] = df['view_id'].astype(str).str[:25]
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['medium'] = df['medium'].astype(str).str[:100]
-        df['source_medium'] = df['source_medium'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:50]
-        df['campaign'] = df['campaign'].astype(str).str[:100]
-        df['url'] = df['url'].astype(str).str[:500]
-        df['sessions'] = df['sessions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['percent_new_sessions'] = df['percent_new_sessions'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['pageviews'] = df['pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['unique_pageviews'] = df['unique_pageviews'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['pageviews_per_session'] = df['pageviews_per_session'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['entrances'] = df['entrances'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['bounces'] = df['bounces'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['session_duration'] = df['session_duration'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['users'] = df['users'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['new_users'] = df['new_users'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -159,7 +139,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -220,6 +200,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
         self.set_attribute('data_source', 'Google Analytics - Events')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -256,23 +237,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        df['view_id'] = df['view_id'].astype(str).str[:25]
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['medium'] = df['medium'].astype(str).str[:100]
-        df['source_medium'] = df['source_medium'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:50]
-        df['campaign'] = df['campaign'].astype(str).str[:255]
-        df['url'] = df['url'].astype(str).str[:1000]
-        df['event_label'] = df['event_label'].astype(str).str[:200]
-        df['event_action'] = df['event_action'].astype(str).str[:255]
-        df['total_events'] = df['total_events'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['unique_events'] = df['unique_events'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['event_value'] = df['event_value'].fillna('0').apply(lambda x: float(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -289,7 +254,7 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -349,6 +314,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
         self.set_attribute('data_source', 'Google Analytics - Goals')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -392,23 +358,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         :param df:
         :return:
         """
-        df['view_id'] = df['view_id'].astype(str).str[:25]
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['medium'] = df['medium'].astype(str).str[:100]
-        df['source_medium'] = df['source_medium'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:50]
-        df['campaign'] = df['campaign'].astype(str).str[:255]
-        df['url'] = df['url'].astype(str).str[:1000]
-        df['request_a_quote'] = df['request_a_quote'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['sidebar_contact_us'] = df['sidebar_contact_us'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['contact_us_form_submission'] = df['contact_us_form_submission'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['newsletter_signups'] = df['newsletter_signups'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['dialogtech_calls'] = df['dialogtech_calls'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -425,7 +375,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:

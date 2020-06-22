@@ -66,6 +66,7 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         self.set_attribute('historical_end_date', '2020-01-02')
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Google My Business - Insights')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -108,26 +109,7 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['listing_id'] = df['listing_id'].astype(str)
-        df['listing_name'] = df['listing_name'].astype(str).str[:50]
-        df['phone_call_actions'] = df['phone_call_actions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['driving_direction_actions'] = df['driving_direction_actions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['photo_views_customers'] = df['photo_views_customers'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['photo_views_merchant'] = df['photo_views_merchant'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['maps_views'] = df['maps_views'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['search_views'] = df['search_views'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['website_click_actions'] = df['website_click_actions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['branded_searches'] = df['branded_searches'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['direct_searches'] = df['direct_searches'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['discovery_searches'] = df['discovery_searches'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['post_views_on_search'] = df['post_views_on_search'].fillna('0').apply(lambda x: int(x) if x else None)
-        # df['post_cta_actions'] = df['post_cta_actions'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -144,7 +126,7 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -190,6 +172,7 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         self.set_attribute('historical_end_date', '2020-01-02')
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Google My Business - Reviews')
+        self.set_attribute('schema', {'columns': []})
 
         # noinspection PyMethodMayBeStatic
 
@@ -228,18 +211,7 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['listing_name'] = df['listing_name'].astype(str).str[:150]
-        df['listing_id'] = df['listing_id'].astype(str).str[:150]
-        df['average_rating'] = df['average_rating'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['rating'] = df['rating'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['review_count'] = df['review_count'].fillna('0').apply(lambda x: float(x) if x else None)
-        df['reviewer'] = df['reviewer'].astype(str).str[:150]
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -256,7 +228,7 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
