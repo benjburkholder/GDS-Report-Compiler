@@ -16,15 +16,8 @@ class AccountCost(Customizer):
         super().__init__()
         self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
 
-        # TODO: is there a way to optimize this?
-        drop_columns = {
-            'status': False,
-            'columns': ['zip', 'phone']
-        }
-
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('data_source', 'Account - Cost')
-        self.set_attribute('drop_columns', drop_columns)
         self.set_attribute('table', self.prefix)
         self.set_attribute('class', True)
         self.set_attribute('schema', {'columns': []})

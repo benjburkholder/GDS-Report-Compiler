@@ -14,13 +14,6 @@ class GoogleSearchConsole(Customizer):
         super().__init__()
         self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
 
-        # TODO: is there a way to optimize this?
-        drop_columns = {
-            'status': False,
-            'columns': ['zip', 'phone']
-        }
-        self.set_attribute('drop_columns', drop_columns)
-
     def get_property_urls(self) -> list:
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:

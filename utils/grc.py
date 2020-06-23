@@ -183,9 +183,9 @@ def reshape_lookup_data(customizer, df, sheet):
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
 
-    if hasattr(customizer, f'{customizer.prefix}_drop_columns'):
-        if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
-            df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
+    if customizer.columns_to_drop:
+        if customizer.columns_to_drop['status']:
+            df.drop(columns=customizer.columns_to_drop['columns'], inplace=True)
 
     for column in sheet['table']['columns']:
         if column['name'] in df.columns:
@@ -212,9 +212,9 @@ def reshape_source_table_data(customizer, df, sheet):
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
 
-    if hasattr(customizer, f'{customizer.prefix}_drop_columns'):
-        if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
-            df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
+    if customizer.columns_to_drop:
+        if customizer.columns_to_drop['status']:
+            df.drop(columns=customizer.columns_to_drop['columns'], inplace=True)
 
     for column in sheet['table']['columns']:
         if column['name'] in df.columns:

@@ -1391,6 +1391,12 @@ class Customizer:
         'owner': 'postgres'
     }}
 
+    # Indicates which columns to be dropped from source / lookup tables
+    columns_to_drop = {
+        'status': False,
+        'columns': ['zip', 'phone']
+    }
+
     supported_dbms = [
         'postgresql'
     ]
