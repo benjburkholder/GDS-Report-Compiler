@@ -14,7 +14,9 @@ In an effort to cut down on Google Sheet API calls, source tables (typically acc
 twice a month (1st & 15th). Lookup table data (location mapping) is still refreshed once during each daily run since this data is more prone to consistent change. 
 
 #### Dynamic Ingest / Backfilter Handling
-
+In order to eliminate the need to manually build physical ingest statements for each data source, the platform generates each ingest statement dynamically, looping 
+through all of the reporting tables to build the statement and keep the order consistent for each data source. The data source reporting 
+table is used to determine which columns should be set to NULL and which should not.
 
 #### Processing Stages
 
