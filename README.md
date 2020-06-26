@@ -31,7 +31,7 @@ To allow for maximum customization of data manipulation during the data pull pro
 #### Recommended Structure
 
 
-#### Usage instructions
+### Usage instructions
 This section will provide a walk-through on starting a project with GDSCompiler from start to finish.<br><br>
 
 1. Navigate to https://github.com/linkmedia360/GDS-Report-Compiler. If you'd like to start with the existing stable release, select the "Master" branch. If you'd like to start with the latest and greatest working branch, select the "2020.x.x" branch. Then select "Download ZIP" from the "Clone" button.
