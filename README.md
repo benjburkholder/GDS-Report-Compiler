@@ -28,10 +28,10 @@ To allow for maximum customization of data manipulation during the data pull pro
 	3. Parse: Right now, this step is used for any additional manipulation which wouldn't make sense adding into the other steps.<br><br>
 	4. Post-Processing: This step allows the user to write and execute as many custom sql queries as needed on the respective reporting table. Although not explicitly enforced, it's important for organizational purposes to make sure only the current data reporting table is being updated.
 
-#### Recommended Structure
+## Recommended Structure
 
 
-### Usage instructions
+## Usage instructions
 This section will provide a walk-through on starting a project with GDSCompiler from start to finish.<br><br>
 
 1. Navigate to https://github.com/linkmedia360/GDS-Report-Compiler. If you'd like to start with the existing stable release, select the "Master" branch. If you'd like to start with the latest and greatest working branch, select the "2020.x.x" branch. Then select "Download ZIP" from the "Clone" button.
