@@ -59,7 +59,13 @@ def main(refresh_indicator) -> int:
         else:
             # automated setup - last month by default
             today = datetime.date.today()
-            report_date = datetime.date(today.year, today.month, 1)
+            
+            if today.day in [2, 3, 7, 15]:
+                report_date = datetime.date(today.year, today.month, 1)
+
+            else:
+                print('Nothing to run, not the proper day')
+                return 0
 
         master_list = []
         if grc.get_required_attribute(customizer, 'historical'):
