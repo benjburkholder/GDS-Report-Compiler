@@ -56,3 +56,11 @@ This section will provide a walk-through on starting a project with GDSCompiler 
 <br><br>
 13. Once data has been pulled with each script (and any bugs or issues dealt with), the last main piece is to structure the batch file for scheduling. A default template should already be in place to start with, named "run_report.bat". The main new piece to notice here, is the inclusion of two command line arguments, "refresh_indicator_run" and "refresh_indicator"skip". The first script to run should always be set to "refresh_indicator_run" and all of the rest set to "refresh_indicator_skip". The purpose is so that only the first script will perform the full table check / creation and lookup / source table refreshment. After this is done once, there is no need to perform again during this run.
 
+````
+%venvpath% %cd%\google_analytics_events.py %refresh_indicator_run%
+timeout 10
+%venvpath% %cd%\google_analytics_traffic.py %refresh_indicator_skip%
+timeout 10
+%venvpath% %cd%\google_analytics_goals.py %refresh_indicator_skip%
+timeout 10
+````
