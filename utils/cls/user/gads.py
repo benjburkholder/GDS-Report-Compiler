@@ -1,71 +1,46 @@
 import pandas as pd
-import numpy as np
 import sqlalchemy
+import datetime
 import pathlib
 import os
 
-from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer
 
 
-class GoogleMyBusiness(Customizer):
+class GoogleAds(Customizer):
 
     def __init__(self):
         super().__init__()
-        self.set_attribute("secrets_path", str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+        self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
 
-    def get_gmb_accounts(self) -> list:
+    def get_account_ids(self) -> list:
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
             sql = sqlalchemy.text(
                 """
                 SELECT DISTINCT
-                    account_name
-                FROM public.source_gmb_accountmaster;
+                    account_id
+                FROM public.source_gads_accountmaster;
                 """
             )
             results = con.execute(sql).fetchall()
             return [
-                result['account_name'] for result in results
+                result['account_id'] for result in results
             ] if results else []
 
-    def assign_average_rating(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Rather than use a rolling average
-        Compute the historical to date average
-        For each review in the dataset
-        """
-        df.sort_values(
-            by='Date',
-            ascending=False,
-            inplace=True
-        )
-        df['Average_Rating'] = None
-        first_review_date = df['Date'].unique()[-1]
-        for date in df['Date'].unique()[::-1]:
-            # get all reviews up to and including the ones on this date
-            reviews = df.loc[df['Date'] > first_review_date, ['Date', 'Rating']]
-            reviews = reviews.loc[reviews['Date'] <= date, :]
-            # compute the mean
-            average_rating = np.mean(list(reviews['Rating']))
-            # assign the mean for this date
-            df['Average_Rating'][df['Date'] == date] = average_rating
-        # round to double precision
-        df['Average_Rating'] = df['Average_Rating'].apply(lambda x: round(x, 2))
-        return df
 
-
-class GoogleMyBusinessInsights(GoogleMyBusiness):
+class GoogleAdsCampaign(GoogleAds):
 
     def __init__(self):
         super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
+        self.set_attribute('class', True),
+        self.set_attribute('debug', True),
         self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-01-02')
+        self.set_attribute('historical_start_date', '2018-01-01')
+        self.set_attribute('historical_end_date', '2018-04-22')
         self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Google My Business - Insights')
+        self.set_attribute('data_source', 'Google Ads - Campaign')
         self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
@@ -86,20 +61,19 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         """
         return df.rename(columns={
             'Date': 'report_date',
-            'Listing_ID': 'listing_id',
-            'Listing_Name': 'listing_name',
-            'VIEWS_MAPS': 'maps_views',
-            'VIEWS_SEARCH': 'search_views',
-            'ACTIONS_WEBSITE': 'website_click_actions',
-            'ACTIONS_PHONE': 'phone_call_actions',
-            'ACTIONS_DRIVING_DIRECTIONS': 'driving_direction_actions',
-            'PHOTOS_VIEWS_CUSTOMERS': 'photo_views_customers',
-            'PHOTOS_VIEWS_MERCHANT': 'photo_views_merchant',
-            'QUERIES_CHAIN': 'branded_searches',
-            'QUERIES_DIRECT': 'direct_searches',
-            'QUERIES_INDIRECT': 'discovery_searches',
-            'LOCAL_POST_VIEWS_SEARCH': 'post_views_on_search',
-            # 'LOCAL_POST_ACTIONS_CALL_TO_ACTION': 'post_cta_actions'
+            'Campaign': 'campaign',
+            'Campaign_ID': 'campaign_id',
+            'Clicks': 'clicks',
+            'Cost': 'cost',
+            'Device': 'device',
+            'Impressions': 'impressions',
+            'Search_Impression_Share': 'search_impression_share',
+            'Search_Budget_Lost_Impression_Share': 'search_budget_lost_impression_share',
+            'Search_Rank_Lost_Impression_Share': 'search_rank_lost_impression_share',
+            'Content_Impression_Share': 'content_impression_share',
+            'Content_Budget_Lost_Impression_Share': 'content_budget_lost_impression_share',
+            'Content_Rank_Lost_Impression_Share': 'content_rank_lost_impression_share',
+            'Medium': 'advertising_channel_type',
         })
 
     # noinspection PyMethodMayBeStatic
@@ -131,10 +105,6 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
 
-        df['photo_views'] = (df['photo_views_customers'] + df['photo_views_merchant'])
-        del df['photo_views_customers']
-        del df['photo_views_merchant']
-
         return df
 
     def post_processing(self) -> None:
@@ -161,21 +131,30 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         return
 
 
-class GoogleMyBusinessReviews(GoogleMyBusiness):
+class GoogleAdsKeyword(GoogleAds):
+
+    # Area for adding key / value pairs for columns which vary client to client
+    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
+    custom_columns = [
+        {'data_source': 'Google Ads - Campaign'},
+        {'property': None},
+        # {'service_line': None}
+    ]
 
     def __init__(self):
         super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
+        self.set_attribute('class', True),
+        self.set_attribute('debug', True),
         self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-01-02')
+        self.set_attribute('historical_start_date', '2018-01-01')
+        self.set_attribute('historical_end_date', '2018-04-22')
         self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Google My Business - Reviews')
         self.set_attribute('schema', {'columns': []})
 
-        # noinspection PyMethodMayBeStatic
+        # Used to set columns which vary from data source and client vertical
+        self.set_attribute('custom_columns', self.custom_columns)
 
+    # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """
         Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
@@ -184,8 +163,7 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         # TODO: with a new version of GA that accepts function pointers
         return '{"msg": "i am json credentials"}'
 
-        # noinspection PyMethodMayBeStatic
-
+    # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Renames columns into pg/sql friendly aliases
@@ -193,18 +171,20 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         :return:
         """
         return df.rename(columns={
-            'Date': 'report_date',
-            'Reviewer': 'reviewer',
-            'Rating': 'rating',
-            'Review_Count': 'review_count',
-            'Average_Rating': 'average_rating',
-            'Listing_ID': 'listing_id',
-            'Listing_Name': 'listing_name'
-
+            'date': 'report_date',
+            'sourceMedium': 'source_medium',
+            'channelGrouping': 'medium',
+            'deviceCategory': 'device',
+            'pagePath': 'url',
+            'percentNewSessions': 'percent_new_sessions',
+            'percentNewPageviews': 'percent_new_pageviews',
+            'uniquePageviews': 'unique_pageviews',
+            'pageviewsPerSession': 'pageviews_per_session',
+            'sessionDuration': 'session_duration',
+            'newUsers': 'new_users'
         })
 
-        # noinspection PyMethodMayBeStatic
-
+    # noinspection PyMethodMayBeStatic
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
@@ -232,8 +212,10 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        del df['Data_Source']
+        if getattr(self, f'{self.prefix}_custom_columns'):
+            for row in getattr(self, f'{self.prefix}_custom_columns'):
+                for key, value in row.items():
+                    df[key] = value
 
         return df
 
@@ -259,4 +241,3 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
                 con.execute(query)
 
         return
-

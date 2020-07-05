@@ -2,15 +2,13 @@
 Platform
 """
 import pandas as pd
-import sqlalchemy
 import datetime
-import sys
 import os
 
+from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
+from utils.gs_manager import GoogleSheetsManager
 from utils.dbms_helpers import postgres_helpers
 from utils import custom, stdlib
-from utils.gs_manager import GoogleSheetsManager
-from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
 
 
 def get_script_name(file):
@@ -170,6 +168,11 @@ def build_marketing_table(customizer) -> int:
                             if not any(column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']):
                                 customizer.marketing_data['table']['columns'].append(column)
 
+        # Add custom columns to end of marketing table
+        if customizer.custom_marketing_data_columns['table']['active']:
+            if customizer.custom_marketing_data_columns['table']['columns']:
+                customizer.marketing_data['table']['columns'].append(customizer.custom_marketing_data_columns['table']['columns'])
+
         create_table_from_schema(customizer, schema=customizer.marketing_data)
 
     return 0
@@ -180,9 +183,9 @@ def reshape_lookup_data(customizer, df, sheet):
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
 
-    if hasattr(customizer, f'{customizer.prefix}_drop_columns'):
-        if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
-            df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
+    if customizer.columns_to_drop:
+        if customizer.columns_to_drop['status']:
+            df.drop(columns=customizer.columns_to_drop['columns'], inplace=True)
 
     for column in sheet['table']['columns']:
         if column['name'] in df.columns:
@@ -209,9 +212,9 @@ def reshape_source_table_data(customizer, df, sheet):
     df.columns = map(str.lower, df.columns)
     df.columns = [col.replace(' ', '_') for col in df.columns]
 
-    if hasattr(customizer, f'{customizer.prefix}_drop_columns'):
-        if getattr(customizer, f'{customizer.prefix}_drop_columns')['status']:
-            df.drop(columns=getattr(customizer, f'{customizer.prefix}_drop_columns')['columns'], inplace=True)
+    if customizer.columns_to_drop:
+        if customizer.columns_to_drop['status']:
+            df.drop(columns=customizer.columns_to_drop['columns'], inplace=True)
 
     for column in sheet['table']['columns']:
         if column['name'] in df.columns:
@@ -244,6 +247,8 @@ def refresh_lookup_tables(customizer) -> int:
                     clear_lookup_table_data(customizer=customizer, sheet=sheet)
                     df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
                     insert_other_data(customizer, df=df, sheet=sheet)
+
+                    print(f"SUCCESS: {sheet['table']['name']} Refreshed.")
 
     # Once one script refreshed lookup tables, set global status to True to bypass with following scripts
     customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] = True
@@ -360,9 +365,25 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
     for stage in processing_stages:
         print(f'Checking for processing stage {stage}...')
         if get_optional_attribute(cls=customizer, attribute=stage):
-            print(f'\tNow processing stage {stage}')
-            df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
+            if stage != 'post_processing':
+                print(f'\tNow processing stage {stage}')
+                df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
     return df
+
+
+def run_post_processing(customizer: custom.Customizer, processing_stages: list):
+    for stage in processing_stages:
+        print(f'Checking for processing stage {stage}...')
+        if get_optional_attribute(cls=customizer, attribute=stage):
+            if stage == 'post_processing':
+                print(f'\tNow processing stage {stage}')
+                get_optional_attribute(cls=customizer, attribute=stage)()
+
+
+def dynamic_typing(customizer: custom.Customizer):
+    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['name'] == customizer.get_attribute('table'):
+            customizer.get_attribute('schema')['columns'].append(sheet['table']['columns'])
 
 
 def table_backfilter(customizer: custom.Customizer):
@@ -387,9 +408,10 @@ def ingest_procedures(customizer: custom.Customizer):
     master_columns = []
     for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheets['table']['type'] == 'reporting':
-            for column in sheets['table']['columns']:
-                if column['master_include']:
-                    master_columns.append(column)
+            if sheets['table']['active']:
+                for column in sheets['table']['columns']:
+                    if column['master_include']:
+                        master_columns.append(column)
     target_sheets = [
         sheet for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']
         if sheet['table']['name'] == customizer.get_attribute('table')]
@@ -403,10 +425,10 @@ def ingest_procedures(customizer: custom.Customizer):
 def audit_automation(customizer: custom.Customizer):
     for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheets['table']['type'] == 'reporting':
-            if sheets['table']['cadence']:
+            if sheets['table']['audit_cadence']:
                 if sheets['table']['name'] == customizer.get_attribute('table'):
                     audit_automation_indicator = [column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column][0]
-                    customizer.audit_automation_procedure(index_column=customizer.custom_columns[0][audit_automation_indicator], cadence=sheets['table']['cadence'])
+                    customizer.audit_automation_procedure(index_column=customizer.get_attribute(audit_automation_indicator), cadence=sheets['table']['audit_cadence'])
 
 
 def refresh_source_tables(customizer: custom.Customizer):

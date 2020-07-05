@@ -1,12 +1,13 @@
 """
-Google My Business - Insights
+Google Search Console - Analytics
 """
 import pandas as pd
 import datetime
+import calendar
 import logging
 import sys
 
-from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting
+from googlesearchconsole.reporting.client.search_analytics import SearchAnalytics
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
@@ -22,16 +23,17 @@ INGEST_ONLY = False
 BACK_FILTER_ONLY = False
 
 PROCESSING_STAGES = [
-    'rename',
+    # 'rename',
     'type',
-    'parse',
+    # 'parse',
     # 'post_processing'
 ]
 
 REQUIRED_ATTRIBUTES = [
     'historical',
-    'historical_start_date',
-    'historical_end_date',
+    # 'historical_start_date',
+    # 'historical_end_date',
+    'historical_report_date',
     'table'
 ]
 logger = logging.getLogger(__file__)
@@ -49,52 +51,31 @@ def main(refresh_indicator) -> int:
     if not INGEST_ONLY and not BACK_FILTER_ONLY:
 
         if grc.get_required_attribute(customizer, 'historical'):
-            start_date = grc.get_required_attribute(customizer, 'historical_start_date')
-            end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+            report_date = grc.get_required_attribute(customizer, 'historical_report_date')
 
         else:
             # automated setup - last week by default
-            start_date = (datetime.datetime.today() - datetime.timedelta(540)).strftime('%Y-%m-%d')
-            end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
+            today = datetime.date.today()
 
-        gmb_client = GoogleMyBusinessReporting(
-                secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
-                )
+            if today.day in [2, 5, 15]:
+                if today.month == 1:
+                    last_month = 12
+                    last_month_year = (today.year - 1)
+                else:
+                    last_month = (today.month - 1)
+                    last_month_year = today.year
 
-        accounts = grc.get_required_attribute(customizer, 'get_gmb_accounts')()
-        gmb_accounts = gmb_client.get_gmb_accounts()
-
-        filtered_accounts = [account for account in gmb_accounts
-                             if list(account.keys())[0] in accounts]
-
-        print(filtered_accounts)
+                report_date = datetime.date(
+                    last_month_year,
+                    last_month,
+                    calendar.monthrange(last_month_year, last_month)[1])
 
         df_list = []
-
-        for account in filtered_accounts:
-            # get account name using first key (account human name) to access API Name
-            account_name = account[list(account.keys())[0]]['API_Name']
-
-            # get all listings
-            listings = gmb_client.get_gmb_listings(account=account_name)
-
-            # for each listing, get insight data
-            for listing in listings:
-                report = gmb_client.get_gmb_insights(
-                    start_date=start_date,
-                    end_date=end_date,
-                    account=account_name,
-                    location_name=listing['name'])
-
-                if report:
-                    df = pd.DataFrame(report)
-                    df['Listing_ID'] = int(listing['storeCode']) \
-                        if str(listing['storeCode']).isdigit() else str(listing['storeCode'])
-                    df['Listing_Name'] = listing['locationName']
-                    df_list.append(df)
-
-            else:
-                logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
+        for property_url in grc.get_required_attribute(customizer, 'get_property_urls')():
+            print(property_url)
+            df = SearchAnalytics().get_monthly_search_analytics(
+                report_date=report_date, property_url=property_url)
+            df_list.append(df)
 
         if df_list:
             df = pd.concat(df_list)
@@ -121,6 +102,9 @@ def main(refresh_indicator) -> int:
             grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
             grc.audit_automation(customizer=customizer)
+
+        else:
+            logger.warning('No data returned for dates - {}'.format(report_date))
 
     else:
         if BACK_FILTER_ONLY:

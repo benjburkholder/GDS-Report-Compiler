@@ -1,11 +1,12 @@
-import os
-import pathlib
-import datetime
-import sqlalchemy
 import pandas as pd
+import sqlalchemy
+import datetime
+import pathlib
+import os
 
-from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer
+from utils import grc
 
 
 class Moz(Customizer):
@@ -49,6 +50,30 @@ class Moz(Customizer):
 
             return campaign_ids
 
+    def clear_moz_local(self, listing_id):
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            sql = sqlalchemy.text(
+                """
+                DELETE
+                FROM public.moz_local_visibility
+                WHERE listing_id = :listing_id;
+                """
+            )
+            con.execute(sql,
+                        listing_id=str(listing_id['listing_id']))
+
+    def push_moz_local(self, df):
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            df.to_sql(
+                'moz_local_visibility',
+                con=con,
+                if_exists='append',
+                index=True,
+                index_label='report_date'
+            )
+
     def exclude_moz_directories(self, df):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
@@ -77,23 +102,16 @@ class Moz(Customizer):
 
 class MozProRankingsCustomizer(Moz):
 
-    custom_columns = [
-
-        {'data_source': 'Moz Pro - Rankings'},
-        {'property': None},
-        # {'service_line': None}
-    ]
-
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True),
         self.set_attribute('debug', True),
         self.set_attribute('historical', False)
-        self.set_attribute('historical_report_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
         self.set_attribute('table', self.prefix)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Moz Pro - Rankings')
+        self.set_attribute('schema', {'columns': []})
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -125,24 +143,9 @@ class MozProRankingsCustomizer(Moz):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['campaign_id'] = df['campaign_id'].astype(str).str[:100]
-        df['id'] = df['id'].astype(str).str[:100]
-        df['search_id'] = df['search_id'].astype(str).str[:100]
-        df['keyword'] = df['keyword'].astype(str).str[:100]
-        df['search_engine'] = df['search_engine'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:100]
-        df['geo'] = df['geo'].astype(str).str[:100]
-        df['tags'] = df['tags'].astype(str).str[:250]
-        df['url'] = df['url'].astype(str).str[:1000]
-        # df['keyword_added_at'] = df['keyword_added_at'].dt.date
-        df['rank'] = df['rank'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['branded'] = df['branded'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
+        grc.dynamic_typing(customizer=self)
+
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -159,45 +162,49 @@ class MozProRankingsCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
+
         return df
 
-    def post_processing(self):
+    def post_processing(self) -> None:
         """
-        Execute UPDATE... JOIN statements against the source table of the calling class
+        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
         :return:
         """
-        # build engine
-        # execute statements
+
+        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
+        sql = """ CUSTOM SQL HERE """
+
+        sql2 = """ CUSTOM SQL HERE """
+
+        custom_sql = [
+            sql,
+            sql2
+        ]
+
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            for query in custom_sql:
+                con.execute(query)
+
         return
 
 
 class MozProSerpCustomizer(Moz):
-
-    custom_columns = [
-
-        {'data_source': 'Moz Pro - SERP'},
-        {'property': None},
-        # {'service_line': None}
-    ]
 
     def __init__(self):
         super().__init__()
         self.set_attribute('class', True),
         self.set_attribute('debug', True),
         self.set_attribute('historical', False)
-        self.set_attribute('historical_report_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
+        self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
         self.set_attribute('table', self.prefix)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Moz Pro - SERP')
+        self.set_attribute('schema', {'columns': []})
 
         # noinspection PyMethodMayBeStatic
 
@@ -230,38 +237,9 @@ class MozProSerpCustomizer(Moz):
         :param df:
         :return:
         """
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['campaign_id'] = df['campaign_id'].astype(str).str[:100]
-        df['id'] = df['id'].astype(str).str[:100]
-        df['search_id'] = df['search_id'].astype(str).str[:100]
-        df['keyword'] = df['keyword'].astype(str).str[:100]
-        df['search_engine'] = df['search_engine'].astype(str).str[:100]
-        df['device'] = df['device'].astype(str).str[:100]
-        df['geo'] = df['geo'].astype(str).str[:100]
-        df['tags'] = df['tags'].astype(str).str[:250]
-        df['url'] = df['url'].astype(str).str[:1000]
-        # df['keyword_added_at'] = df['keyword_added_at'].dt.date
-        df['ads_bottom'] = df['ads_bottom'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['ads_top'] = df['ads_top'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['featured_snippet'] = df['featured_snippet'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['image_pack'] = df['image_pack'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['in_depth_articles'] = df['in_depth_articles'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['knowledge_card'] = df['knowledge_card'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['knowledge_panel'] = df['knowledge_panel'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['local_pack'] = df['local_pack'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['local_teaser'] = df['local_teaser'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['news_pack'] = df['news_pack'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['related_questions'] = df['related_questions'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['shopping_results'] = df['shopping_results'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['site_links'] = df['site_links'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['tweet'] = df['tweet'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['video'] = df['video'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['branded'] = df['branded'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
+        grc.dynamic_typing(customizer=self)
 
-        '''
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -278,34 +256,38 @@ class MozProSerpCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
+
         return df
 
-    def post_processing(self):
+    def post_processing(self) -> None:
         """
-        Execute UPDATE... JOIN statements against the source table of the calling class
+        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
         :return:
         """
-        # build engine
-        # execute statements
+
+        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
+        sql = """ CUSTOM SQL HERE """
+
+        sql2 = """ CUSTOM SQL HERE """
+
+        custom_sql = [
+            sql,
+            sql2
+        ]
+
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            for query in custom_sql:
+                con.execute(query)
+
         return
 
 
 class MozLocalVisibilityCustomizer(Moz):
-
-    custom_columns = [
-
-        {'data_source': 'Moz Local - Visibility Report'},
-        {'property': None},
-        # {'service_line': None}
-    ]
 
     def __init__(self):
         super().__init__()
@@ -315,9 +297,8 @@ class MozLocalVisibilityCustomizer(Moz):
         self.set_attribute('historical_start_date', '2020-01-01')
         self.set_attribute('historical_end_date', '2020-04-08')
         self.set_attribute('table', self.prefix)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Moz Local - Visibility Report')
+        self.set_attribute('schema', {'columns': []})
 
         # noinspection PyMethodMayBeStatic
 
@@ -352,17 +333,9 @@ class MozLocalVisibilityCustomizer(Moz):
         :param df:
         :return:
         """
-        # noinspection PyUnresolvedReferences
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['account_name'] = df['account_name'].astype(str).str[:100]
-        df['listing_id'] = df['listing_id'].astype(str).str[:25]
-        df['directory'] = df['directory'].astype(str).str[:100]
-        df['points_reached'] = df['points_reached'].fillna('0').apply(lambda x: int(x) if x else None)
-        df['max_points'] = df['max_points'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
+        grc.dynamic_typing(customizer=self)
+
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -379,34 +352,38 @@ class MozLocalVisibilityCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
+
         return df
 
-    def post_processing(self):
+    def post_processing(self) -> None:
         """
-        Execute UPDATE... JOIN statements against the source table of the calling class
+        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
         :return:
         """
-        # build engine
-        # execute statements
+
+        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
+        sql = """ CUSTOM SQL HERE """
+
+        sql2 = """ CUSTOM SQL HERE """
+
+        custom_sql = [
+            sql,
+            sql2
+        ]
+
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            for query in custom_sql:
+                con.execute(query)
+
         return
 
 
 class MozLocalSyncCustomizer(Moz):
-
-    custom_columns = [
-
-        {'data_source': 'Moz Local - Sync Report'},
-        {'property': None},
-        # {'service_line': None}
-    ]
 
     def __init__(self):
         super().__init__()
@@ -416,9 +393,8 @@ class MozLocalSyncCustomizer(Moz):
         self.set_attribute('historical_start_date', '2020-01-01')
         self.set_attribute('historical_end_date', '2020-01-02')
         self.set_attribute('table', self.prefix)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
+        self.set_attribute('data_source', 'Moz Local - Sync Report')
+        self.set_attribute('schema', {'columns': []})
 
         # noinspection PyMethodMayBeStatic
 
@@ -451,16 +427,9 @@ class MozLocalSyncCustomizer(Moz):
         :param df:
         :return:
         """
-        df['report_date'] = pd.to_datetime(df['report_date']).dt.date
-        df['account_name'] = df['account_name'].astype(str).str[:100]
-        df['listing_id'] = df['listing_id'].astype(str).str[:25]
-        df['directory'] = df['directory'].astype(str).str[:100]
-        df['field'] = df['field'].astype(str).str[:100]
-        df['sync_status'] = df['sync_status'].fillna('0').apply(lambda x: int(x) if x else None)
 
-        # TODO: Later optimization... keeping the schema for the table in the customizer
-        #   - and use it to reference typing command to df
-        '''
+        grc.dynamic_typing(customizer=self)
+
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -477,14 +446,35 @@ class MozLocalSyncCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-        '''
+
         return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
+
         return df
+
+    def post_processing(self) -> None:
+        """
+        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        :return:
+        """
+
+        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
+        sql = """ CUSTOM SQL HERE """
+
+        sql2 = """ CUSTOM SQL HERE """
+
+        custom_sql = [
+            sql,
+            sql2
+        ]
+
+        engine = postgres_helpers.build_postgresql_engine(customizer=self)
+        with engine.connect() as con:
+            for query in custom_sql:
+                con.execute(query)
+
+        return
+
 
 

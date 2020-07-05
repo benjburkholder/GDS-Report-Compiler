@@ -1,31 +1,34 @@
 """
-Google My Business - Insights
+Enquire CRM - Tour
 """
+from pathlib import Path
+import subprocess
 import pandas as pd
 import datetime
 import logging
 import sys
 
-from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting
+from googleadspy.reporting.client.reporting import GoogleAdsReporting
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
 
 SCRIPT_NAME = grc.get_script_name(__file__)
+yaml_path = Path('secrets')
 
-DEBUG = False
+DEBUG = True
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
 # Toggle for manually running ingest and backfilter procedures
-INGEST_ONLY = False
+INGEST_ONLY = True
 BACK_FILTER_ONLY = False
 
 PROCESSING_STAGES = [
     'rename',
     'type',
     'parse',
-    # 'post_processing'
+    'post_processing'
 ]
 
 REQUIRED_ATTRIBUTES = [
@@ -34,6 +37,7 @@ REQUIRED_ATTRIBUTES = [
     'historical_end_date',
     'table'
 ]
+
 logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
@@ -54,73 +58,43 @@ def main(refresh_indicator) -> int:
 
         else:
             # automated setup - last week by default
-            start_date = (datetime.datetime.today() - datetime.timedelta(540)).strftime('%Y-%m-%d')
+            start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
             end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
-        gmb_client = GoogleMyBusinessReporting(
-                secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
-                )
-
-        accounts = grc.get_required_attribute(customizer, 'get_gmb_accounts')()
-        gmb_accounts = gmb_client.get_gmb_accounts()
-
-        filtered_accounts = [account for account in gmb_accounts
-                             if list(account.keys())[0] in accounts]
-
-        print(filtered_accounts)
+        gads = GoogleAdsReporting(yaml_path=yaml_path, customer_id='9664678140')
 
         df_list = []
+        for account_id in grc.get_required_attribute(customizer, 'get_account_ids')():
+            df = gads.campaign_performance(
+                customer_id=account_id,
+                start_date=start_date,
+                end_date=end_date
+            )
 
-        for account in filtered_accounts:
-            # get account name using first key (account human name) to access API Name
-            account_name = account[list(account.keys())[0]]['API_Name']
+            if df.shape[0]:
+                df['account_id'] = account_id
+                df_list.append(df)
 
-            # get all listings
-            listings = gmb_client.get_gmb_listings(account=account_name)
+        df = pd.concat(df_list)
 
-            # for each listing, get insight data
-            for listing in listings:
-                report = gmb_client.get_gmb_insights(
-                    start_date=start_date,
-                    end_date=end_date,
-                    account=account_name,
-                    location_name=listing['name'])
-
-                if report:
-                    df = pd.DataFrame(report)
-                    df['Listing_ID'] = int(listing['storeCode']) \
-                        if str(listing['storeCode']).isdigit() else str(listing['storeCode'])
-                    df['Listing_Name'] = listing['locationName']
-                    df_list.append(df)
-
-            else:
-                logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
-
-        if df_list:
-            df = pd.concat(df_list)
-
-            df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
-            df['property'] = None
-
+        if df.shape[0]:
             df = grc.run_processing(
                 df=df,
                 customizer=customizer,
                 processing_stages=PROCESSING_STAGES
             )
-
             grc.run_data_ingest_rolling_dates(
                 df=df,
                 customizer=customizer,
                 date_col='report_date',
                 table=grc.get_required_attribute(customizer, 'table')
             )
-
-            # Executes post_processing stage after all data is pulled and ingested
-            grc.run_post_processing(customizer=customizer, processing_stages=PROCESSING_STAGES)
-
-            grc.table_backfilter(customizer=customizer)
+            # grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
             grc.audit_automation(customizer=customizer)
+
+        else:
+            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
 
     else:
         if BACK_FILTER_ONLY:
@@ -129,6 +103,9 @@ def main(refresh_indicator) -> int:
 
         if INGEST_ONLY:
             print('Running manual ingest...')
+
+            # Executes post_processing stage after all data is pulled and ingested
+            grc.run_post_processing(customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.ingest_procedures(customizer=customizer)
 
     return 0

@@ -1,12 +1,13 @@
 """
-Google My Business - Insights
+DialogTech - Call Details
 """
 import pandas as pd
 import datetime
+import calendar
 import logging
 import sys
 
-from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting
+from dialogtech.reporting.client.call_detail import CallDetailReporting
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
@@ -44,7 +45,8 @@ def main(refresh_indicator) -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
+    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES,
+                           refresh_indicator=refresh_indicator, expedited=DEBUG)
 
     if not INGEST_ONLY and not BACK_FILTER_ONLY:
 
@@ -54,54 +56,26 @@ def main(refresh_indicator) -> int:
 
         else:
             # automated setup - last week by default
-            start_date = (datetime.datetime.today() - datetime.timedelta(540)).strftime('%Y-%m-%d')
-            end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
+            start_date = (datetime.datetime.today() - datetime.timedelta(540))
+            end_date = (datetime.datetime.today() - datetime.timedelta(1))
 
-        gmb_client = GoogleMyBusinessReporting(
-                secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
-                )
-
-        accounts = grc.get_required_attribute(customizer, 'get_gmb_accounts')()
-        gmb_accounts = gmb_client.get_gmb_accounts()
-
-        filtered_accounts = [account for account in gmb_accounts
-                             if list(account.keys())[0] in accounts]
-
-        print(filtered_accounts)
+        dialog_tech = CallDetailReporting(vertical='<ENTER VERTICAL>')
 
         df_list = []
+        for phone_label in grc.get_required_attribute(customizer, 'pull_dialogtech_labels')():
+            df = dialog_tech.get_call_detail_report(
+                start_date=start_date,
+                end_date=end_date,
+                phone_label=phone_label[0]
+            )
+            if df.shape[0]:
+                df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
+                df['property'] = None
+                df['medium'] = phone_label[1]
+                df_list.append(df)
 
-        for account in filtered_accounts:
-            # get account name using first key (account human name) to access API Name
-            account_name = account[list(account.keys())[0]]['API_Name']
-
-            # get all listings
-            listings = gmb_client.get_gmb_listings(account=account_name)
-
-            # for each listing, get insight data
-            for listing in listings:
-                report = gmb_client.get_gmb_insights(
-                    start_date=start_date,
-                    end_date=end_date,
-                    account=account_name,
-                    location_name=listing['name'])
-
-                if report:
-                    df = pd.DataFrame(report)
-                    df['Listing_ID'] = int(listing['storeCode']) \
-                        if str(listing['storeCode']).isdigit() else str(listing['storeCode'])
-                    df['Listing_Name'] = listing['locationName']
-                    df_list.append(df)
-
-            else:
-                logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
-
-        if df_list:
+        if len(df_list):
             df = pd.concat(df_list)
-
-            df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
-            df['property'] = None
-
             df = grc.run_processing(
                 df=df,
                 customizer=customizer,
@@ -121,6 +95,9 @@ def main(refresh_indicator) -> int:
             grc.table_backfilter(customizer=customizer)
             grc.ingest_procedures(customizer=customizer)
             grc.audit_automation(customizer=customizer)
+
+        else:
+            logger.warning('No data returned for dates {} - {}'.format(start_date, end_date))
 
     else:
         if BACK_FILTER_ONLY:

@@ -26,4 +26,12 @@ timeout 10
 %venvpath% %cd%\moz_pro_rankings.py %refresh_indicator_skip%
 timeout 10
 %venvpath% %cd%\moz_pro_serp.py %refresh_indicator_skip%
+timeout 10
+%venvpath% %cd%\dialogtech_call_detail.py %refresh_indicator_skip%
+timeout 10
+%venvpath% %cd%\google_ads_campaign.py %refresh_indicator_skip%
+timeout 10
+%venvpath% %cd%\account_cost.py %refresh_indicator_skip%
+timeout 10
+%venvpath% %cd%\custom_post_processing_master_table.py
 ENDLOCAL
