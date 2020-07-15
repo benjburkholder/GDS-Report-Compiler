@@ -9,8 +9,6 @@ name: "Develop Branch Merge Action"
 on:
   push:
     branches: 'master'
-  pull_request:
-    types: [closed]
 jobs:
   merge-master-develop:
     runs-on: ubuntu-latest
