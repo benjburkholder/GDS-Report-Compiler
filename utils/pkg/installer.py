@@ -115,12 +115,53 @@ class PackageInstaller:
         assert result, "Package removal failed"
         return result
 
-    def freeze_requirements(self, package_list: list) -> None:
-        # cd to base path
-        # execute pip freeze > requirements.txt
-        # open requirements.txt in read mode
-        # readlines()
-        # for each package in package_list, check if its pip_alias is present
-        # if so, delete the entry (mark for deletion)
-        # re-write requirements.txt without proprietary packages
-        return
+    def _freeze_requirements(self) -> str:
+        if os.name == 'nt':
+            bat_path = self._create_batch_file_path(
+                file_name=self.install_file_name_win
+            )
+            requirements_path = os.path.join(
+                self.base_path,
+                'requirements.txt'
+            )
+            with open(bat_path, 'w') as file:
+                file.write(
+                    (
+                        f'{self._get_venv_activate_path()} '
+                        f'& pip freeze > "{requirements_path}"'
+                    )
+                )
+            process = subprocess.Popen(
+                [
+                    bat_path
+                ],
+                stdout=subprocess.PIPE,
+                stdin=subprocess.PIPE,
+                stderr=subprocess.STDOUT
+            )
+            std_out, std_err = process.communicate()
+            print(std_out.decode())
+
+            return requirements_path
+        else:
+            raise AssertionError('Operating system ' + os.name + ' not supported')
+
+    def freeze_requirements(self, package_list: list) -> bool:
+        requirements_path = self._freeze_requirements()
+
+        with open(requirements_path, 'r') as file:
+            requirements = file.readlines()
+
+        keep_requirements = []
+        for req in requirements:
+            req_name = req[:req.find('==')]
+            matching_packages = [
+                package for package in package_list
+                if package['pip_alias'] == req_name
+            ]
+            if not matching_packages:
+                keep_requirements.append(req)
+
+        with open(requirements_path, 'w') as file:
+            file.writelines(keep_requirements)
+        return True

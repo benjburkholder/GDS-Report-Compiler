@@ -2,11 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/utils/pkg/tests/test_installer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/pkg/tmp/install.bat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_install_proprietary_packages.py" beforeDir="false" afterPath="$PROJECT_DIR$/sys_install_proprietary_packages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/pkg/checker.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/checker.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/pkg/installer.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/installer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/pkg/tests/test_installer.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/tests/test_installer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/pkg/tmp/install.bat" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/tmp/install.bat" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,8 +66,8 @@
       <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_update_package">
-    <configuration name="stdlib" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.sys_install_proprietary_packages">
+    <configuration name="sys_install_proprietary_packages" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -73,11 +75,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/stdlib.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sys_install_proprietary_packages.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -86,7 +88,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for pkg.tests.test_installer.TestPackageChecker" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for pkg.tests.test_installer.TestPackageChecker.test_freeze_requirements" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -96,7 +98,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;pkg.tests.test_installer.TestPackageChecker&quot;" />
+      <option name="_new_target" value="&quot;pkg.tests.test_installer.TestPackageChecker.test_freeze_requirements&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -144,11 +146,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.sys_install_proprietary_packages" />
+        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_freeze_requirements" />
+        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_install_packages" />
         <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_update_package" />
         <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_remove_package" />
-        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_install_packages" />
-        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker" />
-        <item itemvalue="Python.stdlib" />
       </list>
     </recent_temporary>
   </component>
@@ -233,7 +235,14 @@
       <option name="project" value="LOCAL" />
       <updated>1594824504532</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Checkpoint - installing and uninstalling packages using simply python">
+      <created>1594828086721</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1594828086721</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -251,53 +260,54 @@
     <MESSAGE value="Remove trailing comma" />
     <MESSAGE value="Update Statement Generation Updates" />
     <MESSAGE value="Checkpoint - adding functionality to auto-install lmpy dependencies (and track installed packages locally)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Checkpoint - adding functionality to auto-install lmpy dependencies (and track installed packages locally)" />
+    <MESSAGE value="Checkpoint - installing and uninstalling packages using simply python" />
+    <option name="LAST_COMMIT_MESSAGE" value="Checkpoint - installing and uninstalling packages using simply python" />
   </component>
   <component name="WindowStateProjectService">
     <state x="909" y="227" key="#xdebugger.evaluate" timestamp="1586378086100">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="909" y="227" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1586378086100" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1594824504092">
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1594828085982">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1594824504092" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1594828085982" />
     <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1594826394496">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594826394496" />
-    <state width="1899" height="348" key="GridCell.Tab.0.bottom" timestamp="1594827998357">
+    <state width="1899" height="374" key="GridCell.Tab.0.bottom" timestamp="1594828759328">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594827998357" />
-    <state width="1899" height="348" key="GridCell.Tab.0.center" timestamp="1594827998357">
+    <state width="1899" height="374" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759328" />
+    <state width="1899" height="374" key="GridCell.Tab.0.center" timestamp="1594828759328">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594827998357" />
-    <state width="1899" height="348" key="GridCell.Tab.0.left" timestamp="1594827998357">
+    <state width="1899" height="374" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759328" />
+    <state width="1899" height="374" key="GridCell.Tab.0.left" timestamp="1594828759327">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594827998357" />
-    <state width="1899" height="348" key="GridCell.Tab.0.right" timestamp="1594827998357">
+    <state width="1899" height="374" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759327" />
+    <state width="1899" height="374" key="GridCell.Tab.0.right" timestamp="1594828759328">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594827998357" />
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1594827992687">
+    <state width="1899" height="374" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759328" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594827992687" />
-    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1594827992687">
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594827992687" />
-    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1594827992687">
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594827992687" />
-    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1594827992687">
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594827992687" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
     <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1594824508697">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

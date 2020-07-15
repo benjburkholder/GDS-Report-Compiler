@@ -32,3 +32,11 @@ class TestPackageChecker(unittest.TestCase):
             package=self.package_install
         )
         self.assertTrue(result)
+
+    def test_freeze_requirements(self):
+        result = self.src_cls.freeze_requirements(
+            package_list=[
+                self.package_install
+            ]
+        )
+        self.assertTrue(result)

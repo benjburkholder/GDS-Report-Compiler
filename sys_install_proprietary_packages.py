@@ -4,10 +4,19 @@ System Script :: Install Proprietary Packages
 This script helps ensure you have the proper proprietary packages installed (from GitHub)
 given the REQUIRED_PACKAGES global in conf/static.py
 """
+# STANDARD IMPORTS
+import os
+
 # PLATFORM IMPORTS
+from utils.cls.core import Customizer
 from conf.static import REQUIRED_PACKAGES
+from utils.email_manager import EmailClient
 from utils.pkg.installer import PackageInstaller
 from utils.pkg.checker import find_package_by_name, PackageChecker
+SCRIPT_NAME = os.path.basename(__file__)
+DEBUG = False
+if DEBUG:
+    print('WARN: Error reporting disabled. DEBUG = TRUE')
 
 
 def main() -> None:
@@ -54,9 +63,22 @@ def main() -> None:
     pi.freeze_requirements(
         package_list=conf_packages
     )
+
+    # update installed.json
+    pc.write_installed_packages(package_list=conf_packages)
+
     return
 
 
 if __name__ == '__main__':
-    # todo: error handling
-    main()
+    try:
+        main()
+    except Exception as error:
+        if not DEBUG:
+            EmailClient().send_error_email(
+                to=Customizer.recipients,
+                script_name=SCRIPT_NAME,
+                error=error,
+                client=Customizer.client
+            )
+        raise

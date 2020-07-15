@@ -60,12 +60,15 @@ class PackageChecker:
 
     default_installed_packages = []
 
-    def get_installed_packages(self):
-        installed_package_path = os.path.join(
+    def _get_installed_package_path(self):
+        return os.path.join(
             os.path.abspath(os.path.dirname(__file__)),
             'tmp',
             'installed.json'
         )
+
+    def get_installed_packages(self):
+        installed_package_path = self._get_installed_package_path()
         try:
             with open(installed_package_path, 'r') as file:
                 packages = json.load(file)
@@ -75,3 +78,8 @@ class PackageChecker:
                 packages = self.default_installed_packages
         return packages
 
+    def write_installed_packages(self, package_list: list):
+        installed_package_path = self._get_installed_package_path()
+        with open(installed_package_path, 'w') as file:
+            file.write(json.dumps(package_list))
+        return True
