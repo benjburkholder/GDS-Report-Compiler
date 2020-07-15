@@ -1,0 +1,27 @@
+# Hotfix Merge Action
+# ````````````````````````````````````````````````````````````````````
+# keep the 'hotfix' branch up-to-date with master, ensuring develop
+# new features / updates are automatically merged into the
+# hotfix branch
+#
+# occurs on push actions
+name: "Hotfix Branch Merge Action"
+
+on:
+  push:
+    branches: 'master'
+jobs:
+  merge-master-develop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+    
+      - name: Merge
+        uses: robotology/gh-action-nightly-merge@v1.2.0
+        with:
+          stable_branch: 'master'
+          development_branch: 'hotfix'
+          allow_ff: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
