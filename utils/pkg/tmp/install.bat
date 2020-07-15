@@ -1,0 +1,1 @@
+C:\Repositories\GDS-Report-Compiler\venv\Scripts\activate & pip freeze > "C:\Repositories\GDS-Report-Compiler\requirements.txt"

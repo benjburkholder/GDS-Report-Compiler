@@ -3,12 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/google_analytics_events.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_events.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/google_analytics_goals.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_goals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/google_analytics_traffic.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_traffic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/ga.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/ga.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/custom.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/grc.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/grc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_install_proprietary_packages.py" beforeDir="false" afterPath="$PROJECT_DIR$/sys_install_proprietary_packages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/pkg/checker.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/checker.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/pkg/installer.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/installer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/pkg/tests/test_installer.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/tests/test_installer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/pkg/tmp/install.bat" beforeDir="false" afterPath="$PROJECT_DIR$/utils/pkg/tmp/install.bat" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,7 +30,6 @@
             <value>
               <list>
                 <branch-info repo="$PROJECT_DIR$" source="2020.0" />
-                <branch-info repo="$PROJECT_DIR$" source="2020.1" />
               </list>
             </value>
           </entry>
@@ -45,38 +44,30 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1Y5I2vC3IDioe5O7nPBDb9NxhUe" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/utils/cls/user/tests" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.detected.package.tslint" value="true" />
-    <property name="node.js.path.for.package.eslint" value="project" />
-    <property name="node.js.path.for.package.tslint" value="project" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
-    <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="editing.templates" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../lm360-package-installer" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Repositories\GDS-Report-Compiler\utils\cls\user" />
       <recent name="C:\Repositories\GDS-Report-Compiler\utils\dbms_helpers" />
       <recent name="C:\Repositories\gds-report-compiler" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Repositories\GDS-Report-Compiler\utils\cls\test\conf" />
       <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.google_analytics_events">
-    <configuration name="google_analytics_events" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.sys_install_proprietary_packages">
+    <configuration name="sys_install_proprietary_packages" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -88,7 +79,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/google_analytics_events.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sys_install_proprietary_packages.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -97,83 +88,69 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="google_analytics_goals" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="gds-report-compiler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/google_analytics_goals.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="google_analytics_traffic" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="gds-report-compiler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/google_analytics_traffic.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for user.tests.test_moz.TestMozLocalSyncCustomizer" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for pkg.tests.test_installer.TestPackageChecker.test_freeze_requirements" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;user.tests.test_moz.TestMozLocalSyncCustomizer&quot;" />
+      <option name="_new_target" value="&quot;pkg.tests.test_installer.TestPackageChecker.test_freeze_requirements&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests in test_moz.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for pkg.tests.test_installer.TestPackageChecker.test_install_packages" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/utils/cls/user/tests/test_moz.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;pkg.tests.test_installer.TestPackageChecker.test_install_packages&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for pkg.tests.test_installer.TestPackageChecker.test_remove_package" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="gds-report-compiler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;pkg.tests.test_installer.TestPackageChecker.test_remove_package&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for pkg.tests.test_installer.TestPackageChecker.test_update_package" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="gds-report-compiler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;pkg.tests.test_installer.TestPackageChecker.test_update_package&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.google_analytics_events" />
-        <item itemvalue="Python.google_analytics_goals" />
-        <item itemvalue="Python.google_analytics_traffic" />
-        <item itemvalue="Python tests.Unittests in test_moz.py" />
-        <item itemvalue="Python tests.Unittests for user.tests.test_moz.TestMozLocalSyncCustomizer" />
+        <item itemvalue="Python.sys_install_proprietary_packages" />
+        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_freeze_requirements" />
+        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_install_packages" />
+        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_update_package" />
+        <item itemvalue="Python tests.Unittests for pkg.tests.test_installer.TestPackageChecker.test_remove_package" />
       </list>
     </recent_temporary>
   </component>
@@ -187,7 +164,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1582225824815</updated>
-      <workItem from="1593627190484" duration="6080000" />
     </task>
     <task id="LOCAL-00001" summary="Updates from Test Client">
       <created>1582921852970</created>
@@ -252,20 +228,25 @@
       <option name="project" value="LOCAL" />
       <updated>1586376109261</updated>
     </task>
-    <task id="LOCAL-00010" summary="Add Testing Architecture + Google Analytics database secrets functionality&#10;&#10;Further testing is required for the database secrets">
-      <created>1594816880981</created>
+    <task id="LOCAL-00010" summary="Checkpoint - adding functionality to auto-install lmpy dependencies (and track installed packages locally)">
+      <created>1594824504532</created>
       <option name="number" value="00010" />
       <option name="presentableId" value="LOCAL-00010" />
       <option name="project" value="LOCAL" />
-      <updated>1594816880981</updated>
+      <updated>1594824504532</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Checkpoint - installing and uninstalling packages using simply python">
+      <created>1594828086721</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1594828086721</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="2" />
-  </component>
   <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <ignored-roots>
       <path value="$PROJECT_DIR$/GDS-Report-Compiler" />
     </ignored-roots>
@@ -278,66 +259,59 @@
     <MESSAGE value="2020-03-27: Set function prefixes dynamically" />
     <MESSAGE value="Remove trailing comma" />
     <MESSAGE value="Update Statement Generation Updates" />
-    <MESSAGE value="Add Testing Architecture + Google Analytics database secrets functionality&#10;&#10;Further testing is required for the database secrets" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Testing Architecture + Google Analytics database secrets functionality&#10;&#10;Further testing is required for the database secrets" />
+    <MESSAGE value="Checkpoint - adding functionality to auto-install lmpy dependencies (and track installed packages locally)" />
+    <MESSAGE value="Checkpoint - installing and uninstalling packages using simply python" />
+    <option name="LAST_COMMIT_MESSAGE" value="Checkpoint - installing and uninstalling packages using simply python" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="339" y="361" key="#SQL_Dialects" timestamp="1593629987174">
+    <state x="909" y="227" key="#xdebugger.evaluate" timestamp="1586378086100">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="339" y="361" key="#SQL_Dialects/0.0.1920.1040@0.0.1920.1040" timestamp="1593629987174" />
-    <state x="909" y="227" key="#xdebugger.evaluate" timestamp="1594817755585">
+    <state x="909" y="227" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1586378086100" />
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1594828085982">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="909" y="227" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1594817755585" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1594816880354">
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1594828085982" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1594826394496">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1594816880354" />
-    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1594815029061">
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594826394496" />
+    <state width="1899" height="374" key="GridCell.Tab.0.bottom" timestamp="1594828759328">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594815029061" />
-    <state width="1899" height="348" key="GridCell.Tab.0.bottom" timestamp="1594819578755">
+    <state width="1899" height="374" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759328" />
+    <state width="1899" height="374" key="GridCell.Tab.0.center" timestamp="1594828759328">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578755" />
-    <state width="1899" height="348" key="GridCell.Tab.0.center" timestamp="1594819578755">
+    <state width="1899" height="374" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759328" />
+    <state width="1899" height="374" key="GridCell.Tab.0.left" timestamp="1594828759327">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578755" />
-    <state width="1899" height="348" key="GridCell.Tab.0.left" timestamp="1594819578755">
+    <state width="1899" height="374" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759327" />
+    <state width="1899" height="374" key="GridCell.Tab.0.right" timestamp="1594828759328">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578755" />
-    <state width="1899" height="348" key="GridCell.Tab.0.right" timestamp="1594819578755">
+    <state width="1899" height="374" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594828759328" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578755" />
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1594819578756">
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578756" />
-    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1594819578756">
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578756" />
-    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1594819578756">
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1594828638482">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578756" />
-    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1594819578756">
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594828638482" />
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1594824508697">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1594819578756" />
-    <state x="461" y="165" key="SettingsEditor" timestamp="1594815003774">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1594815003774" />
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1594816883904">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1594816883904" />
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1594824508697" />
     <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1586379378932">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -346,31 +320,13 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="581" y="298" key="com.intellij.ide.util.TipDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1586373355355" />
-    <state x="769" y="437" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1593628931610">
+    <state x="769" y="437" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1586374006963">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="769" y="437" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1593628931610" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1593630466433">
+    <state x="769" y="437" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1586374006963" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1594827623393">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1593630466433" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/google_analytics_goals.py</url>
-          <line>73</line>
-          <option name="timeStamp" value="31" />
-        </line-breakpoint>
-      </breakpoints>
-      <default-breakpoints>
-        <breakpoint type="python-exception">
-          <properties notifyOnTerminate="true" exception="BaseException">
-            <option name="notifyOnTerminate" value="true" />
-          </properties>
-        </breakpoint>
-      </default-breakpoints>
-    </breakpoint-manager>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1594827623393" />
   </component>
 </project>

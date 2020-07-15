@@ -139,3 +139,4 @@ secrets/
 
 # tests configuration
 /utils/cls/user/tests/conf/test_config.py
+/utils/pkg/tmp/installed.json
