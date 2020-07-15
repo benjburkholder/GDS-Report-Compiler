@@ -21,7 +21,7 @@ def get_customizers() -> list:
     """
     cls_members = []
     for script in os.listdir(USER_DEFINED_CLASS_PATH):
-        if script != '__pycache__':
+        if script not in ('__pycache__', 'tests'):
             mdle = module_from_file(script.replace('.py', ''), os.path.join(USER_DEFINED_CLASS_PATH, script))
             cls_members.extend(inspect.getmembers(mdle, inspect.isclass))
     return cls_members  # as list

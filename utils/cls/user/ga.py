@@ -9,7 +9,8 @@ from utils.cls.core import Customizer
 
 class GoogleAnalytics(Customizer):
 
-    credential_name = 'GoogleAnalytics'
+    credential_name = 'OAuthCredential'
+    secrets_name = 'GoogleAnalytics'
 
     supported_metrics = [
 
@@ -82,15 +83,6 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
         # set whether this data source is being actively used or not
         self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        # TODO: with a new version of GA that accepts function pointers
-        return '{"msg": "i am json credentials"}'
 
     # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -204,14 +196,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         self.set_attribute('active', True)
 
     # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
-
-    # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Renames columns into pg/sql friendly aliases
@@ -319,14 +303,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
 
         # set whether this data source is being actively used or not
         self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
 
     # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:

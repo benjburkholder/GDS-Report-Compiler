@@ -77,20 +77,61 @@ def get_customizer_secrets(customizer: Customizer) -> Customizer:
 
 
 def set_customizer_secrets_dat(customizer: Customizer) -> None:
+    client_name = customizer.client  # camel-case client name
+    name_value = getattr(customizer, 'secrets_name', '')
+    assert name_value, f"Invalid name_value {name_value} provided"
+    content_value = getattr(customizer, 'secrets_dat', '')
+    assert content_value, f"Invalid content_value {content_value} provided"
+    content_value = json.dumps(content_value) if type(content_value) == dict else content_value
     with create_application_sql_engine(customizer=customizer).connect() as con:
-        con.execute(
+        count_result = con.execute(
             sqlalchemy.text(
                 """
-                UPDATE public.gds_compiler_credentials_dat
-                SET content_value = :content_value
+                SELECT COUNT(*) as count_value
+                FROM public.gds_compiler_credentials_dat
                 WHERE client_name = :client_name
                 AND name_value = :name_value;
                 """
             ),
-            content_value=customizer.secrets_dat,
-            client_name=customizer.client,  # camel-case client name
-            name_value=getattr(customizer, 'credential_name')
-        )
+            client_name=client_name,
+            name_value=name_value
+        ).first()
+        if count_result['count_value'] == 0:
+            con.execute(
+                sqlalchemy.text(
+                    """
+                    INSERT INTO public.gds_compiler_credentials_dat
+                    (
+                        client_name,
+                        name_value,
+                        content_value
+                    )
+                    VALUES
+                    (
+                        :client_name, 
+                        :name_value,
+                        :content_value
+                    );
+                    """
+                ),
+                client_name=client_name,
+                name_value=name_value,
+                content_value=content_value
+            )
+        else:
+            con.execute(
+                sqlalchemy.text(
+                    """
+                    UPDATE public.gds_compiler_credentials_dat
+                    SET content_value = :content_value
+                    WHERE client_name = :client_name
+                    AND name_value = :name_value;
+                    """
+                ),
+                client_name=client_name,
+                name_value=name_value,
+                content_value=content_value
+            )
     return
 
 
@@ -101,6 +142,7 @@ def __get_customizer_secrets_dat(customizer: Customizer) -> Customizer:
     :param customizer:
     :return:
     """
+    name_value = getattr(customizer, 'secrets_name')
     with create_application_sql_engine(customizer=customizer).connect() as con:
         result = con.execute(
             sqlalchemy.text(
@@ -115,9 +157,9 @@ def __get_customizer_secrets_dat(customizer: Customizer) -> Customizer:
                 """
             ),
             client_name=customizer.client,  # camel-case client name
-            name_value=getattr(customizer, 'credential_name')
+            name_value=name_value
         ).first()
-    customizer.secrets_dat = dict(result) if result else {}
+    customizer.secrets_dat = json.dumps(result['content_value']) if result else {}
     return customizer
 
 
@@ -128,6 +170,7 @@ def __get_customizer_secrets(customizer: Customizer) -> Customizer:
     :param customizer:
     :return:
     """
+    name_value = getattr(customizer, 'credential_name')
     with create_application_sql_engine(customizer=customizer).connect() as con:
         result = con.execute(
             sqlalchemy.text(
@@ -137,37 +180,10 @@ def __get_customizer_secrets(customizer: Customizer) -> Customizer:
                 WHERE name_value = :name_value;
                 """
             ),
-            name_value=getattr(customizer, 'credential_name')
+            name_value=name_value
         ).first()
-    customizer.secrets = dict(result) if result else {}
+    customizer.secrets = result['content_value'] if result else {}
     return customizer
-
-
-def set_customizer_secrets_dat(customizer, payload: dict) -> None:
-    """
-    Set credentials by the client and credential_name
-    ====================================================================================================
-    :param customizer:
-    :param payload:
-    :return:
-    """
-    # ensure JSON string is provided
-    payload = json.dumps(payload) if type(payload) == dict else payload
-    with create_application_sql_engine(customizer=customizer).connect() as con:
-        con.execute(
-            sqlalchemy.text(
-                """
-                UPDATE public.gds_compiler_credentials_dat
-                SET content_value = :payload
-                WHERE client_name = :client_name
-                AND name_value = :name_value;
-                """
-            ),
-            client_name=customizer.client,  # camel-case client name
-            name_value=getattr(customizer, 'credential_name'),
-            payload=payload
-        )
-
 
 def clear_non_golden_data(customizer, date_col, min_date, max_date, table):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
