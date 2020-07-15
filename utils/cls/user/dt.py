@@ -43,6 +43,9 @@ class DialogtechCallDetail(DialogTech):
         self.set_attribute('data_source', 'DialogTech - Call Details')
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """

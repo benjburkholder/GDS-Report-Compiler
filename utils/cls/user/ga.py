@@ -9,6 +9,9 @@ from utils.cls.core import Customizer
 
 class GoogleAnalytics(Customizer):
 
+    credential_name = 'OAuthCredential'
+    secrets_name = 'GoogleAnalytics'
+
     supported_metrics = [
 
     ]
@@ -78,14 +81,8 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         self.set_attribute('data_source', 'Google Analytics - Traffic')
         self.set_attribute('schema', {'columns': []})
 
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        # TODO: with a new version of GA that accepts function pointers
-        return '{"msg": "i am json credentials"}'
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
     # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -195,13 +192,8 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         self.set_attribute('data_source', 'Google Analytics - Events')
         self.set_attribute('schema', {'columns': []})
 
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
     # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -309,13 +301,8 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         self.set_attribute('data_source', 'Google Analytics - Goals')
         self.set_attribute('schema', {'columns': []})
 
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
     # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:

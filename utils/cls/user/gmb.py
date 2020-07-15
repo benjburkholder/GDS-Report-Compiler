@@ -68,6 +68,9 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
         self.set_attribute('data_source', 'Google My Business - Insights')
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """
@@ -173,6 +176,9 @@ class GoogleMyBusinessReviews(GoogleMyBusiness):
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Google My Business - Reviews')
         self.set_attribute('schema', {'columns': []})
+
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
         # noinspection PyMethodMayBeStatic
 

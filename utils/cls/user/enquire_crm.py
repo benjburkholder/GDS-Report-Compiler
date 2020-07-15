@@ -20,6 +20,9 @@ class EnquireCrmActivityDeposit(EnquireCRM):
         self.set_attribute('table', self.prefix)
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """
@@ -189,7 +192,7 @@ class EnquireCrmActivityInquiry(EnquireCRM):
         return
 
 
-class EnquireCrmActivityMovein(EnquireCRM):
+class EnquireCrmActivityMoveIn(EnquireCRM):
 
     def __init__(self):
         super().__init__()

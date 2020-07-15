@@ -4,8 +4,11 @@ Custom
 This script is where all reporting configuration takes place
 """
 from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
+from ..stdlib import module_from_file
+
 import pandas as pd
 import re
+import os
 
 
 class Customizer:
@@ -1458,7 +1461,7 @@ class Customizer:
 
     # ### START EDITING HERE ###
     dbms = 'postgresql'
-    client = ''  # Enter in camel case
+    client = '<TEST>'  # Enter in camel case
     project = '<PROJECT>'
     version = '<VERSION>'
     recipients = [
@@ -1478,7 +1481,31 @@ class Customizer:
     def __init__(self):
         self.prefix = self.get_class_prefix()
         self.set_function_prefixes()
+        self._load_test_configuration()
         assert self.valid_global_configuration(), self.global_configuration_message
+
+    test_config_file_name = 'test_config.py'
+
+    def _load_test_configuration(self):
+        if not self.db['DATABASE']:
+            test_config_path = os.path.join(
+                os.path.abspath(os.path.dirname(__file__)),
+                'user',
+                'tests',
+                'conf',
+                self.test_config_file_name
+            )
+            try:
+                test_config = module_from_file(self.test_config_file_name.replace('.py', ''), test_config_path)
+                self.dbms = test_config.dbms
+                self.client = test_config.client
+                self.project = test_config.project
+                self.version = test_config.version
+                self.recipients = test_config.recipients
+                self.db = test_config.db
+            except FileNotFoundError:
+                print('INFO: No testing configuration found, running script with production configuration.')
+                return
 
     def valid_global_configuration(self) -> bool:
         for attribute in self.required_attributes:

@@ -1,6 +1,7 @@
 """
 Google Analytics - Traffic
 """
+import pandas as pd
 import datetime
 import logging
 import sys
@@ -9,11 +10,10 @@ from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
 from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
-import pandas as pd
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 
-DEBUG = False
+DEBUG = True
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
@@ -41,11 +41,24 @@ logger.setLevel(logging.INFO)
 
 def main(refresh_indicator) -> int:
     # run startup global checks
-    grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=PROCESSING_STAGES, label='PROCESSING_STAGES')
-    grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
+    grc.run_prestart_assertion(
+        script_name=SCRIPT_NAME,
+        attribute=PROCESSING_STAGES,
+        label='PROCESSING_STAGES'
+    )
+    grc.run_prestart_assertion(
+        script_name=SCRIPT_NAME,
+        attribute=REQUIRED_ATTRIBUTES,
+        label='REQUIRED_ATTRIBUTES'
+    )
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
+    customizer = grc.setup(
+        script_name=SCRIPT_NAME,
+        required_attributes=REQUIRED_ATTRIBUTES,
+        refresh_indicator=refresh_indicator,
+        expedited=DEBUG
+    )
 
     if not INGEST_ONLY and not BACK_FILTER_ONLY:
 
@@ -58,10 +71,11 @@ def main(refresh_indicator) -> int:
             start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
             end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
+        customizer = grc.get_customizer_secrets(customizer=customizer)
+
         ga_client = GoogleAnalytics(
-            client_name=customizer.client,
-            secrets_path=grc.get_required_attribute(customizer, 'secrets_path')
-            )
+            customizer=customizer
+        )
 
         master_list = []
         for view_id in grc.get_required_attribute(customizer, 'get_view_ids')():
@@ -72,6 +86,11 @@ def main(refresh_indicator) -> int:
                  start_date=start_date,
                  end_date=end_date
             )
+
+            # if the ga client has secrets after the request, lets update the database with those
+            # for good housekeeping
+            if getattr(ga_client.customizer, 'secrets_dat', {}):
+                customizer = update_credentials(customizer=customizer, ga_client=ga_client)
 
             if df.shape[0]:
                 df['view_id'] = view_id
@@ -85,7 +104,9 @@ def main(refresh_indicator) -> int:
                 master_list.append(df)
 
             else:
-                logger.warning('No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date))
+                logger.warning(
+                    'No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date)
+                )
 
         grc.run_data_ingest_rolling_dates(
             df=pd.concat(master_list),
@@ -99,8 +120,10 @@ def main(refresh_indicator) -> int:
 
         grc.table_backfilter(customizer=customizer)
         grc.ingest_procedures(customizer=customizer)
-        grc.audit_automation(customizer=customizer)
+        grc.audit_automation(customizer=customizer)  # todo: may want to remove in favor of tests suite usage
 
+        # update credentials at script termination to ensure things are up-to-date
+        update_credentials(customizer=customizer, ga_client=ga_client)
     else:
         if BACK_FILTER_ONLY:
             print('Running manual backfilter...')
@@ -111,6 +134,22 @@ def main(refresh_indicator) -> int:
             grc.ingest_procedures(customizer=customizer)
 
     return 0
+
+
+# noinspection PyUnresolvedReferences
+def update_credentials(customizer: Customizer, ga_client: GoogleAnalytics) -> Customizer:
+    """
+    Ensure the application database has the most recent data on-file for the client
+    and script / data source
+
+    :param customizer:
+    :param ga_client:
+    :return:
+    """
+    customizer.secrets_dat = ga_client.customizer.secrets_dat
+    customizer.secrets = ga_client.customizer.secrets
+    grc.set_customizer_secrets_dat(customizer=customizer)
+    return customizer
 
 
 if __name__ == '__main__':

@@ -43,6 +43,9 @@ class GoogleAdsCampaign(GoogleAds):
         self.set_attribute('data_source', 'Google Ads - Campaign')
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """
@@ -150,6 +153,9 @@ class GoogleAdsKeyword(GoogleAds):
         self.set_attribute('historical_end_date', '2018-04-22')
         self.set_attribute('table', self.prefix)
         self.set_attribute('schema', {'columns': []})
+
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
         # Used to set columns which vary from data source and client vertical
         self.set_attribute('custom_columns', self.custom_columns)

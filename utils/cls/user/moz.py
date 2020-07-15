@@ -113,6 +113,9 @@ class MozProRankingsCustomizer(Moz):
         self.set_attribute('data_source', 'Moz Pro - Rankings')
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """
@@ -205,6 +208,9 @@ class MozProSerpCustomizer(Moz):
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Moz Pro - SERP')
         self.set_attribute('schema', {'columns': []})
+
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
         # noinspection PyMethodMayBeStatic
 
@@ -299,6 +305,9 @@ class MozLocalVisibilityCustomizer(Moz):
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Moz Local - Visibility Report')
         self.set_attribute('schema', {'columns': []})
+
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
         # noinspection PyMethodMayBeStatic
 
@@ -395,6 +404,9 @@ class MozLocalSyncCustomizer(Moz):
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', 'Moz Local - Sync Report')
         self.set_attribute('schema', {'columns': []})
+
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
         # noinspection PyMethodMayBeStatic
 

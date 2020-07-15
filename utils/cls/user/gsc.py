@@ -42,6 +42,9 @@ class GoogleSearchConsoleMonthly(GoogleSearchConsole):
         self.set_attribute('data_source', 'Google Search Console - Analytics')
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """
