@@ -4,10 +4,8 @@ Custom
 This script is where all reporting configuration takes place
 """
 import os
-import sys
 import inspect
-import importlib
-import importlib.util
+from .stdlib import module_from_file
 from utils.cls.core import Customizer
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 USER_DEFINED_CLASS_PATH = os.path.join(BASE_DIR, 'cls', 'user')
@@ -16,14 +14,6 @@ USER_DEFINED_CLASS_PATH = os.path.join(BASE_DIR, 'cls', 'user')
 # NO EDITING BEYOND THIS POINT
 # ````````````````````````````````````````````````````````````````````````````````````````````````````
 # GRC UTILITY FUNCTIONS
-# https://www.journaldev.com/22576/python-import#python-import-class-from-another-file
-def module_from_file(module_name, file_path):
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
 def get_customizers() -> list:
     """
     Return all custom.py Class objects in [(name, <class>)] format
@@ -53,6 +43,3 @@ def get_customizer(calling_file: str) -> Customizer:
             if getattr(ini_cls, target_attribute):
                 return ini_cls
     raise AssertionError("No configured classes for data source {}".format(calling_file))
-
-
-print(get_customizers())

@@ -9,6 +9,8 @@ from utils.cls.core import Customizer
 
 class GoogleAnalytics(Customizer):
 
+    credential_name = 'GoogleAnalytics'
+
     supported_metrics = [
 
     ]
@@ -77,6 +79,9 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         self.set_attribute('dimensions', self.dimensions)
         self.set_attribute('data_source', 'Google Analytics - Traffic')
         self.set_attribute('schema', {'columns': []})
+
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
@@ -195,6 +200,9 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
         self.set_attribute('data_source', 'Google Analytics - Events')
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:
         """
@@ -308,6 +316,9 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         self.set_attribute('dimensions', self.dimensions)
         self.set_attribute('data_source', 'Google Analytics - Goals')
         self.set_attribute('schema', {'columns': []})
+
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
 
     # noinspection PyMethodMayBeStatic
     def getter(self) -> str:

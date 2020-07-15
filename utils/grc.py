@@ -1,14 +1,19 @@
 """
-Platform
+Platform Functions
 """
 import pandas as pd
+import sqlalchemy
 import datetime
+import copy
+import json
 import os
 
 from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
 from utils.gs_manager import GoogleSheetsManager
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer
 from utils import custom, stdlib
+APPLICATION_DATABASE = 'applications'
 
 
 def get_script_name(file):
@@ -51,6 +56,117 @@ def create_sql_engine(customizer):
         return postgres_helpers.build_postgresql_engine(customizer=customizer)
     else:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
+
+
+def create_application_sql_engine(customizer):
+    # this ensures that customizer, if passed back in the future, is not returned altered
+    app_customizer = copy.deepcopy(
+        customizer
+    )
+    app_customizer.db['DATABASE'] = APPLICATION_DATABASE
+    # create a special database
+    return create_sql_engine(
+        customizer=app_customizer
+    )
+
+
+def get_customizer_secrets(customizer: Customizer) -> Customizer:
+    customizer = __get_customizer_secrets(customizer=customizer)
+    customizer = __get_customizer_secrets_dat(customizer=customizer)
+    return customizer
+
+
+def set_customizer_secrets_dat(customizer: Customizer) -> None:
+    with create_application_sql_engine(customizer=customizer).connect() as con:
+        con.execute(
+            sqlalchemy.text(
+                """
+                UPDATE public.gds_compiler_credentials_dat
+                SET content_value = :content_value
+                WHERE client_name = :client_name
+                AND name_value = :name_value;
+                """
+            ),
+            content_value=customizer.secrets_dat,
+            client_name=customizer.client,  # camel-case client name
+            name_value=getattr(customizer, 'credential_name')
+        )
+    return
+
+
+def __get_customizer_secrets_dat(customizer: Customizer) -> Customizer:
+    """
+    Get DAT credentials by the client and credential_name
+    ====================================================================================================
+    :param customizer:
+    :return:
+    """
+    with create_application_sql_engine(customizer=customizer).connect() as con:
+        result = con.execute(
+            sqlalchemy.text(
+                """
+                SELECT
+                    client_name,
+                    name_value,
+                    content_value
+                FROM public.gds_compiler_credentials_dat
+                WHERE client_name = :client_name
+                AND name_value = :name_value;
+                """
+            ),
+            client_name=customizer.client,  # camel-case client name
+            name_value=getattr(customizer, 'credential_name')
+        ).first()
+    customizer.secrets_dat = dict(result) if result else {}
+    return customizer
+
+
+def __get_customizer_secrets(customizer: Customizer) -> Customizer:
+    """
+    Get OAuth credentials by the client and credential_name
+    ====================================================================================================
+    :param customizer:
+    :return:
+    """
+    with create_application_sql_engine(customizer=customizer).connect() as con:
+        result = con.execute(
+            sqlalchemy.text(
+                """
+                SELECT content_value
+                FROM public.gds_compiler_credentials
+                WHERE name_value = :name_value;
+                """
+            ),
+            name_value=getattr(customizer, 'credential_name')
+        ).first()
+    customizer.secrets = dict(result) if result else {}
+    return customizer
+
+
+def set_customizer_secrets_dat(customizer, payload: dict) -> None:
+    """
+    Set credentials by the client and credential_name
+    ====================================================================================================
+    :param customizer:
+    :param payload:
+    :return:
+    """
+    # ensure JSON string is provided
+    payload = json.dumps(payload) if type(payload) == dict else payload
+    with create_application_sql_engine(customizer=customizer).connect() as con:
+        con.execute(
+            sqlalchemy.text(
+                """
+                UPDATE public.gds_compiler_credentials_dat
+                SET content_value = :payload
+                WHERE client_name = :client_name
+                AND name_value = :name_value;
+                """
+            ),
+            client_name=customizer.client,  # camel-case client name
+            name_value=getattr(customizer, 'credential_name'),
+            payload=payload
+        )
 
 
 def clear_non_golden_data(customizer, date_col, min_date, max_date, table):

@@ -7,7 +7,7 @@ from utils import stdlib
 
 
 def build_postgresql_engine(customizer):
-    connection_string = 'postgresql+pypostgresql://{username}:{password}@{server}/{database}'.format(
+    connection_string = 'postgresql+psycopg2://{username}:{password}@{server}/{database}'.format(
         username=customizer.db['USERNAME'],
         password=customizer.db['PASSWORD'],
         server=customizer.db['SERVER'],

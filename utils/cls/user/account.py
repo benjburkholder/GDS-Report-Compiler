@@ -22,6 +22,9 @@ class AccountCost(Customizer):
         self.set_attribute('class', True)
         self.set_attribute('schema', {'columns': []})
 
+        # set whether this data source is being actively used or not
+        self.set_attribute('active', True)
+
     def pull_account_cost(self):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
