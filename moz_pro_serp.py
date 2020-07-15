@@ -59,7 +59,7 @@ def main(refresh_indicator) -> int:
         else:
             # automated setup - last month by default
             today = datetime.date.today()
-            
+
             if today.day in [2, 3, 7, 15]:
                 report_date = datetime.date(today.year, today.month, 1)
 

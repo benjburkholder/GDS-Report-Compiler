@@ -57,22 +57,47 @@ class Customizer:
     def create_backfilter_statement(
             self, table: dict, lookup_table: dict, backfilter_column: dict, entity_columns: list, update_type: str):
         set_statement = self.generate_set_statement_by_entity_columns(entity_columns=entity_columns)
+
+        start_date = self.get_attribute(attrib='historical_start_date')
+        end_date = self.get_attribute(attrib='historical_end_date')
+        date_range = f"""
+                      AND report_date BETWEEN '{start_date}' AND '{end_date}'
+                      """
+
         if update_type == 'exact':
-            return f"""
+            exact_lookup = """AND LOOKUP.exact = 1;"""
+
+            exact_stmt = f"""
                 UPDATE {table['schema']}.{table['name']} TARGET
                     {set_statement}
                 FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
                 WHERE TARGET.{backfilter_column['name']} = LOOKUP.{backfilter_column['name']}
-                AND LOOKUP.exact = 1;
-            """
+                """
+
+            if self.get_attribute(attrib='historical'):
+                exact_stmt += date_range
+
+            exact_stmt += exact_lookup
+
+            return exact_stmt
+
         elif update_type == 'fuzzy':
-            return f"""
+            fuzzy_lookup = """AND LOOKUP.exact = 0;"""
+
+            fuzzy_stmt = f"""
                 UPDATE {table['schema']}.{table['name']} TARGET
                     {set_statement}
                 FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
                 WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT('%', LOOKUP.{backfilter_column['name']}, '%')
-                AND LOOKUP.exact = 0;
-            """
+                """
+
+            if self.get_attribute(attrib='historical'):
+                fuzzy_stmt += date_range
+
+            fuzzy_stmt += fuzzy_lookup
+
+            return fuzzy_stmt
+
         else:
             raise AssertionError(
                 f"GRC: Unsupported update_type, {update_type}"
@@ -128,6 +153,11 @@ class Customizer:
         delete_statement = self.__create_delete_from_statement(customizer=customizer, target_columns=target_columns)
         insert_statement = self.__create_insert_statement(customizer, master_columns=master_columns, target_columns=target_columns, ingest_defaults=default_ingest_statements)
         group_by_columns = self.__create_group_by_statement(target_sheet_columns=target_sheets)
+        historical_date_range = self.__create_historical_range_statement(customizer=customizer)
+
+        # Specifying date range for ingest statement
+        if self.get_attribute(attrib='historical'):
+            insert_statement += historical_date_range
 
         # Group_by statement is optional, checks if exists and appends to insert stmt if True
         if group_by_columns:
@@ -142,11 +172,26 @@ class Customizer:
     def __create_delete_from_statement(self, customizer, target_columns):
         assert len([col for col in target_columns if "ingest_indicator" in col]) == 1, "'ingest_indicator' attribute not assigned to table column used in ingest procedure"
         ingest_indicator = [column['name'] for column in target_columns if 'ingest_indicator' in column][0]
-        return f"""
-                DELETE FROM public.{customizer.marketing_data['table']['name']}
-                WHERE {ingest_indicator} = '{customizer.custom_columns[0][ingest_indicator]}';
 
-                """
+        if not self.get_attribute(attrib='historical'):
+            delete_stmt = f"""
+                          DELETE FROM public.{customizer.marketing_data['table']['name']}
+                          WHERE {ingest_indicator} = f'{self.get_attribute(attrib=ingest_indicator)}';
+                          """
+        else:
+            start_date = self.get_attribute(attrib='historical_start_date')
+            end_date = self.get_attribute(attrib='historical_end_date')
+
+            date_range = f"""AND report_date BETWEEN '{start_date}' AND '{end_date}';"""
+
+            delete_stmt = f"""
+                           DELETE FROM public.{customizer.marketing_data['table']['name']}
+                           WHERE {ingest_indicator} = f'{self.get_attribute(attrib=ingest_indicator)}'
+                           """
+
+            delete_stmt += date_range
+
+        return delete_stmt
 
     def __compile_target_keys(self, target_columns):
 
@@ -251,6 +296,14 @@ class Customizer:
                 GROUP BY
                 {group_by_statement}
                 """ if group_by_statement else None
+
+    def __create_historical_range_statement(self, customizer):
+        start_date = getattr(customizer, f'{self.prefix}_historical_start_date')
+        end_date = getattr(customizer, f'{self.prefix}_historical_end_date')
+
+        return f"""
+                WHERE report_date BETWEEN '{start_date}' AND '{end_date}';
+                """
 
     def audit_automation_procedure(self, index_column, cadence):
         engine = build_postgresql_engine(customizer=self)
