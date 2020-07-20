@@ -1,18 +1,20 @@
 """
 Platform Functions
 """
-import pandas as pd
-import sqlalchemy
-import datetime
 import copy
+import datetime
 import json
 import os
 
+import pandas as pd
+import sqlalchemy
+
+from utils import custom, stdlib
+from utils.cls.core import Customizer
+from utils.dbms_helpers import postgres_helpers
 from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
 from utils.gs_manager import GoogleSheetsManager
-from utils.dbms_helpers import postgres_helpers
-from utils.cls.core import Customizer
-from utils import custom, stdlib
+
 APPLICATION_DATABASE = 'applications'
 
 
@@ -70,9 +72,10 @@ def create_application_sql_engine(customizer):
     )
 
 
-def get_customizer_secrets(customizer: Customizer) -> Customizer:
+def get_customizer_secrets(customizer: Customizer, include_dat: bool = True) -> Customizer:
     customizer = __get_customizer_secrets(customizer=customizer)
-    customizer = __get_customizer_secrets_dat(customizer=customizer)
+    if include_dat:
+        customizer = __get_customizer_secrets_dat(customizer=customizer)
     return customizer
 
 

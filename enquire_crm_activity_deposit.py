@@ -1,17 +1,18 @@
 """
 Enquire CRM - Deposit
 """
-from pathlib import Path
-import pandas as pd
-import subprocess
 import datetime
 import logging
+import traceback
 import sys
+from pathlib import Path
 
+import pandas as pd
 from googleadspy.reporting.client.reporting import GoogleAdsReporting
-from utils.email_manager import EmailClient
-from utils.cls.core import Customizer
+
 from utils import grc
+from utils.cls.core import Customizer
+from utils.cls.pltfm.gmail import send_error_email
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 yaml_path = Path('secrets')
@@ -116,10 +117,11 @@ if __name__ == '__main__':
         main(refresh_indicator=sys.argv)
     except Exception as error:
         if not DEBUG:
-            EmailClient().send_error_email(
-                to=Customizer.recipients,
+            send_error_email(
+                client_name=Customizer.client,
                 script_name=SCRIPT_NAME,
+                to=Customizer.recipients,
                 error=error,
-                client=Customizer.client
+                stack_trace=traceback.format_exc()
             )
         raise
