@@ -153,6 +153,7 @@ class GoogleAdsKeyword(GoogleAds):
         self.set_attribute('historical_end_date', '2018-04-22')
         self.set_attribute('table', self.prefix)
         self.set_attribute('schema', {'columns': []})
+        self.set_attribute('data_source', 'Google Ads - Keyword')
 
         # set whether this data source is being actively used or not
         self.set_attribute('active', True)

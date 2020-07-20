@@ -17,6 +17,30 @@ class TestHelper(unittest.TestCase):
 
     src_cls = Customizer()
 
+    default_where_clause_levels = [1, 2, 3]
+
+    def generate_where_clause(self, data_source_name: str = None, levels: list = None) -> str:
+        if not levels:
+            levels = self.default_where_clause_levels
+        if data_source_name:
+            where_clause = f"WHERE data_source = '{data_source_name}'\n"
+            idx = 1
+        else:
+            where_clause = "WHERE \n"
+            idx = 0
+        for col_idx in self.src_cls.entity_cols.keys():
+            if col_idx in levels:
+                col = self.src_cls.entity_cols[col_idx]
+                null_value = "= '{}'".format(
+                    col['default_db_value']
+                ) if col['default_db_value'] != 'NULL' else 'IS NULL'
+                if idx > 0:
+                    where_clause += f'''AND "{col['name']}" {null_value} \n'''
+                else:
+                    where_clause += f'''"{col['name']}" {null_value} \n'''
+                idx += 1
+        return where_clause
+
     def _get_table_schema(self):
         """
         Helper function to get and return the table schema from the src_cls Customizer instance
