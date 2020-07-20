@@ -44,6 +44,13 @@ def main(refresh_indicator) -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=PROCESSING_STAGES, label='PROCESSING_STAGES')
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
+    # Used when running backfill and ingest systematically
+    if 'backfill' in refresh_indicator:
+        BACK_FILTER_ONLY = True
+
+    if 'ingest' in refresh_indicator:
+        INGEST_ONLY = True
+
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
 
