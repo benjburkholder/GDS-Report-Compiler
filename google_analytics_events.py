@@ -13,7 +13,7 @@ import pandas as pd
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 
-DEBUG = True
+DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
