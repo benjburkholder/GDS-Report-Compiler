@@ -19,6 +19,7 @@ class EnquireMapHistories(EnquireMAP):
         self.set_attribute('historical_end_date', '2020-01-02')
         self.set_attribute('table', self.prefix)
         self.set_attribute('schema', {'columns': []})
+        self.set_attribute('data_source', 'Enquire MAP - Histories')
 
         # set whether this data source is being actively used or not
         self.set_attribute('active', True)

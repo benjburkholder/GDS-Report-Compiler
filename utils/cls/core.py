@@ -11,6 +11,7 @@ import sqlalchemy
 
 from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
 from ..stdlib import module_from_file
+from conf.static import ENTITY_COLS
 
 
 class Customizer:
@@ -31,6 +32,9 @@ class Customizer:
     secrets = {}
     secrets_dat = {}
     application_engine = None
+
+    # columns used for entity mapping
+    entity_cols = ENTITY_COLS
 
     def get_lookup_table_by_tablespace(self, tablespace: list) -> dict:
         lookup_tables = []
@@ -1068,6 +1072,58 @@ class Customizer:
                 ],
                 'owner': 'postgres'
             }},
+            {'sheet': None, 'table': {
+                'name': 'google_ads_keyword',
+                'schema': 'public',
+                'type': 'reporting',
+                'tablespace': ['google_ads'],
+                'audit_cadence': False,
+                'backfilter_cadence': False,
+                'active': False,
+                'columns': [
+                    # TODO: NEEDS UPDATING
+                    {'name': 'report_date', 'type': 'date', 'master_include': True},
+                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
+                     'ingest_indicator': True},
+                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
+                     'default': 'Non-Location Pages', 'master_include': True},
+                    {'name': 'account_id', 'type': 'character varying', 'length': 25, 'master_include': True},
+                    {'name': 'advertising_channel_type', 'type': 'character varying', 'length': 100,
+                     'master_include': True},
+                    {'name': 'device', 'type': 'character varying', 'length': 50, 'master_include': True},
+                    {'name': 'campaign', 'type': 'character varying', 'length': 250, 'backfilter': True,
+                     'master_include': True},
+                    {'name': 'campaign_id', 'type': 'character varying', 'length': 25, 'master_include': True},
+                    {'name': 'cost', 'type': 'double precision', 'master_include': True},
+                    {'name': 'clicks', 'type': 'bigint', 'master_include': True},
+                    {'name': 'impressions', 'type': 'bigint', 'master_include': True},
+                    {'name': 'search_available_impressions', 'type': 'double precision', 'master_include': True},
+                    {'name': 'search_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'search_budget_lost_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'search_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'content_available_impressions', 'type': 'double precision', 'master_include': True},
+                    {'name': 'content_impression_share', 'type': 'double precision', 'master_include': True},
+                    {'name': 'content_budget_lost_impression_share', 'type': 'double precision',
+                     'master_include': True},
+                    {'name': 'content_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
+
+                ],
+                'indexes': [
+                    {
+                        'name': 'ix_google_ads_campaign',
+                        'tablespace': 'pg_default',
+                        'clustered': True,
+                        'method': 'btree',
+                        'columns': [
+                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'campaign_id', 'sort': 'asc', 'nulls_last': True},
+                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
+                        ],
+                    }
+                ],
+                'owner': 'postgres'
+            }},
+
             {'sheet': None, 'table': {
                 'name': 'enquire_crm_activity_deposit',
                 'schema': 'public',

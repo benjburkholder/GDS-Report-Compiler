@@ -10,3 +10,18 @@ REQUIRED_PACKAGES = [
         'version': 'latest'
     }
 ]
+
+ENTITY_COLS = {
+    1: {
+        'name': 'property',
+        'default_db_value': 'NULL'
+    },
+    2: {
+        'name': 'community',
+        'default_db_value': 'NULL'
+    },
+    3: {
+        'name': 'service_line',
+        'default_db_value': 'NULL'
+    }
+}
