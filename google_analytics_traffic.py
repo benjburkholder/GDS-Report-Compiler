@@ -53,6 +53,13 @@ def main(refresh_indicator) -> int:
         label='REQUIRED_ATTRIBUTES'
     )
 
+    # Used when running backfill and ingest systematically
+    if 'backfill' in refresh_indicator:
+        BACK_FILTER_ONLY = True
+
+    if 'ingest' in refresh_indicator:
+        INGEST_ONLY = True
+
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(
         script_name=SCRIPT_NAME,
