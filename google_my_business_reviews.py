@@ -65,6 +65,8 @@ def main(refresh_indicator) -> int:
         filtered_accounts = [account for account in gmb_accounts
                              if list(account.keys())[0] in accounts]
 
+        assert filtered_accounts, f"{accounts} accounts not found, check the GMB account to ensure the client's location bucket name has not changed."
+
         print(filtered_accounts)
 
         df_list = []
