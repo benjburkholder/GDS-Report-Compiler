@@ -188,6 +188,7 @@ def __get_customizer_secrets(customizer: Customizer) -> Customizer:
     customizer.secrets = result['content_value'] if result else {}
     return customizer
 
+
 def clear_non_golden_data(customizer, date_col, min_date, max_date, table):
     assert hasattr(customizer, 'dbms'), "Invalid global Customizer configuration, missing 'dbms' attribute"
     if customizer.dbms == 'postgresql':
@@ -436,7 +437,7 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
     run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
 
     # check if command there are more than one command line argument
-    if len(refresh_indicator) == 2:
+    if len(refresh_indicator) > 1:
 
         # 'Run' means it's the first script being run
         if 'run' in refresh_indicator:
@@ -468,9 +469,9 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
         print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)
 
-    # Delete extra argument (necessary for GMB API)
-    if len(refresh_indicator) == 2:
-        del refresh_indicator[1]
+    # Delete extra arguments (necessary for GMB API)
+    if len(refresh_indicator) > 1:
+        del refresh_indicator[1:]
 
     return customizer
 
@@ -584,6 +585,16 @@ def refresh_source_tables(customizer: custom.Customizer):
         print('Not listed refresh day.')
 
     return 0
+
+
+def systematic_procedure_execution():
+    table_names = []
+    for sheet in Customizer.CONFIGURATION_WORKBOOK['sheets']:
+        if sheet['table']['type'] == 'reporting':
+            if sheet['table']['active']:
+                table_names.append(sheet['table']['name'])
+
+    return table_names if True else None
 
 
 
