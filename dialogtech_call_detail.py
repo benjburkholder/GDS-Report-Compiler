@@ -1,16 +1,17 @@
 """
 DialogTech - Call Details
 """
-import pandas as pd
 import datetime
-import calendar
 import logging
 import sys
+import traceback
 
+import pandas as pd
 from dialogtech.reporting.client.call_detail import CallDetailReporting
-from utils.email_manager import EmailClient
-from utils.cls.core import Customizer
+
 from utils import grc
+from utils.cls.core import Customizer
+from utils.cls.pltfm.gmail import send_error_email
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 
@@ -116,10 +117,11 @@ if __name__ == '__main__':
         main(refresh_indicator=sys.argv)
     except Exception as error:
         if not DEBUG:
-            EmailClient().send_error_email(
-                to=Customizer.recipients,
+            send_error_email(
+                client_name=Customizer.client,
                 script_name=SCRIPT_NAME,
+                to=Customizer.recipients,
                 error=error,
-                client=Customizer.client
+                stack_trace=traceback.format_exc()
             )
         raise

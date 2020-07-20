@@ -1,8 +1,11 @@
+"""
+Master Table - Custom Post Processing
+"""
+import traceback
 from utils.dbms_helpers import postgres_helpers
-from utils.email_manager import EmailClient
 from utils.cls.core import Customizer
 from utils import grc
-
+from utils.cls.pltfm.gmail import send_error_email
 SCRIPT_NAME = grc.get_script_name(__file__)
 
 
@@ -29,10 +32,12 @@ if __name__ == '__main__':
     try:
         custom_post_processing()
     except Exception as error:
-        EmailClient().send_error_email(
-            to=Customizer.recipients,
+        send_error_email(
+            client_name=Customizer.client,
             script_name=SCRIPT_NAME,
+            to=Customizer.recipients,
             error=error,
-            client=Customizer.client
+            stack_trace=traceback.format_exc(),
+            engine=grc.create_application_sql_engine(customizer=Customizer)
         )
         raise
