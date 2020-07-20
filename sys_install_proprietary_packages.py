@@ -6,11 +6,12 @@ given the REQUIRED_PACKAGES global in conf/static.py
 """
 # STANDARD IMPORTS
 import os
+import traceback
 
 # PLATFORM IMPORTS
 from utils.cls.core import Customizer
 from conf.static import REQUIRED_PACKAGES
-from utils.email_manager import EmailClient
+from utils.cls.pltfm.gmail import send_error_email
 from utils.pkg.installer import PackageInstaller
 from utils.pkg.checker import find_package_by_name, PackageChecker
 SCRIPT_NAME = os.path.basename(__file__)
@@ -75,10 +76,11 @@ if __name__ == '__main__':
         main()
     except Exception as error:
         if not DEBUG:
-            EmailClient().send_error_email(
-                to=Customizer.recipients,
+            send_error_email(
+                client_name=Customizer.client,
                 script_name=SCRIPT_NAME,
+                to=Customizer.recipients,
                 error=error,
-                client=Customizer.client
+                stack_trace=traceback.format_exc()
             )
         raise

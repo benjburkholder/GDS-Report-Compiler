@@ -3,12 +3,14 @@ Custom
 
 This script is where all reporting configuration takes place
 """
-from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
-from ..stdlib import module_from_file
+import os
+import re
 
 import pandas as pd
-import re
-import os
+import sqlalchemy
+
+from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
+from ..stdlib import module_from_file
 
 
 class Customizer:
@@ -24,6 +26,11 @@ class Customizer:
         'version',
         'recipients'
     ]
+
+    # placeholder for oauth credentials and engine
+    secrets = {}
+    secrets_dat = {}
+    application_engine = None
 
     def get_lookup_table_by_tablespace(self, tablespace: list) -> dict:
         lookup_tables = []
@@ -1545,3 +1552,23 @@ class Customizer:
                 setattr(self, prefix_func, getattr(self, func))
                 assert hasattr(self, prefix_func)
         return
+
+    def get_secrets(self) -> dict:
+        """
+        Get OAuth credentials by the client and credential_name
+        ====================================================================================================
+        :return:
+        """
+        name_value = getattr(self, 'credential_name')
+        with self.application_engine.connect() as con:
+            result = con.execute(
+                sqlalchemy.text(
+                    """
+                    SELECT content_value
+                    FROM public.gds_compiler_credentials
+                    WHERE name_value = :name_value;
+                    """
+                ),
+                name_value=name_value
+            ).first()
+        return result['content_value'] if result else {}

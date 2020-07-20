@@ -3,11 +3,12 @@ Google Analytics - Traffic
 """
 import pandas as pd
 import datetime
+import traceback
 import logging
 import sys
 
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics
-from utils.email_manager import EmailClient
+from utils.cls.pltfm.gmail import send_error_email
 from utils.cls.core import Customizer
 from utils import grc
 
