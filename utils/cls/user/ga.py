@@ -43,6 +43,21 @@ class GoogleAnalytics(Customizer):
                 result['view_id'] for result in results
             ] if results else []
 
+    # noinspection PyUnresolvedReferences
+    def update_credentials(self, customizer: Customizer, ga_client: GoogleAnalytics) -> Customizer:
+        """
+        Ensure the application database has the most recent data on-file for the client
+        and script / data source
+
+        :param customizer:
+        :param ga_client:
+        :return:
+        """
+        customizer.secrets_dat = ga_client.customizer.secrets_dat
+        customizer.secrets = ga_client.customizer.secrets
+        grc.set_customizer_secrets_dat(customizer=customizer)
+        return customizer
+
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
