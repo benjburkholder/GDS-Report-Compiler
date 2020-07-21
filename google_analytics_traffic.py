@@ -14,7 +14,7 @@ from utils import grc
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 
-DEBUG = True
+DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
@@ -53,12 +53,8 @@ def main(refresh_indicator) -> int:
         label='REQUIRED_ATTRIBUTES'
     )
 
-    # Used when running backfill and ingest systematically
-    if 'backfill' in refresh_indicator:
-        BACK_FILTER_ONLY = True
-
-    if 'ingest' in refresh_indicator:
-        INGEST_ONLY = True
+    global BACK_FILTER_ONLY, INGEST_ONLY
+    BACK_FILTER_ONLY, INGEST_ONLY = grc.procedure_flag_indicator(refresh_indicator=refresh_indicator, back_filter=BACK_FILTER_ONLY, ingest=INGEST_ONLY)
 
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(
@@ -98,7 +94,7 @@ def main(refresh_indicator) -> int:
             # if the ga client has secrets after the request, lets update the database with those
             # for good housekeeping
             if getattr(ga_client.customizer, 'secrets_dat', {}):
-                customizer = update_credentials(customizer=customizer, ga_client=ga_client)
+                customizer = customizer.update_credentials(customizer=customizer, ga_client=ga_client)
 
             if df.shape[0]:
                 df['view_id'] = view_id
@@ -131,7 +127,8 @@ def main(refresh_indicator) -> int:
         grc.audit_automation(customizer=customizer)  # todo: may want to remove in favor of tests suite usage
 
         # update credentials at script termination to ensure things are up-to-date
-        update_credentials(customizer=customizer, ga_client=ga_client)
+        customizer.update_credentials(customizer=customizer, ga_client=ga_client)
+
     else:
         if BACK_FILTER_ONLY:
             print('Running manual backfilter...')
@@ -144,31 +141,17 @@ def main(refresh_indicator) -> int:
     return 0
 
 
-# noinspection PyUnresolvedReferences
-def update_credentials(customizer: Customizer, ga_client: GoogleAnalytics) -> Customizer:
-    """
-    Ensure the application database has the most recent data on-file for the client
-    and script / data source
-
-    :param customizer:
-    :param ga_client:
-    :return:
-    """
-    customizer.secrets_dat = ga_client.customizer.secrets_dat
-    customizer.secrets = ga_client.customizer.secrets
-    grc.set_customizer_secrets_dat(customizer=customizer)
-    return customizer
-
-
 if __name__ == '__main__':
     try:
         main(refresh_indicator=sys.argv)
     except Exception as error:
         if not DEBUG:
-            EmailClient().send_error_email(
-                to=Customizer.recipients,
+            send_error_email(
+                client_name=Customizer.client,
                 script_name=SCRIPT_NAME,
+                to=Customizer.recipients,
                 error=error,
-                client=Customizer.client
+                stack_trace=traceback.format_exc(),
+                engine=grc.create_application_sql_engine(customizer=Customizer)
             )
         raise
