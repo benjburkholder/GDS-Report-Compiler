@@ -587,7 +587,7 @@ def refresh_source_tables(customizer: custom.Customizer):
     return 0
 
 
-def systematic_procedure_execution():
+def systematic_procedure_execution() -> list:
     table_names = []
     for sheet in Customizer.CONFIGURATION_WORKBOOK['sheets']:
         if sheet['table']['type'] == 'reporting':
@@ -595,6 +595,17 @@ def systematic_procedure_execution():
                 table_names.append(sheet['table']['name'])
 
     return table_names if True else None
+
+
+def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ingest: bool) -> (bool, bool):
+
+    if 'backfill' in refresh_indicator:
+        back_filter = True
+
+    if 'ingest' in refresh_indicator:
+        ingest = True
+
+    return back_filter, ingest
 
 
 
