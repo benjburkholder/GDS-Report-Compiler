@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import os
+import sys
 
 import pandas as pd
 import sqlalchemy
@@ -449,6 +450,9 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
 
     if not expedited:
 
+        # Dynamically inserts correct vertical specific alert slack channel to recipients list
+        insert_vertical_specific_alert_channel(customizer=customizer)
+
         # Build marketing data table
         build_marketing_table(customizer=customizer)
 
@@ -606,6 +610,10 @@ def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ing
         ingest = True
 
     return back_filter, ingest
+
+
+def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
+    customizer.recipients.append(customizer.vertical_specific_slack_alerts[customizer.vertical])
 
 
 
