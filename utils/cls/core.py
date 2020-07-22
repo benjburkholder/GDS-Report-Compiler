@@ -1525,6 +1525,7 @@ class Customizer:
     # ### START EDITING HERE ###
     dbms = 'postgresql'
     client = '<TEST>'  # Enter in camel case
+    vertical = ''  # Reference "vertical_specific_slack_alerts" dictionary below
     project = '<PROJECT>'
     version = '<VERSION>'
     recipients = [
@@ -1537,6 +1538,15 @@ class Customizer:
         'USERNAME': 'python-2',
         'PASSWORD': 'pythonpipelines',
         'SERVER': '35.222.11.147'
+    }
+
+    # Used to reference and dynamically assign proper alert channel to recipients list
+    vertical_specific_slack_alerts = {
+        'senior_living': 'v3i7w7v9w6f9e1b6@linkmedia360.slack.com',
+        'allin': 'x2f8r7c8r1q4o5j4@linkmedia360.slack.com',
+        'omni_local': 'y0o5g1x8g9s3s6z1@linkmedia360.slack.com',
+        'self_storage': 'c7u3z2b1j5z8i9x8@linkmedia360.slack.com',
+        'addiction': 'v2s2x4r7n6p3c3c3@linkmedia360.slack.com'
     }
 
     # ### END EDITING ###
