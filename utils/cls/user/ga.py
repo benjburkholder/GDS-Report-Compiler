@@ -3,6 +3,7 @@ import sqlalchemy
 import pathlib
 import os
 
+from googleanalyticspy.reporting.client.reporting import GoogleAnalytics as GA_Package
 from utils.dbms_helpers import postgres_helpers
 from utils.cls.core import Customizer
 
@@ -44,7 +45,7 @@ class GoogleAnalytics(Customizer):
             ] if results else []
 
     # noinspection PyUnresolvedReferences
-    def update_credentials(self, customizer: Customizer, ga_client: GoogleAnalytics) -> Customizer:
+    def update_credentials(self, customizer: Customizer, ga_client: GA_Package) -> Customizer:
         """
         Ensure the application database has the most recent data on-file for the client
         and script / data source
