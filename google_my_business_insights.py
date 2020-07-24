@@ -151,6 +151,6 @@ if __name__ == '__main__':
                 to=Customizer.recipients,
                 error=error,
                 stack_trace=traceback.format_exc(),
-                engine=grc.create_application_sql_engine(customizer=Customizer)
+                engine=grc.create_application_sql_engine()
             )
         raise
