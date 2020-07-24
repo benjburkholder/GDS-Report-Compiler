@@ -317,19 +317,18 @@ class Customizer:
                 """
 
     def audit_automation_procedure(self, index_column, cadence):
-        engine = build_postgresql_engine(customizer=self)
         fail_list = []
         if cadence.lower() == 'daily':
             # if daily, there should be 7 days in week query
-            days = self.__run_audit_query(how='week', quan=1, engine=engine, source=index_column)
+            days = self.__run_audit_query(how='week', quan=1, source=index_column)
             score = self.__score_days(days=days, min_days=7)
         elif cadence.lower() == 'weekly':
             # if weekly, there should be 1 day in week query
-            days = self.__run_audit_query(how='week', quan=1, engine=engine, source=index_column)
+            days = self.__run_audit_query(how='week', quan=1, source=index_column)
             score = self.__score_days(days=days, min_days=1)
         elif cadence.lower() == 'monthly':
             # if monthly, there should be 1 day in 61 day query
-            days = self.__run_audit_query(how='month', quan=2, engine=engine, source=index_column)
+            days = self.__run_audit_query(how='month', quan=2, source=index_column)
             score = self.__score_days(days=days, min_days=1)
         else:
             raise AssertionError(
@@ -357,7 +356,7 @@ class Customizer:
         else:
             return True
 
-    def __run_audit_query(self, how: str, quan: int, engine, source: str) -> list:
+    def __run_audit_query(self, how: str, quan: int, source: str) -> list:
         sql = """
         SELECT DISTINCT report_date
         FROM public.{marketing_table}
@@ -366,7 +365,7 @@ class Customizer:
             AND data_source = '{source}';
         """.format(quan=quan, how=how.lower(), source=source, marketing_table=self.marketing_data['table']['name'])
         print(sql)
-        with engine.connect() as con:
+        with self.engine.connect() as con:
             results = con.execute(sql).fetchall()
         return [item[0] for item in results] if results else None
 
@@ -1546,6 +1545,7 @@ class Customizer:
         self.set_function_prefixes()
         self._load_test_configuration()
         assert self.valid_global_configuration(), self.global_configuration_message
+        self.engine = build_postgresql_engine(customizer=self)
 
     test_config_file_name = 'test_config.py'
 

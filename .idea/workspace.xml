@@ -2,15 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/utils/cls/pltfm/marketing_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/cls/pltfm/tests/test_marketing_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/scripts/post_processing/user/select_marketing_data.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/static.py" beforeDir="false" afterPath="$PROJECT_DIR$/conf/static.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/account_cost.py" beforeDir="false" afterPath="$PROJECT_DIR$/account_cost.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dialogtech_call_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/dialogtech_call_detail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enquire_crm_activity_deposit.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_crm_activity_deposit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enquire_crm_activity_inquiry.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_crm_activity_inquiry.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enquire_crm_activity_movein.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_crm_activity_movein.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enquire_crm_activity_tour.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_crm_activity_tour.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enquire_map_email_performance_summary.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_map_email_performance_summary.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/enquire_map_histories.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_map_histories.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/google_ads_campaign.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_ads_campaign.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/cls/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/enquire_map.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/enquire_map.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/gads.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/gads.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/tests/test_core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/tests/test_core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/tests/test_dt.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/tests/test_dt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/tests/test_enquire_map.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/tests/test_enquire_map.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/tests/test_gads.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/tests/test_gads.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,79 +62,73 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/utils/cls/pltfm/tests" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Repositories\GDS-Report-Compiler\utils\dbms_helpers" />
-      <recent name="C:\Repositories\gds-report-compiler" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Repositories\GDS-Report-Compiler\utils\scripts\post_processing" />
+      <recent name="C:\Repositories\GDS-Report-Compiler\utils\dbms_helpers" />
+      <recent name="C:\Repositories\gds-report-compiler" />
+    </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for user.tests.test_gads.TestGoogleAdsKeyword.test_unmapped_campaigns_all_source_table">
-    <configuration name="google_analytics_events" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="gds-report-compiler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/google_analytics_events.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for tests.test_dt.TestDialogtechCallDetail.test_unmapped_phone_labels_all" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python tests.Unittests for test_marketing_data.TestMarketingData.test_execute_scripts">
+    <configuration name="Unittests for test_marketing_data.TestMarketingData" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls/user" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls/pltfm/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_dt.TestDialogtechCallDetail.test_unmapped_phone_labels_all&quot;" />
+      <option name="_new_target" value="&quot;test_marketing_data.TestMarketingData&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for user.tests.test_enquire_map.TestEnquireMapHistories.test_unmapped_ctns_all_marketing_data" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for test_marketing_data.TestMarketingData.test_execute_scripts" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls/pltfm/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;user.tests.test_enquire_map.TestEnquireMapHistories.test_unmapped_ctns_all_marketing_data&quot;" />
+      <option name="_new_target" value="&quot;test_marketing_data.TestMarketingData.test_execute_scripts&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for user.tests.test_gads.TestGoogleAdsCampaign.test_unmapped_campaigns_all_source_table" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for test_marketing_data.TestMarketingData.test_find_scripts" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls/pltfm/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;user.tests.test_gads.TestGoogleAdsCampaign.test_unmapped_campaigns_all_source_table&quot;" />
+      <option name="_new_target" value="&quot;test_marketing_data.TestMarketingData.test_find_scripts&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for test_marketing_data.TestMarketingData.test_get_scripts_directory" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="gds-report-compiler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls/pltfm/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_marketing_data.TestMarketingData.test_get_scripts_directory&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -149,11 +148,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.Unittests for test_marketing_data.TestMarketingData.test_execute_scripts" />
+        <item itemvalue="Python tests.Unittests for test_marketing_data.TestMarketingData" />
+        <item itemvalue="Python tests.Unittests for test_marketing_data.TestMarketingData.test_find_scripts" />
+        <item itemvalue="Python tests.Unittests for test_marketing_data.TestMarketingData.test_get_scripts_directory" />
         <item itemvalue="Python tests.Unittests for user.tests.test_gads.TestGoogleAdsKeyword.test_unmapped_campaigns_all_source_table" />
-        <item itemvalue="Python tests.Unittests for user.tests.test_gads.TestGoogleAdsCampaign.test_unmapped_campaigns_all_source_table" />
-        <item itemvalue="Python tests.Unittests for user.tests.test_enquire_map.TestEnquireMapHistories.test_unmapped_ctns_all_marketing_data" />
-        <item itemvalue="Python tests.Unittests for tests.test_dt.TestDialogtechCallDetail.test_unmapped_phone_labels_all" />
-        <item itemvalue="Python.google_analytics_events" />
       </list>
     </recent_temporary>
   </component>
@@ -259,7 +258,14 @@
       <option name="project" value="LOCAL" />
       <updated>1595254532578</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Tests for DialogTech, GoogleAds.Campaign and GoogleAds.Keyword">
+      <created>1595263799471</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1595263799471</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -280,61 +286,62 @@
     <MESSAGE value="Checkpoint - installing and uninstalling packages using simply python" />
     <MESSAGE value="Functionality to install and manage packages using the new system script tested and finalized" />
     <MESSAGE value="GmailCustomizer using global credentials for reporting errors and notifications" />
-    <option name="LAST_COMMIT_MESSAGE" value="GmailCustomizer using global credentials for reporting errors and notifications" />
+    <MESSAGE value="Tests for DialogTech, GoogleAds.Campaign and GoogleAds.Keyword" />
+    <option name="LAST_COMMIT_MESSAGE" value="Tests for DialogTech, GoogleAds.Campaign and GoogleAds.Keyword" />
   </component>
   <component name="WindowStateProjectService">
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595254451470">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1595254451470" />
-    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1595253958192">
+    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1595604925330">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595253958192" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595254531905">
+    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595604925330" />
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595263798894">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595254531905" />
-    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1594826394496">
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595263798894" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1595605137831">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594826394496" />
-    <state width="1899" height="374" key="GridCell.Tab.0.bottom" timestamp="1595263725631">
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1595605137831" />
+    <state width="1899" height="348" key="GridCell.Tab.0.bottom" timestamp="1595606457643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="374" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595263725631" />
-    <state width="1899" height="374" key="GridCell.Tab.0.center" timestamp="1595263725631">
+    <state width="1899" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457643" />
+    <state width="1899" height="348" key="GridCell.Tab.0.center" timestamp="1595606457643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="374" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595263725631" />
-    <state width="1899" height="374" key="GridCell.Tab.0.left" timestamp="1595263725631">
+    <state width="1899" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457643" />
+    <state width="1899" height="348" key="GridCell.Tab.0.left" timestamp="1595606457642">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="374" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595263725631" />
-    <state width="1899" height="374" key="GridCell.Tab.0.right" timestamp="1595263725631">
+    <state width="1899" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457642" />
+    <state width="1899" height="348" key="GridCell.Tab.0.right" timestamp="1595606457643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="374" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595263725631" />
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1595263648395">
+    <state width="1899" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457643" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1595606457643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595263648395" />
-    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1595263648394">
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457643" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1595606457643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595263648394" />
-    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1595263648394">
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457643" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1595606457643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595263648394" />
-    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1595263648395">
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457643" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1595606457643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595263648395" />
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595254536338">
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595606457643" />
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595263907381">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595254536338" />
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595263907381" />
     <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1595263601723">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

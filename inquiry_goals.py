@@ -9,6 +9,7 @@ from utils.gs_manager import GoogleSheetsManager
 from utils.cls.pltfm.gmail import send_error_email
 from utils.cls.core import Customizer
 from utils import grc
+from utils.cls.pltfm.marketing_data import execute_post_processing_scripts_for_process
 
 SCRIPT_NAME = grc.get_script_name(__file__)
 
