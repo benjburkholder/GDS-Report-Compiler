@@ -48,7 +48,7 @@ class TestHelper(unittest.TestCase):
         :return:
         """
         table = self.src_cls.get_attribute('table')
-        workbook = self.src_cls.CONFIGURATION_WORKBOOK
+        workbook = self.src_cls.configuration_workbook
         for sheet in workbook.get('sheets', []):
             if sheet.get('table'):
                 if sheet.get('table', {}).get('name') == table:

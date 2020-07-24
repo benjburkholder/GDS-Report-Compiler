@@ -62,14 +62,8 @@ def create_sql_engine(customizer):
 
 
 def create_application_sql_engine(customizer):
-    # this ensures that customizer, if passed back in the future, is not returned altered
-    app_customizer = copy.deepcopy(
-        customizer
-    )
-    app_customizer.db['DATABASE'] = APPLICATION_DATABASE
-    # create a special database
     return create_sql_engine(
-        customizer=app_customizer
+        customizer=Customizer(database=APPLICATION_DATABASE)
     )
 
 
@@ -248,7 +242,7 @@ def run_data_ingest_rolling_dates(df, customizer, table, date_col='report_date')
 
 
 def build_lookup_tables(customizer) -> int:
-    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['type'] == 'lookup':
             if sheet['table']['active']:
                 lookup_table_existence = check_table_exists(customizer, schema=sheet)
@@ -261,7 +255,7 @@ def build_lookup_tables(customizer) -> int:
 
 
 def build_reporting_tables(customizer) -> int:
-    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['type'] == 'reporting':
             if sheet['table']['active']:
                 print(f'Checking if {sheet["table"]["name"]} exists...')
@@ -275,7 +269,7 @@ def build_reporting_tables(customizer) -> int:
 
 
 def build_source_tables(customizer) -> int:
-    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['type'] == 'source':
             if sheet['table']['active']:
                 print(f'Checking if {sheet["table"]["name"]} exists...')
@@ -297,7 +291,7 @@ def build_marketing_table(customizer) -> int:
     if not marketing_table_existence:
         print(f'{customizer.marketing_data["table"]["name"]} does not exist, creating...')
 
-        for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
+        for sheets in customizer.configuration_workbook['sheets']:
             if sheets['table']['type'] == 'reporting':
                 if sheets['table']['active']:
                     for column in sheets['table']['columns']:
@@ -374,12 +368,12 @@ def reshape_source_table_data(customizer, df, sheet):
 
 
 def refresh_lookup_tables(customizer) -> int:
-    if customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] is False:
-        for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    if customizer.configuration_workbook['lookup_refresh_status'] is False:
+        for sheet in customizer.configuration_workbook['sheets']:
             if sheet['table']['type'] == 'lookup':
                 if sheet['table']['active']:
-                    raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
-                                                                                               worksheet_name=sheet['sheet'])
+                    raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.configuration_workbook['config_sheet_name'],
+                                                                                                     worksheet_name=sheet['sheet'])
 
                     clear_lookup_table_data(customizer=customizer, sheet=sheet)
                     df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
@@ -388,7 +382,7 @@ def refresh_lookup_tables(customizer) -> int:
                     print(f"SUCCESS: {sheet['table']['name']} Refreshed.")
 
     # Once one script refreshed lookup tables, set global status to True to bypass with following scripts
-    customizer.CONFIGURATION_WORKBOOK['lookup_refresh_status'] = True
+    customizer.configuration_workbook['lookup_refresh_status'] = True
 
     print("SUCCESS: Lookup Tables Refreshed.")
 
@@ -521,7 +515,7 @@ def run_post_processing(customizer: custom.Customizer, processing_stages: list):
 
 
 def dynamic_typing(customizer: custom.Customizer):
-    for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['name'] == customizer.get_attribute('table'):
             customizer.get_attribute('schema')['columns'].append(sheet['table']['columns'])
 
@@ -529,7 +523,7 @@ def dynamic_typing(customizer: custom.Customizer):
 def table_backfilter(customizer: custom.Customizer):
     engine = build_postgresql_engine(customizer=customizer)
     target_sheets = [
-        sheet for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']
+        sheet for sheet in customizer.configuration_workbook['sheets']
         if sheet['table']['name'] == customizer.get_attribute('table')
     ]
     assert len(target_sheets) == 1
@@ -546,14 +540,14 @@ def ingest_procedures(customizer: custom.Customizer):
     engine = build_postgresql_engine(customizer=customizer)
 
     master_columns = []
-    for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    for sheets in customizer.configuration_workbook['sheets']:
         if sheets['table']['type'] == 'reporting':
             if sheets['table']['active']:
                 for column in sheets['table']['columns']:
                     if column['master_include']:
                         master_columns.append(column)
     target_sheets = [
-        sheet for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']
+        sheet for sheet in customizer.configuration_workbook['sheets']
         if sheet['table']['name'] == customizer.get_attribute('table')]
     ingest_procedure = customizer.create_ingest_statement(customizer, master_columns, target_sheets)
     with engine.connect() as con:
@@ -563,7 +557,7 @@ def ingest_procedures(customizer: custom.Customizer):
 
 
 def audit_automation(customizer: custom.Customizer):
-    for sheets in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    for sheets in customizer.configuration_workbook['sheets']:
         if sheets['table']['type'] == 'reporting':
             if sheets['table']['audit_cadence']:
                 if sheets['table']['name'] == customizer.get_attribute('table'):
@@ -574,11 +568,11 @@ def audit_automation(customizer: custom.Customizer):
 def refresh_source_tables(customizer: custom.Customizer):
     today = datetime.date.today()
 
-    if today.day in customizer.CONFIGURATION_WORKBOOK['source_refresh_dates']:
-        for sheet in customizer.CONFIGURATION_WORKBOOK['sheets']:
+    if today.day in customizer.configuration_workbook['source_refresh_dates']:
+        for sheet in customizer.configuration_workbook['sheets']:
             if sheet['table']['type'] == 'source':
                 if sheet['table']['active']:
-                    raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'], worksheet_name=sheet['sheet'])
+                    raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.configuration_workbook['config_sheet_name'], worksheet_name=sheet['sheet'])
 
                     clear_source_table_data(customizer=customizer, sheet=sheet)
                     df = reshape_source_table_data(customizer=customizer, df=raw_source_data, sheet=sheet)
@@ -593,7 +587,7 @@ def refresh_source_tables(customizer: custom.Customizer):
 
 def systematic_procedure_execution() -> list:
     table_names = []
-    for sheet in Customizer.CONFIGURATION_WORKBOOK['sheets']:
+    for sheet in Customizer.configuration_workbook['sheets']:
         if sheet['table']['type'] == 'reporting':
             if sheet['table']['active']:
                 table_names.append(sheet['table']['name'])

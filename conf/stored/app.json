@@ -1,0 +1,13 @@
+{
+  "version": "2020.2.1",
+  "dbms": "postgresql",
+  "client": "<TEST>",
+  "vertical": "<TEST>",
+  "project": "GDS",
+  "db": {
+    "DATABASE": "",
+    "USERNAME": "python-2",
+    "PASSWORD": "pythonpipelines",
+    "SERVER": "35.222.11.147"
+  }
+}

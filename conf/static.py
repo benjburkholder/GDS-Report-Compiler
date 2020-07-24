@@ -2,6 +2,8 @@
 Static GRC Configuration
 """
 
+GIT_HUB_KEY = '<API_KEY>'
+
 # specify the repository name and version
 REQUIRED_PACKAGES = [
     {

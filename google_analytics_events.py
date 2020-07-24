@@ -14,7 +14,6 @@ import pandas as pd
 from utils.cls.pltfm.marketing_data import execute_post_processing_scripts_for_process
 
 SCRIPT_NAME = grc.get_script_name(__file__)
-SCRIPT_FILTER = SCRIPT_NAME.replace('.py')
 
 DEBUG = False
 if DEBUG:
@@ -170,9 +169,9 @@ if __name__ == '__main__':
     except Exception as error:
         if not DEBUG:
             send_error_email(
-                client_name=Customizer.client,
+                client_name=Customizer().client,
                 script_name=SCRIPT_NAME,
-                to=Customizer.recipients,
+                to=Customizer().recipients,
                 error=error,
                 stack_trace=traceback.format_exc(),
                 engine=grc.create_application_sql_engine(customizer=Customizer)

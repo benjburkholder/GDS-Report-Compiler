@@ -64,7 +64,7 @@ def main(refresh_indicator) -> int:
         df = GoogleSheetsManager(
             customizer.client
         ).get_spreadsheet_by_name(
-            workbook_name=customizer.CONFIGURATION_WORKBOOK['config_sheet_name'],
+            workbook_name=customizer.configuration_workbook['config_sheet_name'],
             worksheet_name='Inquiry Goals'
         )
 
