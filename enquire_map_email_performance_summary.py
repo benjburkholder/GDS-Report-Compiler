@@ -111,6 +111,11 @@ def main(refresh_indicator) -> int:
             grc.run_post_processing(customizer=customizer, processing_stages=PROCESSING_STAGES)
             grc.ingest_procedures(customizer=customizer)
 
+    # find post processing SQL scripts with this file's name as a search key and execute
+    execute_post_processing_scripts_for_process(
+        script_filter=SCRIPT_FILTER
+    )
+
     return 0
 
 

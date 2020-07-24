@@ -110,6 +110,11 @@ def main(refresh_indicator) -> int:
             subprocess.call(['python', 'custom_post_processing_reporting_tables.py'])
             grc.ingest_procedures(customizer=customizer)
 
+    # find post processing SQL scripts with this file's name as a search key and execute
+    execute_post_processing_scripts_for_process(
+        script_filter=SCRIPT_FILTER
+    )
+
     return 0
 
 
