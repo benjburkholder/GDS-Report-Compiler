@@ -2,11 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/utils/cls/pltfm/marketing_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/cls/pltfm/tests/test_marketing_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/scripts/post_processing/user/select_marketing_data.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account_cost.py" beforeDir="false" afterPath="$PROJECT_DIR$/account_cost.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dialogtech_call_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/dialogtech_call_detail.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/enquire_crm_activity_deposit.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_crm_activity_deposit.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/enquire_crm_activity_inquiry.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_crm_activity_inquiry.py" afterDir="false" />
@@ -15,7 +10,11 @@
       <change beforePath="$PROJECT_DIR$/enquire_map_email_performance_summary.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_map_email_performance_summary.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/enquire_map_histories.py" beforeDir="false" afterPath="$PROJECT_DIR$/enquire_map_histories.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/google_ads_campaign.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_ads_campaign.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/google_analytics_events.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_events.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/google_analytics_goals.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_goals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/google_analytics_traffic.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_traffic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/google_my_business_insights.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_my_business_insights.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/google_my_business_reviews.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_my_business_reviews.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -265,7 +264,14 @@
       <option name="project" value="LOCAL" />
       <updated>1595263799471</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Import new marketing_data module post processing function">
+      <created>1595607230547</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1595607230547</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -287,7 +293,8 @@
     <MESSAGE value="Functionality to install and manage packages using the new system script tested and finalized" />
     <MESSAGE value="GmailCustomizer using global credentials for reporting errors and notifications" />
     <MESSAGE value="Tests for DialogTech, GoogleAds.Campaign and GoogleAds.Keyword" />
-    <option name="LAST_COMMIT_MESSAGE" value="Tests for DialogTech, GoogleAds.Campaign and GoogleAds.Keyword" />
+    <MESSAGE value="Import new marketing_data module post processing function" />
+    <option name="LAST_COMMIT_MESSAGE" value="Import new marketing_data module post processing function" />
   </component>
   <component name="WindowStateProjectService">
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595254451470">
@@ -298,10 +305,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595604925330" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595263798894">
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595607229921">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595263798894" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595607229921" />
     <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1595605137831">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -356,7 +363,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/google_analytics_events.py</url>
-          <line>146</line>
+          <line>147</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>

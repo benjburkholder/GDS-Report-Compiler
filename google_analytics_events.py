@@ -13,6 +13,7 @@ from utils import grc
 import pandas as pd
 
 SCRIPT_NAME = grc.get_script_name(__file__)
+SCRIPT_FILTER = SCRIPT_NAME.replace('.py')
 
 DEBUG = False
 if DEBUG:

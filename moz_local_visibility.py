@@ -14,6 +14,7 @@ from utils import grc
 from utils.cls.pltfm.marketing_data import execute_post_processing_scripts_for_process
 
 SCRIPT_NAME = grc.get_script_name(__file__)
+SCRIPT_FILTER = SCRIPT_NAME.replace('.py')
 
 DEBUG = False
 if DEBUG:
