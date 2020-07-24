@@ -17,7 +17,7 @@ from utils.cls.pltfm.marketing_data import execute_post_processing_scripts_for_p
 SCRIPT_NAME = grc.get_script_name(__file__)
 SCRIPT_FILTER = SCRIPT_NAME.replace('.py')
 
-DEBUG = True
+DEBUG = False
 if DEBUG:
     print("WARN: Error reporting disabled and expedited runtime mode activated")
 
@@ -128,11 +128,6 @@ def main(refresh_indicator) -> int:
             print('Running manual ingest...')
             grc.ingest_procedures(customizer=customizer)
 
-    # find post processing SQL scripts with this file's name as a search key and execute
-    execute_post_processing_scripts_for_process(
-        script_filter=SCRIPT_FILTER
-    )
-
     return 0
 
 
@@ -151,6 +146,7 @@ def update_credentials(customizer: Customizer, ga_client: GoogleAnalytics) -> Cu
     customizer.secrets = ga_client.customizer.secrets
     grc.set_customizer_secrets_dat(customizer=customizer)
     return customizer
+
 
 
 if __name__ == '__main__':
