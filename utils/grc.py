@@ -61,13 +61,18 @@ def create_sql_engine(customizer):
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def create_application_sql_engine(customizer):
-    # this ensures that customizer, if passed back in the future, is not returned altered
-    app_customizer = copy.deepcopy(
-        customizer
-    )
+def create_application_sql_engine():
+    """
+    Use the static APPLICATION_DATABASE to alter existing Customizer setup to support interacting
+    with the applications database
+    ====================================================================================================
+    :return:
+    """
+    # instantiate a brand new Customizer() since we only need the database connection params
+    app_customizer = Customizer()
     app_customizer.db['DATABASE'] = APPLICATION_DATABASE
-    # create a special database
+
+    # call the same create_sql_engine helper function to return a valid DBMS engine
     return create_sql_engine(
         customizer=app_customizer
     )
@@ -87,7 +92,7 @@ def set_customizer_secrets_dat(customizer: Customizer) -> None:
     content_value = getattr(customizer, 'secrets_dat', '')
     assert content_value, f"Invalid content_value {content_value} provided"
     content_value = json.dumps(content_value) if type(content_value) == dict else content_value
-    with create_application_sql_engine(customizer=customizer).connect() as con:
+    with create_application_sql_engine().connect() as con:
         count_result = con.execute(
             sqlalchemy.text(
                 """
@@ -147,7 +152,7 @@ def __get_customizer_secrets_dat(customizer: Customizer) -> Customizer:
     :return:
     """
     name_value = getattr(customizer, 'secrets_name')
-    with create_application_sql_engine(customizer=customizer).connect() as con:
+    with create_application_sql_engine().connect() as con:
         result = con.execute(
             sqlalchemy.text(
                 """
@@ -175,7 +180,7 @@ def __get_customizer_secrets(customizer: Customizer) -> Customizer:
     :return:
     """
     name_value = getattr(customizer, 'credential_name')
-    with create_application_sql_engine(customizer=customizer).connect() as con:
+    with create_application_sql_engine().connect() as con:
         result = con.execute(
             sqlalchemy.text(
                 """
