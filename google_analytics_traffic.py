@@ -57,7 +57,11 @@ def main(refresh_indicator) -> int:
     )
 
     global BACK_FILTER_ONLY, INGEST_ONLY
-    BACK_FILTER_ONLY, INGEST_ONLY = grc.procedure_flag_indicator(refresh_indicator=refresh_indicator, back_filter=BACK_FILTER_ONLY, ingest=INGEST_ONLY)
+    BACK_FILTER_ONLY, INGEST_ONLY = grc.procedure_flag_indicator(
+        refresh_indicator=refresh_indicator,
+        back_filter=BACK_FILTER_ONLY,
+        ingest=INGEST_ONLY
+    )
 
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(

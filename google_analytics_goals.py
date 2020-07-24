@@ -128,6 +128,11 @@ def main(refresh_indicator) -> int:
             print('Running manual ingest...')
             grc.ingest_procedures(customizer=customizer)
 
+    # find post processing SQL scripts with this file's name as a search key and execute
+    execute_post_processing_scripts_for_process(
+        script_filter=SCRIPT_FILTER
+    )
+
     return 0
 
 
@@ -148,7 +153,6 @@ def update_credentials(customizer: Customizer, ga_client: GoogleAnalytics) -> Cu
     return customizer
 
 
-
 if __name__ == '__main__':
     try:
         main(refresh_indicator=sys.argv)
@@ -159,6 +163,7 @@ if __name__ == '__main__':
                 script_name=SCRIPT_NAME,
                 to=Customizer.recipients,
                 error=error,
-                stack_trace=traceback.format_exc()
+                stack_trace=traceback.format_exc(),
+                engine=grc.create_application_sql_engine(customizer=Customizer)
             )
         raise
