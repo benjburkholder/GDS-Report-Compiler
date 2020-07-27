@@ -10,8 +10,11 @@ from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessRep
 from utils.cls.pltfm.gmail import send_error_email
 from utils.cls.core import Customizer
 from utils import grc
+from utils.cls.pltfm.marketing_data import execute_post_processing_scripts_for_process
+
 
 SCRIPT_NAME = grc.get_script_name(__file__)
+SCRIPT_FILTER = SCRIPT_NAME.replace('.py')
 
 DEBUG = False
 if DEBUG:
@@ -44,10 +47,19 @@ def main(refresh_indicator) -> int:
     grc.run_prestart_assertion(script_name=SCRIPT_NAME, attribute=REQUIRED_ATTRIBUTES, label='REQUIRED_ATTRIBUTES')
 
     global BACK_FILTER_ONLY, INGEST_ONLY
-    BACK_FILTER_ONLY, INGEST_ONLY = grc.procedure_flag_indicator(refresh_indicator=refresh_indicator, back_filter=BACK_FILTER_ONLY, ingest=INGEST_ONLY)
+    BACK_FILTER_ONLY, INGEST_ONLY = grc.procedure_flag_indicator(
+        refresh_indicator=refresh_indicator,
+        back_filter=BACK_FILTER_ONLY,
+        ingest=INGEST_ONLY
+    )
 
     # run startup data source checks and initialize data source specific customizer
-    customizer = grc.setup(script_name=SCRIPT_NAME, required_attributes=REQUIRED_ATTRIBUTES, refresh_indicator=refresh_indicator, expedited=DEBUG)
+    customizer = grc.setup(
+        script_name=SCRIPT_NAME,
+        required_attributes=REQUIRED_ATTRIBUTES,
+        refresh_indicator=refresh_indicator,
+        expedited=DEBUG
+    )
 
     if not INGEST_ONLY and not BACK_FILTER_ONLY:
 
@@ -61,7 +73,9 @@ def main(refresh_indicator) -> int:
         filtered_accounts = [account for account in gmb_accounts
                              if list(account.keys())[0] in accounts]
 
-        assert filtered_accounts, f"{accounts} accounts not found, check the GMB account to ensure the client's location bucket name has not changed."
+        assert filtered_accounts, \
+            f"{accounts} accounts not found, " \
+            f"check the GMB account to ensure the client's location bucket name has not changed."
 
         print(filtered_accounts)
 
@@ -127,6 +141,11 @@ def main(refresh_indicator) -> int:
         if INGEST_ONLY:
             print('Running manual ingest...')
             grc.ingest_procedures(customizer=customizer)
+
+    # find post processing SQL scripts with this file's name as a search key and execute
+    execute_post_processing_scripts_for_process(
+        script_filter=SCRIPT_FILTER
+    )
 
     return 0
 

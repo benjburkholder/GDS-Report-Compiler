@@ -5,6 +5,8 @@ This script is where all reporting configuration takes place
 """
 import os
 import re
+import json
+import pathlib
 
 import pandas as pd
 import sqlalchemy
@@ -36,23 +38,28 @@ class Customizer:
     # columns used for entity mapping
     entity_cols = ENTITY_COLS
 
+    __columns_key = 'columns'
+    __sheets_key = 'sheets'
+    __table_key = 'table'
+    __table_type_key = 'type'
+    __table_space_key = 'tablespace'
+
     def get_lookup_table_by_tablespace(self, tablespace: list) -> dict:
         lookup_tables = []
+        ret_idx = 0  # always return the first result for this function
         for space in tablespace:
-            for sheet in self.CONFIGURATION_WORKBOOK['sheets']:
-                if (sheet['table'].get('type') == 'lookup') and (space in sheet['table'].get('tablespace', [])):
-                    lookup_tables.append(sheet['table'])
+            for sheet in self.configuration_workbook[self.__sheets_key]:
+                if (
+                        (sheet[self.__table_key].get(self.__table_type_key) == 'lookup') and
+                        (space in sheet[self.__table_key].get(self.__table_space_key, []))
+                ):
+                    lookup_tables.append(sheet[self.__table_key])
         assert len(lookup_tables) == 1
-        return lookup_tables[0]
-
-    def get_backfilter_columns_by_table(self, table: dict) -> list:
-        return [
-            col for col in table['columns'] if col.get('backfilter')
-        ]
+        return lookup_tables[ret_idx]
 
     def get_backfilter_entity_columns_by_table(self, table: dict) -> list:
         return [
-            col for col in table['columns'] if col.get('entity_col')
+            col for col in table[self.__columns_key] if col.get('entity_col')
         ]
 
     def generate_set_statement_by_entity_columns(self, entity_columns: list) -> str:
@@ -131,7 +138,7 @@ class Customizer:
 
     def get_table_dictionary_by_name(self, table_name: str) -> dict:
         return [
-            table for table in self.CONFIGURATION_WORKBOOK['sheets']
+            table for table in self.configuration_workbook['sheets']
             if table['table']['name'] == table_name
         ][0]['table']
 
@@ -317,19 +324,18 @@ class Customizer:
                 """
 
     def audit_automation_procedure(self, index_column, cadence):
-        engine = build_postgresql_engine(customizer=self)
         fail_list = []
         if cadence.lower() == 'daily':
             # if daily, there should be 7 days in week query
-            days = self.__run_audit_query(how='week', quan=1, engine=engine, source=index_column)
+            days = self.__run_audit_query(how='week', quan=1, source=index_column)
             score = self.__score_days(days=days, min_days=7)
         elif cadence.lower() == 'weekly':
             # if weekly, there should be 1 day in week query
-            days = self.__run_audit_query(how='week', quan=1, engine=engine, source=index_column)
+            days = self.__run_audit_query(how='week', quan=1, source=index_column)
             score = self.__score_days(days=days, min_days=1)
         elif cadence.lower() == 'monthly':
             # if monthly, there should be 1 day in 61 day query
-            days = self.__run_audit_query(how='month', quan=2, engine=engine, source=index_column)
+            days = self.__run_audit_query(how='month', quan=2, source=index_column)
             score = self.__score_days(days=days, min_days=1)
         else:
             raise AssertionError(
@@ -357,7 +363,7 @@ class Customizer:
         else:
             return True
 
-    def __run_audit_query(self, how: str, quan: int, engine, source: str) -> list:
+    def __run_audit_query(self, how: str, quan: int, source: str) -> list:
         sql = """
         SELECT DISTINCT report_date
         FROM public.{marketing_table}
@@ -366,1149 +372,9 @@ class Customizer:
             AND data_source = '{source}';
         """.format(quan=quan, how=how.lower(), source=source, marketing_table=self.marketing_data['table']['name'])
         print(sql)
-        with engine.connect() as con:
+        with self.engine.connect() as con:
             results = con.execute(sql).fetchall()
         return [item[0] for item in results] if results else None
-
-    # ~~~~~~~~~~~~~~~~ EDITABLE CLIENT SPECIFIC DATA PAST THIS POINT ~~~~~~~~~~~~~~~~
-
-    """
-    Each table should have:
-        - backfilter - column to join on for update... join statements
-        - default - column to assign a default value to when NULL (usually an entity, below)
-        - entity - column to map data to based off the lookup table (e.g. Property, Market, etc)
-    """
-    CONFIGURATION_WORKBOOK = {
-        'config_sheet_name': '<CONFIG SHEET NAME>',
-        'source_refresh_dates': [1, 15],
-        'lookup_refresh_status': False,
-        'sheets': [
-            {'sheet': 'URL Mapping', 'table': {
-                'name': 'lookup_urltolocation',
-                'schema': 'public',
-                'type': 'lookup',
-                'tablespace': ['moz_pro', 'google_analytics', 'google_search_console'],
-                'update_types': ['exact', 'fuzzy'],
-                'active': False,
-                'columns': [
-                    {'name': 'url', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
-                    {'name': 'exact', 'type': 'bigint'},
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'Moz Pro Campaign Master', 'table': {
-                'name': 'source_moz_procampaignmaster',
-                'schema': 'public',
-                'type': 'source',
-                'tablespace': ['moz_pro'],
-                'active': False,
-                'columns': [
-                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100},
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'Moz Local Account Master', 'table': {
-                'name': 'source_moz_localaccountmaster',
-                'schema': 'public',
-                'type': 'source',
-                'tablespace': ['moz_local'],
-                'active': False,
-                'columns': [
-                    {'name': 'account', 'type': 'character varying', 'length': 150},
-                    {'name': 'label', 'type': 'character varying', 'length': 150},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'GA Views', 'table': {
-                'name': 'source_ga_views',
-                'schema': 'public',
-                'type': 'source',
-                'active': False,
-                'columns': [
-                    {'name': 'view_id', 'type': 'character varying', 'length': 100},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'GMB Account Master', 'table': {
-                'name': 'source_gmb_accountmaster',
-                'schema': 'public',
-                'type': 'source',
-                'active': False,
-                'columns': [
-                    {'name': 'account_name', 'type': 'character varying', 'length': 100},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'GSC Property Master', 'table': {
-                'name': 'source_gsc_propertymaster',
-                'schema': 'public',
-                'type': 'source',
-                'active': False,
-                'columns': [
-                    {'name': 'property_url', 'type': 'character varying', 'length': 150},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'GAds Account Master', 'table': {
-                'name': 'source_gads_accountmaster',
-                'schema': 'public',
-                'type': 'source',
-                'active': False,
-                'columns': [
-                    {'name': 'account_id', 'type': 'character varying', 'length': 150},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'Account Cost', 'table': {
-                'name': 'source_account_cost',
-                'schema': 'public',
-                'type': 'source',
-                'active': False,
-                'columns': [
-                    {'name': 'date_start', 'type': 'date'},
-                    {'name': 'date_end', 'type': 'date'},
-                    {'name': 'property', 'type': 'character varying', 'length': 100},
-                    {'name': 'tactic', 'type': 'character varying', 'length': 100},
-                    {'name': 'cost', 'type': 'character varying', 'length': 25},
-                    {'name': 'channel', 'type': 'character varying', 'length': 150},
-                    {'name': 'notes', 'type': 'character varying', 'length': 100},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'Moz Directory Exclusions', 'table': {
-                'name': 'source_moz_directoryexclusions',
-                'schema': 'public',
-                'type': 'source',
-                'active': False,
-                'columns': [
-                    {'name': 'exclusions', 'type': 'character varying', 'length': 100},
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'Moz Listing Mapping', 'table': {
-                'name': 'lookup_moz_mapping',
-                'schema': 'public',
-                'tablespace': ['moz_local'],
-                'update_types': ['exact'],
-                'type': 'lookup',
-                'active': False,
-                'columns': [
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 150},
-                    {'name': 'account', 'type': 'character varying', 'length': 150},
-                    {'name': 'label', 'type': 'character varying', 'length': 150},
-                    {'name': 'name', 'type': 'character varying', 'length': 150},
-                    {'name': 'address', 'type': 'character varying', 'length': 250},
-                    {'name': 'city', 'type': 'character varying', 'length': 50},
-                    {'name': 'state', 'type': 'character varying', 'length': 50},
-                    {'name': 'zip', 'type': 'bigint'},
-                    {'name': 'phone', 'type': 'character varying', 'length': 25},
-                    {'name': 'exact', 'type': 'bigint'}
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'GMB Listing Mapping', 'table': {
-                'name': 'lookup_gmb_mapping',
-                'schema': 'public',
-                'type': 'lookup',
-                'tablespace': ['google_my_business'],
-                'update_types': ['exact'],
-                'active': False,
-                'columns': [
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 100},
-                    {'name': 'property', 'type': 'character varying', 'length': 150},
-                    {'name': 'address_line_1', 'type': 'character varying', 'length': 250},
-                    {'name': 'city', 'type': 'character varying', 'length': 50},
-                    {'name': 'state', 'type': 'character varying', 'length': 50},
-                    {'name': 'zip', 'type': 'character varying', 'length': 50},
-                    {'name': 'phone', 'type': 'character varying', 'length': 25},
-                    {'name': 'exact', 'type': 'bigint'}
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'DT Phone Label Mapping', 'table': {
-                'name': 'lookup_dt_mapping',
-                'schema': 'public',
-                'type': 'lookup',
-                'tablespace': ['dialogtech'],
-                'update_types': ['exact'],
-                'active': False,
-                'columns': [
-                        {'name': 'phone_label', 'type': 'character varying', 'length': 150},
-                        {'name': 'medium', 'type': 'character varying', 'length': 150},
-                        {'name': 'property', 'type': 'character varying', 'length': 150},
-                        {'name': 'exact', 'type': 'bigint'}
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'GAds Campaign Mapping', 'table': {
-                'name': 'lookup_gads_mapping',
-                'schema': 'public',
-                'type': 'lookup',
-                'tablespace': ['google_ads'],
-                'update_types': ['exact'],
-                'active': False,
-                'columns': [
-                    {'name': 'campaign_id', 'type': 'character varying', 'length': 150},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 150},
-                    {'name': 'property', 'type': 'character varying', 'length': 150},
-                    {'name': 'exact', 'type': 'bigint'}
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': 'Enquire - Market Source to Channel', 'table': {
-                'name': 'lookup_enquire_market_source_to_channel_mapping',
-                'schema': 'public',
-                'type': 'lookup',
-                'update_types': ['exact'],
-                'active': False,
-                'columns': [
-                    {'name': 'market_source', 'type': 'character varying', 'length': 150},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 150},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'moz_local_visibility',
-                'schema': 'public',
-                'tablespace': ['moz_local'],
-                'type': 'reporting',
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'ingest_defaults': [{'medium': 'Organic Search'}, {'device': 'Desktop'}],
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True, 'group_by': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
-                    {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True, 'group_by': True},
-                    {'name': 'directory', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
-                    {'name': 'points_reached', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
-                    {'name': 'max_points', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'sum'},
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_moz_local_visibility',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'property', 'sort': 'asc', 'nulls_last': True}
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'moz_local_sync',
-                'schema': 'public',
-                'tablespace': ['moz_local'],
-                'type': 'reporting',
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': 'month', 'group_by': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True, 'group_by': True},
-                    {'name': 'account_name', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True, 'group_by': True},
-                    {'name': 'directory', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
-                    {'name': 'field', 'type': 'character varying', 'length': 100, 'master_include': True, 'group_by': True},
-                    {'name': 'sync_status', 'type': 'bigint', 'master_include': True, 'aggregate_type': 'avg', 'aggregate_cast': 'double precision'},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_moz_local_sync',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'property', 'sort': 'asc', 'nulls_last': True}
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'moz_pro_rankings',
-                'schema': 'public',
-                'tablespace': ['moz_pro'],
-                'type': 'reporting',
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'ingest_defaults': [{'medium': 'Organic Search'}],
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'id', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'search_id', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'keyword', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'search_engine', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'geo', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'tags', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True},
-                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'rank', 'type': 'bigint', 'master_include': True},
-                    {'name': 'branded', 'type': 'bigint', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_moz_pro_rankings',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'id', 'sort': 'asc', 'nulls_last': True},
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'moz_pro_serp',
-                'schema': 'public',
-                'tablespace': ['moz_pro'],
-                'type': 'reporting',
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'ingest_defaults': [{'medium': 'Organic Search'}],
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True, 'aggregate_type': '1 month interval'},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'campaign_id', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'id', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'search_id', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'keyword', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'search_engine', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'geo', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'tags', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True},
-                    {'name': 'keyword_added_at', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'ads_bottom', 'type': 'bigint', 'master_include': True},
-                    {'name': 'ads_top', 'type': 'bigint', 'master_include': True},
-                    {'name': 'featured_snippet', 'type': 'bigint', 'master_include': True},
-                    {'name': 'image_pack', 'type': 'bigint', 'master_include': True},
-                    {'name': 'in_depth_articles', 'type': 'bigint', 'master_include': True},
-                    {'name': 'knowledge_card', 'type': 'bigint', 'master_include': True},
-                    {'name': 'knowledge_panel', 'type': 'bigint', 'master_include': True},
-                    {'name': 'local_pack', 'type': 'bigint', 'master_include': True},
-                    {'name': 'local_teaser', 'type': 'bigint', 'master_include': True},
-                    {'name': 'news_pack', 'type': 'bigint', 'master_include': True},
-                    {'name': 'related_questions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'review', 'type': 'bigint', 'master_include': True},
-                    {'name': 'shopping_results', 'type': 'bigint', 'master_include': True},
-                    {'name': 'site_links', 'type': 'bigint', 'master_include': True},
-                    {'name': 'tweet', 'type': 'bigint', 'master_include': True},
-                    {'name': 'video', 'type': 'bigint', 'master_include': True},
-                    {'name': 'branded', 'type': 'bigint', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_moz_pro_serp',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'id', 'sort': 'asc', 'nulls_last': True},
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_analytics_traffic',
-                'schema': 'public',
-                'tablespace': ['google_analytics'],
-                'type': 'reporting',
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'medium', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True},
-                    {'name': 'sessions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'percent_new_sessions', 'type': 'double precision', 'master_include': True},
-                    {'name': 'pageviews', 'type': 'bigint', 'master_include': True},
-                    {'name': 'unique_pageviews', 'type': 'bigint', 'master_include': True},
-                    {'name': 'pageviews_per_session', 'type': 'double precision', 'master_include': True},
-                    {'name': 'entrances', 'type': 'bigint', 'master_include': True},
-                    {'name': 'bounces', 'type': 'bigint', 'master_include': True},
-                    {'name': 'session_duration', 'type': 'double precision', 'master_include': True},
-                    {'name': 'users', 'type': 'bigint', 'master_include': True},
-                    {'name': 'new_users', 'type': 'bigint', 'master_include': True},
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_analytics_traffic',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_analytics_events',
-                'schema': 'public',
-                'tablespace': ['google_analytics'],
-                'type': 'reporting',
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'medium', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True},
-                    {'name': 'event_label', 'type': 'character varying', 'length': 300, 'master_include': True},
-                    {'name': 'event_action', 'type': 'character varying', 'length': 300, 'master_include': True},
-                    {'name': 'total_events', 'type': 'bigint', 'master_include': True},
-                    {'name': 'unique_events', 'type': 'bigint', 'master_include': True},
-                    {'name': 'event_value', 'type': 'double precision', 'master_include': True},
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_analytics_events',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_analytics_goals',
-                'schema': 'public',
-                'tablespace': ['google_analytics'],
-                'type': 'reporting',
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'view_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'medium', 'type': 'character varying', 'length': 100, 'master_include': True, },
-                    {'name': 'source_medium', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'url', 'type': 'character varying', 'length': 1000, 'backfilter': True, 'master_include': True},
-                    {'name': 'request_a_quote', 'type': 'bigint', 'master_include': True},
-                    {'name': 'sidebar_contact_us', 'type': 'bigint', 'master_include': True},
-                    {'name': 'contact_us_form_submission', 'type': 'bigint', 'master_include': True},
-                    {'name': 'newsletter_signups', 'type': 'bigint', 'master_include': True},
-                    {'name': 'dialogtech_calls', 'type': 'bigint', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_analytics_goals',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'source_medium', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_my_business_insights',
-                'schema': 'public',
-                'type': 'reporting',
-                'tablespace': ['google_my_business'],
-                'audit_cadence': 'monthly',
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'listing_name', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True},
-                    {'name': 'maps_views', 'type': 'bigint', 'master_include': True},
-                    {'name': 'search_views', 'type': 'bigint', 'master_include': True},
-                    {'name': 'website_click_actions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'phone_call_actions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'driving_direction_actions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'photo_views', 'type': 'bigint', 'master_include': True},
-                    {'name': 'branded_searches', 'type': 'bigint', 'master_include': True},
-                    {'name': 'direct_searches', 'type': 'bigint', 'master_include': True},
-                    {'name': 'discovery_searches', 'type': 'bigint', 'master_include': True},
-                    {'name': 'post_views_on_search', 'type': 'bigint', 'master_include': True},
-                    {'name': 'post_cta_actions', 'type': 'bigint', 'master_include': True},
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_my_business_insights',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'property', 'sort': 'asc', 'nulls_last': True}
-                        ]
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_my_business_reviews',
-                'schema': 'public',
-                'type': 'reporting',
-                'tablespace': ['google_my_business'],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True, 'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True, 'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'listing_name', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'listing_id', 'type': 'character varying', 'length': 150, 'backfilter': True, 'master_include': True},
-                    {'name': 'average_rating', 'type': 'double precision', 'master_include': True},
-                    {'name': 'rating', 'type': 'double precision', 'master_include': True},
-                    {'name': 'review_count', 'type': 'double precision', 'master_include': True},
-                    {'name': 'reviewer', 'type': 'character varying', 'length': 150, 'master_include': True},
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_my_business_reviews',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'listing_name', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'listing_id', 'sort': 'asc', 'nulls_last': True}
-                        ],
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_search_console_monthly',
-                'schema': 'public',
-                'type': 'reporting',
-                'tablespace': ['google_search_console'],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'property_url', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 150, 'backfilter': True,
-                     'master_include': True},
-                    {'name': 'page', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'query', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'impressions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'clicks', 'type': 'bigint', 'master_include': True},
-                    {'name': 'ctr', 'type': 'double precision', 'master_include': True},
-                    {'name': 'position', 'type': 'double precision', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_search_console_monthly',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'device', 'sort': 'asc', 'nulls_last': True},
-                        ],
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'dialogtech_call_detail',
-                'schema': 'public',
-                'type': 'reporting',
-                'tablespace': ['dialogtech'],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'medium', 'type': 'character varying', 'length': 150, 'backfilter': True,
-                     'master_include': True},
-                    {'name': 'number_dialed', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'caller_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'call_duration', 'type': 'double precision', 'master_include': True},
-                    {'name': 'transfer_to_number', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'phone_label', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'call_transfer_status', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'client_id', 'type': 'character varying', 'length': 150,
-                     'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_dialogtech_call_detail',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'number_dialed', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'caller_id', 'sort': 'asc', 'nulls_last': True},
-
-                        ],
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_ads_campaign',
-                'schema': 'public',
-                'type': 'reporting',
-                'tablespace': ['google_ads'],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'account_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'advertising_channel_type', 'type': 'character varying', 'length': 100,
-                     'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 250, 'backfilter': True,
-                     'master_include': True},
-                    {'name': 'campaign_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'cost', 'type': 'double precision', 'master_include': True},
-                    {'name': 'clicks', 'type': 'bigint', 'master_include': True},
-                    {'name': 'impressions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'search_available_impressions', 'type': 'double precision', 'master_include': True},
-                    {'name': 'search_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'search_budget_lost_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'search_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'content_available_impressions', 'type': 'double precision', 'master_include': True},
-                    {'name': 'content_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'content_budget_lost_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'content_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_ads_campaign',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'campaign_id', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                        ],
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'google_ads_keyword',
-                'schema': 'public',
-                'type': 'reporting',
-                'tablespace': ['google_ads'],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    # TODO: NEEDS UPDATING
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'account_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'advertising_channel_type', 'type': 'character varying', 'length': 100,
-                     'master_include': True},
-                    {'name': 'device', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'campaign', 'type': 'character varying', 'length': 250, 'backfilter': True,
-                     'master_include': True},
-                    {'name': 'campaign_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'cost', 'type': 'double precision', 'master_include': True},
-                    {'name': 'clicks', 'type': 'bigint', 'master_include': True},
-                    {'name': 'impressions', 'type': 'bigint', 'master_include': True},
-                    {'name': 'search_available_impressions', 'type': 'double precision', 'master_include': True},
-                    {'name': 'search_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'search_budget_lost_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'search_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'content_available_impressions', 'type': 'double precision', 'master_include': True},
-                    {'name': 'content_impression_share', 'type': 'double precision', 'master_include': True},
-                    {'name': 'content_budget_lost_impression_share', 'type': 'double precision',
-                     'master_include': True},
-                    {'name': 'content_rank_lost_impression_share', 'type': 'double precision', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_google_ads_campaign',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'campaign_id', 'sort': 'asc', 'nulls_last': True},
-                            {'name': 'device', 'sort': 'asc', 'nulls_last': True}
-                        ],
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-
-            {'sheet': None, 'table': {
-                'name': 'enquire_crm_activity_deposit',
-                'schema': 'public',
-                'type': 'reporting',
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'ingest_only': True,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'portal_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'community', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'service_line', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'market_source', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_status', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'activity_status_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_name', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'activity_type', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'activity_type_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_types_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'time_zone', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'reinquiry', 'type': 'bigint', 'master_include': True},
-                    {'name': 'case_number', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'individual_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'individual_full_name', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'assigned_name', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'assigned_user_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'due_date_descriptive', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'due_date', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'due_date_end', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_updated', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_created', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'all_day', 'type': 'bigint', 'master_include': True},
-                    {'name': 'sale_stage', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'completed', 'type': 'bigint', 'master_include': True},
-                    {'name': 'cancelled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'no_show', 'type': 'bigint', 'master_include': True},
-                    {'name': 'rescheduled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'is_activity_history', 'type': 'bigint', 'master_include': True},
-                    {'name': 'overdue', 'type': 'bigint', 'master_include': True},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'enquire_crm_activity_inquiry',
-                'schema': 'public',
-                'type': 'reporting',
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'ingest_only': True,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'portal_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'community', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'service_line', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'market_source', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'community_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_status', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'activity_status_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_name', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'activity_type', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'activity_type_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_types_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'time_zone', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'reinquiry', 'type': 'bigint', 'master_include': True},
-                    {'name': 'case_number', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'individual_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'individual_full_name', 'type': 'character varying', 'length': 150,
-                     'master_include': True},
-                    {'name': 'assigned_name', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'assigned_user_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'due_date_descriptive', 'type': 'character varying', 'length': 250,
-                     'master_include': True},
-                    {'name': 'due_date', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'due_date_end', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_updated', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_created', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'all_day', 'type': 'bigint', 'master_include': True},
-                    {'name': 'sale_stage', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'completed', 'type': 'bigint', 'master_include': True},
-                    {'name': 'cancelled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'no_show', 'type': 'bigint', 'master_include': True},
-                    {'name': 'rescheduled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'is_activity_history', 'type': 'bigint', 'master_include': True},
-                    {'name': 'overdue', 'type': 'bigint', 'master_include': True},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'enquire_crm_activity_movein',
-                'schema': 'public',
-                'type': 'reporting',
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'ingest_only': True,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'portal_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'community', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'service_line', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'market_source', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_status', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'activity_status_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_name', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'activity_type', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'activity_type_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_types_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'time_zone', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'reinquiry', 'type': 'bigint', 'master_include': True},
-                    {'name': 'case_number', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'individual_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'individual_full_name', 'type': 'character varying', 'length': 150,
-                     'master_include': True},
-                    {'name': 'assigned_name', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'assigned_user_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'due_date_descriptive', 'type': 'character varying', 'length': 250,
-                     'master_include': True},
-                    {'name': 'due_date', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'due_date_end', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_updated', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_created', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'all_day', 'type': 'bigint', 'master_include': True},
-                    {'name': 'sale_stage', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'completed', 'type': 'bigint', 'master_include': True},
-                    {'name': 'cancelled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'no_show', 'type': 'bigint', 'master_include': True},
-                    {'name': 'rescheduled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'is_activity_history', 'type': 'bigint', 'master_include': True},
-                    {'name': 'overdue', 'type': 'bigint', 'master_include': True},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'enquire_crm_activity_tour',
-                'schema': 'public',
-                'type': 'reporting',
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'ingest_only': True,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'portal_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'community', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'service_line', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'channel_grouping', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'market_source', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_status', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'activity_status_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_name', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'activity_type', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'activity_type_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'activity_types_master_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'time_zone', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'reinquiry', 'type': 'bigint', 'master_include': True},
-                    {'name': 'case_number', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'individual_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'individual_full_name', 'type': 'character varying', 'length': 150,
-                     'master_include': True},
-                    {'name': 'assigned_name', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'assigned_user_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'due_date_descriptive', 'type': 'character varying', 'length': 250,
-                     'master_include': True},
-                    {'name': 'due_date', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'due_date_end', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_updated', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'date_created', 'type': 'timestamp with time zone', 'master_include': True},
-                    {'name': 'all_day', 'type': 'bigint', 'master_include': True},
-                    {'name': 'sale_stage', 'type': 'character varying', 'length': 50, 'master_include': True},
-                    {'name': 'completed', 'type': 'bigint', 'master_include': True},
-                    {'name': 'cancelled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'no_show', 'type': 'bigint', 'master_include': True},
-                    {'name': 'rescheduled', 'type': 'bigint', 'master_include': True},
-                    {'name': 'is_activity_history', 'type': 'bigint', 'master_include': True},
-                    {'name': 'overdue', 'type': 'bigint', 'master_include': True},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'enquire_map_histories',
-                'schema': 'public',
-                'type': 'reporting',
-                'ingest_defaults': [],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'ingest_only': True,
-                'columns': [
-                    {'name': 'credential_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'created_at', 'type': 'timestamp without time zone', 'master_include': True},
-                    {'name': 'id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'history_type', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'caller_name', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'direction', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'email_guid', 'type': 'character varying', 'length': 250, 'master_include': True},
-                    {'name': 'email_sent_at', 'type': 'timestamp without time zone', 'master_include': True},
-                    {'name': 'form_id', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'form_name', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': '"from"', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'from_city', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'from_country', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'from_state', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'from_zip', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'marketing_email', 'type': 'bigint', 'master_include': True},
-                    {'name': 'open_tag_type', 'type': 'character varying', 'length': 25, 'master_include': True},
-                    {'name': 'session_entry_page', 'type': 'character varying', 'length': 500, 'master_include': True},
-                    {'name': 'session_ga_client_uid', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'session_ip_address', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'subject_line', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'submitted_from_url', 'type': 'character varying', 'length': 500, 'master_include': True},
-                    {'name': '"to"', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'reply_to', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'transcript', 'type': 'character varying', 'length': 1000, 'master_include': True},
-                    {'name': 'utm_campaign', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'utm_medium', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'utm_source', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'workflow_name', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'campaign_name', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'enquire_map_email_performance_summary',
-                'schema': 'public',
-                'type': 'reporting',
-                'ingest_defaults': [],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'ingest_only': True,
-                'columns': [
-                    {'name': 'credential_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'email_log_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'contact_id', 'type': 'bigint', 'master_include': True},
-                    {'name': 'campaign_name', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'workflow_name', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'email_log_date', 'type': 'date', 'master_include': True},
-                    {'name': 'email', 'type': 'character varying', 'length': 255, 'master_include': True},
-                    {'name': 'subject_line', 'type': 'character varying', 'length': 200, 'master_include': True},
-                    {'name': 'email_log', 'type': 'integer', 'master_include': True},
-                    {'name': 'email_open', 'type': 'integer', 'master_include': True},
-                    {'name': 'email_link_click', 'type': 'integer', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'inquiry_goals',
-                'schema': 'public',
-                'type': 'reporting',
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'ingest_only': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'community', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'ownership_group', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'region', 'type': 'character varying', 'length': 100, 'master_include': True},
-                    {'name': 'inquiry_goal', 'type': 'double precision', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix__inquiry_goals',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        ],
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-            {'sheet': None, 'table': {
-                'name': 'account_cost',
-                'schema': 'public',
-                'type': 'reporting',
-                'tablespace': ['account'],
-                'audit_cadence': False,
-                'backfilter_cadence': False,
-                'active': False,
-                'columns': [
-                    {'name': 'report_date', 'type': 'date', 'master_include': True},
-                    {'name': 'data_source', 'type': 'character varying', 'length': 100, 'master_include': True,
-                     'ingest_indicator': True},
-                    {'name': 'property', 'type': 'character varying', 'length': 100, 'entity_col': True,
-                     'default': 'Non-Location Pages', 'master_include': True},
-                    {'name': 'medium', 'type': 'character varying', 'length': 150, 'master_include': True},
-                    {'name': 'daily_cost', 'type': 'double precision', 'master_include': True},
-
-                ],
-                'indexes': [
-                    {
-                        'name': 'ix_account_cost',
-                        'tablespace': 'pg_default',
-                        'clustered': True,
-                        'method': 'btree',
-                        'columns': [
-                            {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                        ],
-                    }
-                ],
-                'owner': 'postgres'
-            }},
-        ]}
-
-    # Custom columns (will be appended to end of marketing_data table)
-    # Typically used for columns existing solely in marketing_data
-    custom_marketing_data_columns = {'sheet': None, 'table': {
-        'active': False,
-        'columns': [
-
-        ]
-    }}
-
-    # Schema for the marketing_data table creation
-    marketing_data = {'sheet': None, 'table': {
-        'name': 'marketing_data',
-        'schema': 'public',
-        'type': 'master',
-        'columns': [
-
-        ],
-        'indexes': [
-            {
-                'name': 'ix_marketing_data',
-                'tablespace': 'pg_default',
-                'clustered': True,
-                'method': 'btree',
-                'columns': [
-                    {'name': 'report_date', 'sort': 'asc', 'nulls_last': True},
-                    {'name': 'data_source', 'sort': 'asc', 'nulls_last': True},
-                    {'name': 'property', 'sort': 'asc', 'nulls_last': True}
-                ]
-            }
-        ],
-        'owner': 'postgres'
-    }}
 
     # Indicates which columns to be dropped from source / lookup tables
     columns_to_drop = {
@@ -1522,40 +388,70 @@ class Customizer:
 
     global_configuration_message = "Invalid global configuration. Please check your Customizer class and try again"
 
-    # ### START EDITING HERE ###
-    dbms = 'postgresql'
-    client = '<TEST>'  # Enter in camel case
-    vertical = ''  # Reference "vertical_specific_slack_alerts" dictionary below
-    project = '<PROJECT>'
-    version = '<VERSION>'
-    recipients = [
-        # EMAILS HERE for error notifications
-        'jschroeder@linkmedia360.com',
-        'bburkholder@linkmedia360.com'
-    ]
-    db = {
-        'DATABASE': '',
-        'USERNAME': 'python-2',
-        'PASSWORD': 'pythonpipelines',
-        'SERVER': '35.222.11.147'
-    }
+    __configuration_app_file_name = 'app.json'
 
-    # Used to reference and dynamically assign proper alert channel to recipients list
-    vertical_specific_slack_alerts = {
-        'senior_living': 'v3i7w7v9w6f9e1b6@linkmedia360.slack.com',
-        'allin': 'x2f8r7c8r1q4o5j4@linkmedia360.slack.com',
-        'omni_local': 'y0o5g1x8g9s3s6z1@linkmedia360.slack.com',
-        'self_storage': 'c7u3z2b1j5z8i9x8@linkmedia360.slack.com',
-        'addiction': 'v2s2x4r7n6p3c3c3@linkmedia360.slack.com'
-    }
+    __configuration_workbook_file_name = 'workbook.json'
 
-    # ### END EDITING ###
+    __configuration_marketing_data_columns_file_name = 'custom_marketing_data_columns.json'
 
-    def __init__(self):
+    __configuration_slack_alerts_file_name = 'slack_alerts.json'
+
+    __configuration_alert_recipients_file_name = 'alert_recipients.json'
+
+    def __init__(self, database: str = None):
+        # assign project core application configuration
+        app = self.get_configuration_by_file_name(
+            file_name='app.json'
+        )
+        self.dbms = app['dbms']
+        self.client = app['client']
+        self.vertical = app['vertical']
+        self.project = app['project']
+        self.version = app['version']
+        self.db = app['db']
+        if database:
+            self.db['DATABASE'] = database
+        # load configuration for customize-able base class attributes
+        self.configuration_workbook = self.get_configuration_by_file_name(
+            file_name=self.__configuration_workbook_file_name
+        )
+        self.marketing_data = self.get_configuration_by_file_name(
+            file_name='marketing_data.json'
+        )
+        self.custom_marketing_data_columns = self.get_configuration_by_file_name(
+            file_name=self.__configuration_marketing_data_columns_file_name
+        )
+        self.vertical_specific_slack_alerts = self.get_configuration_by_file_name(
+            file_name=self.__configuration_slack_alerts_file_name
+        )
+        self.recipients = self.get_configuration_by_file_name(
+            file_name=self.__configuration_alert_recipients_file_name
+        )
+
+        # run startup assertions, checks and assignments
         self.prefix = self.get_class_prefix()
         self.set_function_prefixes()
         self._load_test_configuration()
         assert self.valid_global_configuration(), self.global_configuration_message
+        self.engine = build_postgresql_engine(customizer=self)
+
+    def __get_base_path(self):
+        return pathlib.Path(__file__).parents[2]
+
+    def _get_configuration_path_by_file_name(self, file_name: str):
+        return os.path.join(
+            self.__get_base_path(),
+            'conf',
+            'stored',
+            file_name
+        )
+
+    def get_configuration_by_file_name(self, file_name: str) -> dict:
+        with open(
+            self._get_configuration_path_by_file_name(file_name=file_name),
+            'r'
+        ) as file:
+            return json.load(file)
 
     test_config_file_name = 'test_config.py'
 
