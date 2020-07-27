@@ -6,6 +6,7 @@ import pathlib
 import requests
 import zipfile
 import shutil
+import filecmp
 
 
 class UpdateManager:
@@ -17,8 +18,8 @@ class UpdateManager:
     release_version = None
 
     def __init__(self, auth_token: str, username: str, repository: str):
-        self.params = {
-            'access_token': auth_token
+        self.headers = {
+            'Authorization': 'token ' + auth_token
         }
         self.username = username
         self.repository = repository
@@ -30,6 +31,7 @@ class UpdateManager:
     current_release_archive_key = 'zipball_url'
 
     def download_latest(self):
+        self.clear_update_zone()
         releases = self._get_releases()
         current_release = releases[self.current_release_idx]
         self.release_version = current_release[self.current_release_version_key]
@@ -47,7 +49,7 @@ class UpdateManager:
     def _get_archive(self, archive_url: str):
         response = requests.get(
             url=archive_url,
-            params=self.params
+            headers=self.headers
         )
         assert response.status_code == 200, self.bad_response_text + response.text
         return response
@@ -57,7 +59,7 @@ class UpdateManager:
         url = self.base_uri.replace(':username', self.username).replace(':repository', self.repository)
         response = requests.get(
             url=url,
-            params=self.params
+            headers=self.headers
         )
         assert response.status_code == 200, self.bad_response_text + response.text
         return response.json()
@@ -117,25 +119,43 @@ class UpdateManager:
 
     excluded_update_files = [
         '.gitattributes',
-        '.idea'
+        '.idea',
+        '.github'
     ]
 
-    def perform_update(self):
+    excluded_update_directories = [
+        'conf',
+        'user'
+    ]
+
+    def perform_update(self, dir_name: str = None):
         parent_dir_name = self.__get_parent_download_path()
         dst_dir_name = self.__get_project_root()
+        if dir_name:
+            parent_dir_name = os.path.join(parent_dir_name, dir_name)
+            dst_dir_name = os.path.join(dst_dir_name, dir_name)
         # walk through downloaded directory
         files = os.listdir(parent_dir_name)
         # for each update-capable file, replace (if exists) or add its equivalent in the live project
         for file in files:
-            if file not in self.excluded_update_files and '.' in file:
-                print(file)
+            if file not in self.excluded_update_files and '.' in file and file != 'venv':
                 src_file = os.path.join(parent_dir_name, file)
                 dst_file = os.path.join(dst_dir_name, file)
-                if os.path.isfile(dst_file):
-                    os.replace(dst_file, src_file)
-                else:
+                # check for changes
+                if not filecmp.cmpfiles(parent_dir_name, dst_dir_name, file):
+                    if os.path.isfile(dst_file):
+                        os.unlink(dst_file)
                     shutil.copyfile(src_file, dst_file)
+            else:
+                if '.' not in file:
+                    if file not in self.excluded_update_directories:
+                        if dir_name:
+                            dir_name = os.path.join(dir_name, file)
+                        else:
+                            dir_name = file
+                        self.perform_update(dir_name=dir_name)
         # update the 'version' attribute of app.json to the version stored in this class
+
         return
 
     def clear_update_zone(self):
