@@ -6,7 +6,6 @@ import pathlib
 import requests
 import zipfile
 import shutil
-import filecmp
 
 
 class UpdateManager:
@@ -142,7 +141,11 @@ class UpdateManager:
                 src_file = os.path.join(parent_dir_name, file)
                 dst_file = os.path.join(dst_dir_name, file)
                 # check for changes
-                if not filecmp.cmpfiles(parent_dir_name, dst_dir_name, file):
+                with open(src_file, 'r') as src:
+                    scr_file_contents = src.read()
+                with open(dst_file, 'r') as dst:
+                    dst_file_contents = dst.read()
+                if scr_file_contents != dst_file_contents:
                     if os.path.isfile(dst_file):
                         os.unlink(dst_file)
                     shutil.copyfile(src_file, dst_file)
