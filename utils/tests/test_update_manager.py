@@ -16,7 +16,6 @@ class TestUpdateManager(unittest.TestCase):
 
     def test_download_latest(self):
         self.um.download_latest()
-        # todo: assert that files exists
         self.assertIsNotNone(self.um.release_version)
 
     def test_perform_update(self):

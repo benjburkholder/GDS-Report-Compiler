@@ -9,6 +9,7 @@ import os
 import traceback
 
 # PLATFORM IMPORTS
+from utils import grc
 from utils.cls.core import Customizer
 from conf.static import REQUIRED_PACKAGES
 from utils.cls.pltfm.gmail import send_error_email
@@ -77,10 +78,11 @@ if __name__ == '__main__':
     except Exception as error:
         if not DEBUG:
             send_error_email(
-                client_name=Customizer.client,
+                client_name=Customizer().client,
                 script_name=SCRIPT_NAME,
-                to=Customizer.recipients,
+                to=Customizer().recipients,
                 error=error,
-                stack_trace=traceback.format_exc()
+                stack_trace=traceback.format_exc(),
+                engine=grc.create_application_sql_engine()
             )
         raise
