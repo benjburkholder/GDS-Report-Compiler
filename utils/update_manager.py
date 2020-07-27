@@ -150,10 +150,10 @@ class UpdateManager:
                 if '.' not in file:
                     if file not in self.excluded_update_directories:
                         if dir_name:
-                            dir_name = os.path.join(dir_name, file)
+                            _dir_name = os.path.join(dir_name, file)
                         else:
-                            dir_name = file
-                        self.perform_update(dir_name=dir_name)
+                            _dir_name = file
+                        self.perform_update(dir_name=_dir_name)
         # update the 'version' attribute of app.json to the version stored in this class
 
         return
