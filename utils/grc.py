@@ -532,7 +532,7 @@ def table_backfilter(customizer: custom.Customizer):
     statements = customizer.build_backfilter_statements()
     with engine.connect() as con:
         for statement in statements:
-            con.execute(statement)
+            con.execute(sqlalchemy.text(statement))
     print('SUCCESS: Table Backfiltered.')
 
 
