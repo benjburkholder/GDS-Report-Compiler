@@ -57,14 +57,16 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../clients/SeniorLiving/FranciscanMinistries/Reporting/Integrations/GDS/202009" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Repositories\GDS-Report-Compiler\conf\stored" />
+      <recent name="C:\Repositories\GDS-Report-Compiler\utils\scripts\post_processing" />
       <recent name="C:\Repositories\GDS-Report-Compiler\utils\dbms_helpers" />
       <recent name="C:\Repositories\gds-report-compiler" />
     </key>
@@ -78,11 +80,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/google_analytics_events.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/update_manager.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -91,59 +93,59 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for tests.test_dt.TestDialogtechCallDetail.test_unmapped_phone_labels_all" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for test_update_manager.TestUpdateManager" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls/user" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;tests.test_dt.TestDialogtechCallDetail.test_unmapped_phone_labels_all&quot;" />
+      <option name="_new_target" value="&quot;test_update_manager.TestUpdateManager&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for user.tests.test_enquire_map.TestEnquireMapHistories.test_unmapped_ctns_all_marketing_data" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for test_update_manager.TestUpdateManager.test_clear_update_zone" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;user.tests.test_enquire_map.TestEnquireMapHistories.test_unmapped_ctns_all_marketing_data&quot;" />
+      <option name="_new_target" value="&quot;test_update_manager.TestUpdateManager.test_clear_update_zone&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for user.tests.test_gads.TestGoogleAdsCampaign.test_unmapped_campaigns_all_source_table" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for test_update_manager.TestUpdateManager.test_download_latest" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;user.tests.test_gads.TestGoogleAdsCampaign.test_unmapped_campaigns_all_source_table&quot;" />
+      <option name="_new_target" value="&quot;test_update_manager.TestUpdateManager.test_download_latest&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for user.tests.test_gads.TestGoogleAdsKeyword.test_unmapped_campaigns_all_source_table" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+    <configuration name="Unittests for test_update_manager.TestUpdateManager.test_perform_update" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/cls" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;user.tests.test_gads.TestGoogleAdsKeyword.test_unmapped_campaigns_all_source_table&quot;" />
+      <option name="_new_target" value="&quot;test_update_manager.TestUpdateManager.test_perform_update&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -259,7 +261,42 @@
       <option name="project" value="LOCAL" />
       <updated>1595254532578</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Tests for DialogTech, GoogleAds.Campaign and GoogleAds.Keyword">
+      <created>1595263799471</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1595263799471</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Import new marketing_data module post processing function">
+      <created>1595607230547</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1595607230547</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Add SCRIPT_FILTER global">
+      <created>1595607321978</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1595607321978</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Add post processing function call">
+      <created>1595607482306</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1595607482306</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Consolidate Customizer configuration">
+      <created>1595617536379</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1595617536379</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -280,7 +317,12 @@
     <MESSAGE value="Checkpoint - installing and uninstalling packages using simply python" />
     <MESSAGE value="Functionality to install and manage packages using the new system script tested and finalized" />
     <MESSAGE value="GmailCustomizer using global credentials for reporting errors and notifications" />
-    <option name="LAST_COMMIT_MESSAGE" value="GmailCustomizer using global credentials for reporting errors and notifications" />
+    <MESSAGE value="Tests for DialogTech, GoogleAds.Campaign and GoogleAds.Keyword" />
+    <MESSAGE value="Import new marketing_data module post processing function" />
+    <MESSAGE value="Add SCRIPT_FILTER global" />
+    <MESSAGE value="Add post processing function call" />
+    <MESSAGE value="Consolidate Customizer configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="Consolidate Customizer configuration" />
   </component>
   <component name="WindowStateProjectService">
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595254451470">
@@ -338,11 +380,19 @@
     <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595254536338">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595254536338" />
+    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1595616226571" />
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595617538723">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595617538723" />
     <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1595263601723">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1595263601723" />
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1595609435084">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595609435084" />
     <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1595254247643">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
