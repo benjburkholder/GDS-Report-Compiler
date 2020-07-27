@@ -60,10 +60,9 @@ def main(refresh_indicator) -> int:
     )
 
     if not INGEST_ONLY:
-
-        df = GoogleSheetsManager(
-            customizer.client
-        ).get_spreadsheet_by_name(
+        # 2020-07-27: patch by jws to handle dynamic credential retrieval
+        gs = grc.get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
+        df = gs.client.get_spreadsheet_by_name(
             workbook_name=customizer.configuration_workbook['config_sheet_name'],
             worksheet_name='Inquiry Goals'
         )
@@ -107,9 +106,9 @@ if __name__ == '__main__':
     except Exception as error:
         if not DEBUG:
             send_error_email(
-                client_name=Customizer.client,
+                client_name=Customizer().client,
                 script_name=SCRIPT_NAME,
-                to=Customizer.recipients,
+                to=Customizer().recipients,
                 error=error,
                 stack_trace=traceback.format_exc(),
                 engine=grc.create_application_sql_engine()

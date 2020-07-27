@@ -1,7 +1,6 @@
 """
 Platform Functions
 """
-import copy
 import datetime
 import json
 import os
@@ -302,13 +301,17 @@ def build_marketing_table(customizer) -> int:
                 if sheets['table']['active']:
                     for column in sheets['table']['columns']:
                         if column['master_include']:
-                            if not any(column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']):
+                            if not any(
+                                    column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']
+                            ):
                                 customizer.marketing_data['table']['columns'].append(column)
 
         # Add custom columns to end of marketing table
         if customizer.custom_marketing_data_columns['table']['active']:
             if customizer.custom_marketing_data_columns['table']['columns']:
-                customizer.marketing_data['table']['columns'].append(customizer.custom_marketing_data_columns['table']['columns'])
+                customizer.marketing_data['table']['columns'].append(
+                    customizer.custom_marketing_data_columns['table']['columns']
+                )
 
         create_table_from_schema(customizer, schema=customizer.marketing_data)
 
@@ -378,8 +381,12 @@ def refresh_lookup_tables(customizer) -> int:
         for sheet in customizer.configuration_workbook['sheets']:
             if sheet['table']['type'] == 'lookup':
                 if sheet['table']['active']:
-                    raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.configuration_workbook['config_sheet_name'],
-                                                                                                     worksheet_name=sheet['sheet'])
+                    # 2020-07-27: patch by jws to handle dynamic credential retrieval
+                    gs = get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
+                    raw_lookup_data = gs.client.get_spreadsheet_by_name(
+                        workbook_name=customizer.configuration_workbook['config_sheet_name'],
+                        worksheet_name=sheet['sheet']
+                    )
 
                     clear_lookup_table_data(customizer=customizer, sheet=sheet)
                     df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
@@ -428,6 +435,7 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
     Return the Customizer instance (initialized) if successful
     Upon failure raise whatever error configuration_check deems useful and informative
 
+    :param refresh_indicator:
     :param script_name:
     :param required_attributes:
     :param expedited: (bool) skip the lookup table refreshment - good for debugging
@@ -567,8 +575,13 @@ def audit_automation(customizer: custom.Customizer):
         if sheets['table']['type'] == 'reporting':
             if sheets['table']['audit_cadence']:
                 if sheets['table']['name'] == customizer.get_attribute('table'):
-                    audit_automation_indicator = [column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column][0]
-                    customizer.audit_automation_procedure(index_column=customizer.get_attribute(audit_automation_indicator), cadence=sheets['table']['audit_cadence'])
+                    audit_automation_indicator = [
+                        column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column
+                    ][0]
+                    customizer.audit_automation_procedure(
+                        index_column=customizer.get_attribute(audit_automation_indicator),
+                        cadence=sheets['table']['audit_cadence']
+                    )
 
 
 def refresh_source_tables(customizer: custom.Customizer):
@@ -578,7 +591,12 @@ def refresh_source_tables(customizer: custom.Customizer):
         for sheet in customizer.configuration_workbook['sheets']:
             if sheet['table']['type'] == 'source':
                 if sheet['table']['active']:
-                    raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.configuration_workbook['config_sheet_name'], worksheet_name=sheet['sheet'])
+                    # 2020-07-27: patch by jws to handle dynamic credential retrieval
+                    gs = get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
+                    raw_source_data = gs.client.get_spreadsheet_by_name(
+                        workbook_name=customizer.configuration_workbook['config_sheet_name'],
+                        worksheet_name=sheet['sheet']
+                    )
 
                     clear_source_table_data(customizer=customizer, sheet=sheet)
                     df = reshape_source_table_data(customizer=customizer, df=raw_source_data, sheet=sheet)
@@ -593,7 +611,7 @@ def refresh_source_tables(customizer: custom.Customizer):
 
 def systematic_procedure_execution() -> list:
     table_names = []
-    for sheet in Customizer.configuration_workbook['sheets']:
+    for sheet in Customizer().configuration_workbook['sheets']:
         if sheet['table']['type'] == 'reporting':
             if sheet['table']['active']:
                 table_names.append(sheet['table']['name'])
@@ -614,6 +632,3 @@ def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ing
 
 def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
     customizer.recipients.append(customizer.vertical_specific_slack_alerts[customizer.vertical])
-
-
-
