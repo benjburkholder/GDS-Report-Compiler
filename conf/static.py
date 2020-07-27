@@ -2,7 +2,9 @@
 Static GRC Configuration
 """
 
-GIT_HUB_KEY = '<API_KEY>'
+UPDATE_KEY = '32e58f63114435f643f2c88617a02a5ba03e1e91'
+UPDATE_USERNAME = 'jwschroeder330'
+UPDATE_REPOSITORY = 'GDS-Report-Compiler'
 
 # specify the repository name and version
 REQUIRED_PACKAGES = [

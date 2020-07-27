@@ -14,6 +14,8 @@ class UpdateManager:
 
     update_key = 'zipball_url'
 
+    release_version = None
+
     def __init__(self, auth_token: str, username: str, repository: str):
         self.params = {
             'access_token': auth_token
@@ -23,10 +25,15 @@ class UpdateManager:
 
     current_release_idx = 0  # first item back is the latest release from github
 
+    current_release_version_key = 'tag_name'
+
+    current_release_archive_key = 'zipball_url'
+
     def download_latest(self):
         releases = self._get_releases()
         current_release = releases[self.current_release_idx]
-        archive_url = current_release.get('zipball_url')
+        self.release_version = current_release[self.current_release_version_key]
+        archive_url = current_release.get(self.current_release_archive_key)
         assert archive_url, "No url provided for release archive " + str(current_release)
         archive = self._get_archive(
             archive_url=archive_url
@@ -55,12 +62,16 @@ class UpdateManager:
         assert response.status_code == 200, self.bad_response_text + response.text
         return response.json()
 
-    tmp_dir_idx = 1  # two directories down from here
+    project_root_idx = 1  # two directories down from here
+
+    def __get_project_root(self):
+        return pathlib.Path(__file__).parents[self.project_root_idx]
+
     tmp_dir_name = 'tmp'
 
     def __get_save_path(self):
         return os.path.join(
-            pathlib.Path(__file__).parents[self.tmp_dir_idx],
+            self.__get_project_root(),
             self.tmp_dir_name
         )
 
@@ -104,11 +115,27 @@ class UpdateManager:
         new_parent_dir_name = self.__get_parent_download_path()
         os.rename(old_parent_dir_name, new_parent_dir_name)
 
+    excluded_update_files = [
+        '.gitattributes',
+        '.idea'
+    ]
+
     def perform_update(self):
         parent_dir_name = self.__get_parent_download_path()
+        dst_dir_name = self.__get_project_root()
         # walk through downloaded directory
-        
+        files = os.listdir(parent_dir_name)
         # for each update-capable file, replace (if exists) or add its equivalent in the live project
+        for file in files:
+            if file not in self.excluded_update_files and '.' in file:
+                print(file)
+                src_file = os.path.join(parent_dir_name, file)
+                dst_file = os.path.join(dst_dir_name, file)
+                if os.path.isfile(dst_file):
+                    os.replace(dst_file, src_file)
+                else:
+                    shutil.copyfile(src_file, dst_file)
+        # update the 'version' attribute of app.json to the version stored in this class
         return
 
     def clear_update_zone(self):
