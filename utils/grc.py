@@ -523,7 +523,7 @@ def run_post_processing(customizer: custom.Customizer, processing_stages: list):
 def dynamic_typing(customizer: custom.Customizer):
     for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['name'] == customizer.get_attribute('table'):
-            customizer.get_attribute('schema')['columns'].append(sheet['table']['columns'])
+            customizer.get_attribute('schema')['columns'].extend(sheet['table']['columns'])
 
 
 def table_backfilter(customizer: custom.Customizer):
