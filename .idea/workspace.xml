@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/gds-report-compiler.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gds-report-compiler.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="Hotfix: Ensure deep">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/update_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/update_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/grc.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/grc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,12 +28,19 @@
               </list>
             </value>
           </entry>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/hotfix" />
+              </list>
+            </value>
+          </entry>
         </map>
       </branch-storage>
     </favorite-branches>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="master" />
+        <entry key="$PROJECT_DIR$" value="develop" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -54,21 +58,21 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../clients/SeniorLiving/FranciscanMinistries/Reporting/Integrations/GDS/202009" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Repositories\GDS-Report-Compiler\conf\stored" />
       <recent name="C:\Repositories\GDS-Report-Compiler\utils\scripts\post_processing" />
       <recent name="C:\Repositories\GDS-Report-Compiler\utils\dbms_helpers" />
       <recent name="C:\Repositories\gds-report-compiler" />
     </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
-    </key>
   </component>
-  <component name="RunManager" selected="Python tests.Unittests for test_update_manager.TestUpdateManager.test_perform_update">
-    <configuration name="sys_install_proprietary_packages" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.google_analytics_events">
+    <configuration name="google_analytics_events" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -76,11 +80,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sys_install_proprietary_packages.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/update_manager.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -147,11 +151,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.Unittests for test_update_manager.TestUpdateManager.test_perform_update" />
-        <item itemvalue="Python tests.Unittests for test_update_manager.TestUpdateManager.test_download_latest" />
-        <item itemvalue="Python.sys_install_proprietary_packages" />
-        <item itemvalue="Python tests.Unittests for test_update_manager.TestUpdateManager.test_clear_update_zone" />
-        <item itemvalue="Python tests.Unittests for test_update_manager.TestUpdateManager" />
+        <item itemvalue="Python.google_analytics_events" />
+        <item itemvalue="Python tests.Unittests for user.tests.test_gads.TestGoogleAdsKeyword.test_unmapped_campaigns_all_source_table" />
+        <item itemvalue="Python tests.Unittests for user.tests.test_gads.TestGoogleAdsCampaign.test_unmapped_campaigns_all_source_table" />
+        <item itemvalue="Python tests.Unittests for user.tests.test_enquire_map.TestEnquireMapHistories.test_unmapped_ctns_all_marketing_data" />
+        <item itemvalue="Python tests.Unittests for tests.test_dt.TestDialogtechCallDetail.test_unmapped_phone_labels_all" />
       </list>
     </recent_temporary>
   </component>
@@ -325,62 +329,58 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1595254451470" />
-    <state x="1012" y="231" key="#xdebugger.evaluate" timestamp="1595849814238">
+    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1595608765581">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="1012" y="231" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595849814238" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595617535753">
+    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595608765581" />
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595608431633">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595617535753" />
-    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1595612463289">
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595608431633" />
+    <state width="572" height="466" key="DebuggerActiveHint" timestamp="1595608367292">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1595612463289" />
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1595853142338">
+    <state width="572" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1595608367292" />
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1594826394496">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595853142338" />
-    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1595853142338">
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594826394496" />
+    <state width="1899" height="348" key="GridCell.Tab.0.bottom" timestamp="1595608985124">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595853142338" />
-    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1595853142338">
+    <state width="1899" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595608985124" />
+    <state width="1899" height="348" key="GridCell.Tab.0.center" timestamp="1595608985124">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595853142338" />
-    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1595853142338">
+    <state width="1899" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595608985124" />
+    <state width="1899" height="348" key="GridCell.Tab.0.left" timestamp="1595608985124">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595853142338" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1595853143590">
+    <state width="1899" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595608985124" />
+    <state width="1899" height="348" key="GridCell.Tab.0.right" timestamp="1595608985124">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595853143590" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1595853143590">
+    <state width="1899" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595608985124" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1595608986562">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595853143590" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1595853143590">
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595608986562" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1595608986562">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595853143590" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1595853143590">
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595608986562" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1595608986562">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595853143590" />
-    <state x="184" y="86" key="MergeDialog" timestamp="1595607508373">
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595608986562" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1595608986562">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="184" y="86" key="MergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1595607508373" />
-    <state x="598" y="281" key="MultipleFileMergeDialog" timestamp="1595607508377">
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595608986562" />
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595254536338">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="598" y="281" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1595607508377" />
-    <state x="461" y="165" key="SettingsEditor" timestamp="1595851565610">
-      <screen x="0" y="0" width="1920" height="1040" />
-    </state>
-    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1595851565610" />
+    <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1595616226571" />
     <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595617538723">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -402,19 +402,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/update_manager.py</url>
-          <line>147</line>
-          <option name="timeStamp" value="13" />
+          <url>file://$PROJECT_DIR$/google_analytics_events.py</url>
+          <line>66</line>
+          <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/update_manager.py</url>
-          <line>145</line>
+          <url>file://$PROJECT_DIR$/google_analytics_events.py</url>
+          <line>64</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/grc.py</url>
+          <line>70</line>
           <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/update_manager.py</url>
-          <line>155</line>
-          <option name="timeStamp" value="15" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
