@@ -1,8 +1,8 @@
 {
   "version": "2020.2.1",
   "dbms": "postgresql",
-  "client": "<TEST>",
-  "vertical": "<TEST>",
+  "client": "National Church Residences",
+  "vertical": "Senior Living",
   "project": "GDS",
   "db": {
     "DATABASE": "",
