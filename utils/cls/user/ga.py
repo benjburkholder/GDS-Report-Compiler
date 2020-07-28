@@ -64,11 +64,20 @@ class GoogleAnalytics(Customizer):
                 index_label=None
             )
 
-    def calculate_date(self, start_date: bool = True):
-        if start_date:
-            return (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
+    def get_date_range(self, start_date: datetime.datetime, end_date: datetime.datetime) -> list:
+        return pd.date_range(start=start_date, end=end_date).to_list()
+
+    def calculate_date(self, start_date: bool = True) -> datetime.datetime:
+        if self.get_attribute('historical'):
+            if start_date:
+                return datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
+            else:
+                return datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
         else:
-            return (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
+            if start_date:
+                return datetime.datetime.today() - datetime.timedelta(7)
+            else:
+                return datetime.datetime.today() - datetime.timedelta(1)
 
     def get_views(self) -> list:
         sql = sqlalchemy.text(

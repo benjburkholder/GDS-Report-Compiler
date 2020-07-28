@@ -12,8 +12,8 @@ from utils.dbms_helpers import postgres_helpers
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics as GoogleAnalyticsClient
 IS_CLASS = True
 HISTORICAL = True
-HISTORICAL_START_DATE = '2020-05-01'
-HISTORICAL_END_DATE = '2020-05-31'
+HISTORICAL_START_DATE = '2019-01-01'
+HISTORICAL_END_DATE = '2020-07-28'
 
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
@@ -108,12 +108,8 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         ====================================================================================================
         :return:
         """
-        if self.get_attribute('historical'):
-            start_date = self.get_attribute('historical_start_date')
-            end_date = self.get_attribute('historical_end_date')
-        else:
-            start_date = self.calculate_date(start_date=True)
-            end_date = self.calculate_date(start_date=False)
+        start_date = self.calculate_date(start_date=True)
+        end_date = self.calculate_date(start_date=False)
         # initialize the client module for connecting to GA
         ga_client = GoogleAnalyticsClient(
             customizer=self
@@ -121,30 +117,38 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         # get all view that are configured
         views = self.get_views()
         assert views, "No " + self.__class__.__name__ + " views setup!"
+        # iterate over each date to pull, process and ingest to prevent sampling and enhance speed
+        date_idx = 0
+        date_range = self.get_date_range(start_date=start_date, end_date=end_date)
+        for _ in date_range:
+            if date_idx != 0:
+                start = date_range[date_idx - 1].strftime('%Y-%m-%d')
+                end = date_range[date_idx].strftime('%Y-%m-%d')
+                # for each, pull according to the dates, metrics and dimensions configured
+                for view in views:
+                    view_id = view['view_id']
+                    prop = view['property']
+                    df = ga_client.query(
+                        view_id=view_id,
+                        raw_dimensions=self.dimensions,
+                        raw_metrics=self.metrics,
+                        start_date=start,
+                        end_date=end
+                    )
+                    # if we have valid secrets after the request, let's update the db with the latest
+                    # we put the onus on the client library to refresh these credentials as needed
+                    # and to store them where they belong
+                    if getattr(self, 'secrets_dat', {}):
+                        self.set_customizer_secrets_dat()
 
-        # for each, pull according to the dates, metrics and dimensions configured
-        for view in views:
-            view_id = view['view_id']
-            prop = view['property']
-            df = ga_client.query(
-                view_id=view_id,
-                raw_dimensions=self.dimensions,
-                raw_metrics=self.metrics,
-                start_date=start_date,
-                end_date=end_date
-            )
-            # if we have valid secrets after the request, let's update the db with the latest
-            # we put the onus on the client library to refresh these credentials as needed
-            # and to store them where they belong
-            if getattr(self, 'secrets_dat', {}):
-                self.set_customizer_secrets_dat()
-
-            if df.shape[0]:
-                df = self.rename(df=df)
-                df = self.type(df=df)
-                df['view_id'] = view_id
-                df['property'] = prop
-                df['data_source'] = self.get_attribute('data_source')
-                self.ingest_by_view_id(view_id=view_id, df=df, start_date=start_date, end_date=end_date)
-            else:
-                print(f'WARN: No data returned for view {view_id} for property {prop}')
+                    if df.shape[0]:
+                        df = self.rename(df=df)
+                        df = self.type(df=df)
+                        df['view_id'] = view_id
+                        df['property'] = prop
+                        df['data_source'] = self.get_attribute('data_source')
+                        self.ingest_by_view_id(view_id=view_id, df=df, start_date=start, end_date=end)
+                    else:
+                        print(f'WARN: No data returned for {start} for view {view_id} for property {prop}')
+            # always increments the date_range idx
+            date_idx += 1

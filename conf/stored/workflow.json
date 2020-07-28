@@ -1,0 +1,11 @@
+[
+  {
+    "name": "google_analytics_traffic",
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  }
+]

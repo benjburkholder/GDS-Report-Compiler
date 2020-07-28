@@ -20,7 +20,7 @@ def main(argv) -> int:
         pull = 1
         ingest = 1
         backfilter = 1
-        expedited = 0
+        expedited = 1
     else:
         script_name = argv[1]
         pull, ingest, backfilter, expedited = grc.get_args(argv=argv)
