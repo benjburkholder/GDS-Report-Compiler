@@ -1,5 +1,6 @@
 """
 Google Analytics - Traffic
+
 """
 import pandas as pd
 import datetime
@@ -12,10 +13,7 @@ from utils.cls.pltfm.gmail import send_error_email
 from utils.cls.core import Customizer
 from utils import grc
 from utils.cls.pltfm.marketing_data import execute_post_processing_scripts_for_process
-
-
 SCRIPT_NAME = grc.get_script_name(__file__)
-SCRIPT_FILTER = SCRIPT_NAME.replace('.py')
 
 DEBUG = False
 if DEBUG:
@@ -33,7 +31,7 @@ PROCESSING_STAGES = [
 ]
 
 REQUIRED_ATTRIBUTES = [
-    'get_view_ids',
+    'get_views',
     'historical',
     'historical_start_date',
     'historical_end_date',
@@ -43,121 +41,111 @@ logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
 
-def main(refresh_indicator) -> int:
-    # run startup global checks
-    grc.run_prestart_assertion(
-        script_name=SCRIPT_NAME,
-        attribute=PROCESSING_STAGES,
-        label='PROCESSING_STAGES'
-    )
-    grc.run_prestart_assertion(
-        script_name=SCRIPT_NAME,
-        attribute=REQUIRED_ATTRIBUTES,
-        label='REQUIRED_ATTRIBUTES'
+def main(argv) -> int:
+    # ensure the stages and attributes are configured in a valid manner
+    grc.check_stages_and_attributes(
+        stages=PROCESSING_STAGES,
+        attributes=REQUIRED_ATTRIBUTES
     )
 
-    global BACK_FILTER_ONLY, INGEST_ONLY
-    BACK_FILTER_ONLY, INGEST_ONLY = grc.procedure_flag_indicator(
-        refresh_indicator=refresh_indicator,
-        back_filter=BACK_FILTER_ONLY,
-        ingest=INGEST_ONLY
-    )
+    # extract our supported command line arguments
+    pull, ingest, backfilter, expedited = grc.get_args(argv=argv)
 
     # run startup data source checks and initialize data source specific customizer
     customizer = grc.setup(
         script_name=SCRIPT_NAME,
         required_attributes=REQUIRED_ATTRIBUTES,
-        refresh_indicator=refresh_indicator,
-        expedited=DEBUG
+        expedited=expedited
     )
 
-    if not INGEST_ONLY and not BACK_FILTER_ONLY:
+    if pull:
+        pull_workflow(customizer=customizer)
+    if backfilter:
+        backfilter_workflow(customizer=customizer)
+    if ingest:
+        ingest_workflow(customizer=customizer)
 
-        if grc.get_required_attribute(customizer, 'historical'):
-            start_date = grc.get_required_attribute(customizer, 'historical_start_date')
-            end_date = grc.get_required_attribute(customizer, 'historical_end_date')
-
-        else:
-            # automated setup - last week by default
-            start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
-            end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
-
-        customizer = grc.get_customizer_secrets(customizer=customizer)
-
-        ga_client = GoogleAnalytics(
-            customizer=customizer
-        )
-
-        master_list = []
-        for view_id in grc.get_required_attribute(customizer, 'get_view_ids')():
-            df = ga_client.query(
-                 view_id=view_id,
-                 raw_dimensions=grc.get_required_attribute(customizer, 'dimensions'),
-                 raw_metrics=grc.get_required_attribute(customizer, 'metrics'),
-                 start_date=start_date,
-                 end_date=end_date
-            )
-
-            # if the ga client has secrets after the request, lets update the database with those
-            # for good housekeeping
-            if getattr(ga_client.customizer, 'secrets_dat', {}):
-                customizer = customizer.update_credentials(customizer=customizer, ga_client=ga_client)
-
-            if df.shape[0]:
-                df['view_id'] = view_id
-                df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
-                df['property'] = None
-
-                df = grc.run_processing(
-                    df=df,
-                    customizer=customizer,
-                    processing_stages=PROCESSING_STAGES)
-                master_list.append(df)
-
-            else:
-                logger.warning(
-                    'No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date)
-                )
-
-        grc.run_data_ingest_rolling_dates(
-            df=pd.concat(master_list),
-            customizer=customizer,
-            date_col='report_date',
-            table=grc.get_required_attribute(customizer, 'table')
-        )
-
-        # Executes post_processing stage after all data is pulled and ingested
-        grc.run_post_processing(customizer=customizer, processing_stages=PROCESSING_STAGES)
-
-        grc.table_backfilter(customizer=customizer)
-        grc.ingest_procedures(customizer=customizer)
-        grc.audit_automation(customizer=customizer)  # todo: may want to remove in favor of tests suite usage
-
-        # update credentials at script termination to ensure things are up-to-date
-        customizer.update_credentials(customizer=customizer, ga_client=ga_client)
-
-    else:
-        if BACK_FILTER_ONLY:
-            print('Running manual backfilter...')
-            grc.table_backfilter(customizer=customizer)
-
-        if INGEST_ONLY:
-            print('Running manual ingest...')
-            grc.ingest_procedures(customizer=customizer)
+    # these stages happen at the end no matter what
+    audit_workflow(customizer=customizer)
 
     # find post processing SQL scripts with this file's name as a search key and execute
-    execute_post_processing_scripts_for_process(
-        script_filter=SCRIPT_FILTER
-    )
-
+    post_processing_workflow(script_name=SCRIPT_NAME)
     return 0
+
+
+def pull_workflow(customizer: Customizer):
+    if grc.get_required_attribute(customizer, 'historical'):
+        start_date = grc.get_required_attribute(customizer, 'historical_start_date')
+        end_date = grc.get_required_attribute(customizer, 'historical_end_date')
+
+    else:
+        # automated setup - last week by default
+        start_date = (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
+        end_date = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
+    customizer = grc.get_customizer_secrets(customizer=customizer)
+    ga_client = GoogleAnalytics(
+        customizer=customizer
+    )
+    master_list = []
+    for view in grc.get_required_attribute(customizer, 'get_views')():
+        df = ga_client.query(
+            view_id=view['view_id'],
+            raw_dimensions=grc.get_required_attribute(customizer, 'dimensions'),
+            raw_metrics=grc.get_required_attribute(customizer, 'metrics'),
+            start_date=start_date,
+            end_date=end_date
+        )
+        # if the ga client has secrets after the request, lets update the database with those
+        # for good housekeeping
+        if getattr(ga_client.customizer, 'secrets_dat', {}):
+            customizer = customizer.update_credentials(customizer=customizer, ga_client=ga_client)
+        if df.shape[0]:
+            df = grc.run_processing(
+                df=df,
+                customizer=customizer,
+                processing_stages=PROCESSING_STAGES
+            )
+            df['view_id'] = view['view_id']
+            df['data_source'] = grc.get_required_attribute(customizer, 'data_source')
+            df['property'] = view['property']
+            master_list.append(df)
+        else:
+            logger.warning(
+                'No data returned for view id {} for dates {} - {}'.format(view_id, start_date, end_date)
+            )
+    grc.run_data_ingest_rolling_dates(
+        df=pd.concat(master_list),
+        customizer=customizer,
+        date_col='report_date',
+        table=grc.get_required_attribute(customizer, 'table')
+    )
+    return
+
+
+def backfilter_workflow(customizer: Customizer) -> None:
+    grc.table_backfilter(customizer=customizer)
+
+
+def ingest_workflow(customizer: Customizer) -> None:
+    grc.ingest_procedures(customizer=customizer)
+
+
+def audit_workflow(customizer: Customizer) -> None:
+    grc.audit_automation(customizer=customizer)
+
+
+def post_processing_workflow(script_name: str) -> None:
+    execute_post_processing_scripts_for_process(
+        script_filter=script_name
+    )
 
 
 if __name__ == '__main__':
     try:
-        main(refresh_indicator=sys.argv)
+        main(argv=sys.argv)
     except Exception as error:
         if not DEBUG:
+            '''
             send_error_email(
                 client_name=Customizer.client,
                 script_name=SCRIPT_NAME,
@@ -166,4 +154,6 @@ if __name__ == '__main__':
                 stack_trace=traceback.format_exc(),
                 engine=grc.create_application_sql_engine()
             )
+            '''
+            pass
         raise

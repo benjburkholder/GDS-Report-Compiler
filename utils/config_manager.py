@@ -39,12 +39,13 @@ class ConfigManager:
         worksheets = sh.worksheets()
         sheet_titles = [sheet.title for sheet in worksheets]
         for sheet in wb_config.get('sheets', []):
-            if sheet.get('type') == 'lookup':
+            if sheet['table'].get('type') in ('lookup', 'source'):
                 sheet_name = sheet['sheet']
                 columns = sheet['table']['columns']
                 num_cols = len(columns)
                 num_rows = sheet['table'].get('max_rows') or self.rows_default
                 if sheet['sheet'] not in sheet_titles:
+                    print(f"Now creating {sheet['sheet']}")
                     ws = sh.add_worksheet(
                         title=sheet_name,
                         rows=num_rows,

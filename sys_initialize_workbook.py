@@ -6,6 +6,7 @@ This script will create a brand new workbook from the configuration given in wor
 
 """
 from utils import grc
+from utils.config_manager import ConfigManager
 from utils.gs_manager import GoogleSheetsManager
 
 
@@ -20,9 +21,7 @@ def main() -> None:
     client = gs.create_client()
 
     # create a google sheets client with the help of GoogleSheetsManager
-
-    # pass the client to ConfigurationManager, and run initialize_workbook()
-
+    ConfigManager(client=client).initialize_workbook()
     return
 
 
