@@ -1,13 +1,25 @@
 """
 Google Analytics Traffic Module
 """
+# STANDARD IMPORTS
 import pandas as pd
 
+# PLATFORM IMPORTS
 from utils.cls.user.ga import GoogleAnalytics
 from utils.dbms_helpers import postgres_helpers
 
+# CUSTOM IMPORTS
+from googleanalyticspy.reporting.client.reporting import GoogleAnalytics as GoogleAnalyticsClient
+IS_CLASS = True
+HISTORICAL = False
+HISTORICAL_START_DATE = '2020-06-01'
+HISTORICAL_END_DATE = '2020-06-30'
+
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
+    """
+    Handles Google Analytisc Traffic pulling, parsing and processing
+    """
 
     metrics = [
         'sessions',
@@ -33,11 +45,10 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
     def __init__(self):
         super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2020-06-01')
-        self.set_attribute('historical_end_date', '2020-06-30')
+        self.set_attribute('class', IS_CLASS)
+        self.set_attribute('historical', HISTORICAL)
+        self.set_attribute('historical_start_date', HISTORICAL_START_DATE)
+        self.set_attribute('historical_end_date', HISTORICAL_END_DATE)
         self.set_attribute('table', self.prefix)
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
@@ -112,3 +123,53 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             for query in self._get_post_processing_sql_list():
                 con.execute(query)
         return
+
+    def pull(self):
+        if self.get_attribute('historical'):
+            start_date = self.get_attribute('historical_start_date')
+            end_date = self.get_attribute('historical_end_date')
+        else:
+            start_date = self.calculate_date(start_date=True)
+            end_date = self.calculate_date(start_date=False)
+        # initialize the client module for connecting to GA
+        ga_client = GoogleAnalyticsClient(
+            customizer=self
+        )
+        # get all view that are configured
+        views = self.get_views()
+        assert views, "No " + self.__class__.__name__ + " views setup!"
+
+        # for each, pull according to the dates, metrics and dimensions configured
+        for view in views:
+            view_id = view['view_id']
+            prop = view['property']
+            df = ga_client.query(
+                view_id=view_id,
+                raw_dimensions=self.dimensions,
+                raw_metrics=self.metrics,
+                start_date=start_date,
+                end_date=end_date
+            )
+            # if we have valid secrets after the request, let's update the db with the latest
+            # we put the onus on the client library to refresh these credentials as needed
+            # and to store them where they belong
+            if getattr(self, 'secrets_dat', {}):
+                self.set_customizer_secrets_dat()
+
+            if df.shape[0]:
+                df = self.rename(df=df)
+                df = self.type(df=df)
+                df['view_id'] = view_id
+                df['property'] = prop
+                df['data_source'] = self.get_attribute('data_source')
+                self.ingest_by_view_id(view_id=view_id, df=df, start_date=start_date, end_date=end_date)
+            else:
+                print(f'WARN: No data returned for view {view_id} for property {prop}')
+
+
+
+
+
+
+
+

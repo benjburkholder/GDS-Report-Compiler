@@ -38,8 +38,9 @@ def get_customizer(calling_file: str) -> Customizer:
     cls_members = get_customizers()
     target_attribute = f'{calling_file}_class'
     for cls in cls_members:
-        ini_cls = cls[1]()  # initialize the class
-        if hasattr(ini_cls, target_attribute):
-            if getattr(ini_cls, target_attribute):
-                return ini_cls
+        if issubclass(cls[1], Customizer):
+            ini_cls = cls[1]()  # initialize the class
+            if hasattr(ini_cls, target_attribute):
+                if getattr(ini_cls, target_attribute):
+                    return ini_cls
     raise AssertionError("No configured classes for data source {}".format(calling_file))

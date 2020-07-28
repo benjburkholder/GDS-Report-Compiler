@@ -488,7 +488,7 @@ def get_args(argv: list) -> tuple:
     return pull, ingest_only, backfilter_only, expedited
 
 
-def setup(script_name: str, required_attributes: list, expedited: int):
+def setup(script_name: str, expedited: int):
     """
     Before allowing any root-level script to execute
     Get the Customizer instance configured for script_name
@@ -504,18 +504,12 @@ def setup(script_name: str, required_attributes: list, expedited: int):
     customizer = custom.get_customizer(calling_file=script_name)
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
 
-    run_configuration_check(
-        script_name=script_name,
-        required_attributes=required_attributes,
-        customizer=customizer
-    )
-
     if not expedited:
 
         # Dynamically inserts correct vertical specific alert slack channel to recipients list
         # TODO: CORRECT THIS
         # insert_vertical_specific_alert_channel(customizer=customizer)
-
+        '''
         # Build marketing data table
         build_marketing_table(customizer=customizer)
 
@@ -531,7 +525,7 @@ def setup(script_name: str, required_attributes: list, expedited: int):
         # Lookup table refresh
         print('Refreshing lookup tables...')
         refresh_lookup_tables(customizer=customizer)
-
+        '''
         # Source table refresh
         print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)
@@ -632,7 +626,7 @@ def refresh_source_tables(customizer: custom.Customizer):
                 if sheet['table']['active']:
                     # 2020-07-27: patch by jws to handle dynamic credential retrieval
                     gs = get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
-                    raw_source_data = gs.client.get_spreadsheet_by_name(
+                    raw_source_data = gs.get_spreadsheet_by_name(
                         workbook_name=customizer.configuration_workbook['config_sheet_name'],
                         worksheet_name=sheet['sheet']
                     )

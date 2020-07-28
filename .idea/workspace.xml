@@ -2,14 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/utils/cls/user/ga_traffic.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/script.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/conf/stored/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/conf/stored/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/static.py" beforeDir="false" afterPath="$PROJECT_DIR$/conf/static.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/conf/stored/workbook.json" beforeDir="false" afterPath="$PROJECT_DIR$/conf/stored/workbook.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/google_analytics_traffic.py" beforeDir="false" afterPath="$PROJECT_DIR$/google_analytics_traffic.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_initialize_workbook.py" beforeDir="false" afterPath="$PROJECT_DIR$/sys_initialize_workbook.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/core.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/cls/user/ga.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/ga.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/config_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/config_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/user/ga_traffic.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/ga_traffic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/custom.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/custom.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/grc.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/grc.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -79,7 +79,7 @@
       <recent name="C:\Repositories\gds-report-compiler" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.google_analytics_traffic">
+  <component name="RunManager" selected="Python.script">
     <configuration name="config_manager" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -122,6 +122,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="gds-report-compiler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="sys_initialize_workbook" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -135,27 +156,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sys_initialize_workbook.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="sys_install_proprietary_packages" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="gds-report-compiler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sys_install_proprietary_packages.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -180,11 +180,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.script" />
         <item itemvalue="Python.google_analytics_traffic" />
         <item itemvalue="Python.sys_initialize_workbook" />
         <item itemvalue="Python.config_manager" />
         <item itemvalue="Python tests.Unittests for test_config_manager.TestConfigManager.test_create" />
-        <item itemvalue="Python.sys_install_proprietary_packages" />
       </list>
     </recent_temporary>
   </component>
@@ -381,7 +381,14 @@
       <option name="project" value="LOCAL" />
       <updated>1595881811051</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="GA Cleanup">
+      <created>1595934649344</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1595934649344</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -389,7 +396,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/GDS-Report-Compiler" />
     </ignored-roots>
-    <MESSAGE value="Updates from Test Client" />
     <MESSAGE value="2020-02-28: Updates from Test Client" />
     <MESSAGE value="2020-02-28: Updates from Test Client (b2)" />
     <MESSAGE value="2020-02-28: Ideas for next iteration (b1)" />
@@ -414,21 +420,22 @@
     <MESSAGE value="Add script for running updates" />
     <MESSAGE value="Automated Config Sheet Creation" />
     <MESSAGE value="grc.py cleanup" />
-    <option name="LAST_COMMIT_MESSAGE" value="grc.py cleanup" />
+    <MESSAGE value="GA Cleanup" />
+    <option name="LAST_COMMIT_MESSAGE" value="GA Cleanup" />
   </component>
   <component name="WindowStateProjectService">
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595254451470">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1595254451470" />
-    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1595886091726">
+    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1595937142943">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595886091726" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595881810586">
+    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595937142943" />
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595934648781">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595881810586" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595934648781" />
     <state width="572" height="466" key="DebuggerActiveHint" timestamp="1595608367292">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -437,38 +444,38 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594826394496" />
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1595934306441">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595934306441" />
-    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1595934306441">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595934306441" />
-    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1595934306441">
+    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595934306441" />
-    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1595934306441">
+    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595934306441" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1595934264426">
+    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595934264426" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1595934264426">
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595934264426" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1595934264426">
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595934264426" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1595934264426">
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1595937786823">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595934264426" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595937786823" />
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1595616226571" />
     <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595881258829">
       <screen x="0" y="0" width="1920" height="1040" />
@@ -482,10 +489,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595609435084" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1595878142456">
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1595935684090">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1595878142456" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1595935684090" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -516,14 +523,19 @@
           <option name="timeStamp" value="42" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/grc.py</url>
-          <line>532</line>
-          <option name="timeStamp" value="43" />
+          <url>file://$PROJECT_DIR$/script.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/cls/user/ga_traffic.py</url>
+          <line>145</line>
+          <option name="timeStamp" value="51" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/utils/grc.py</url>
-          <line>536</line>
-          <option name="timeStamp" value="44" />
+          <line>530</line>
+          <option name="timeStamp" value="56" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

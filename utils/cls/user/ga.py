@@ -1,11 +1,13 @@
 import pandas as pd
 import sqlalchemy
 import pathlib
+import datetime
 import os
 
-from googleanalyticspy.reporting.client.reporting import GoogleAnalytics as ga_package
 from utils.dbms_helpers import postgres_helpers
 from utils.cls.core import Customizer
+TABLE_SCHEMA = 'public'
+DATE_COL = 'report_date'
 
 
 class GoogleAnalytics(Customizer):
@@ -28,37 +30,62 @@ class GoogleAnalytics(Customizer):
     def __init__(self):
         super().__init__()
         self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+        self.get_secrets(include_dat=True)
+        self.set_attribute('table_schema', TABLE_SCHEMA)
+        self.set_attribute('date_col', DATE_COL)
+
+    table = None
+    table_schema = None
+    date_col = 'report_date'
+
+    def ingest_by_view_id(self, view_id: str, df: pd.DataFrame, start_date: str, end_date: str) -> None:
+        table_schema = self.get_attribute('table_schema')
+        table = self.get_attribute('table')
+        date_col = self.get_attribute('date_col')
+        with self.engine.begin() as con:
+            con.execute(
+                sqlalchemy.text(
+                    f"""
+                    DELETE FROM
+                    {table_schema}.{table}
+                    WHERE {date_col} BETWEEN :start_date AND :end_date
+                    AND view_id = :view_id;
+                    """
+                ),
+                start_date=start_date,
+                end_date=end_date,
+                view_id=view_id
+            )
+            df.to_sql(
+                table,
+                con=con,
+                if_exists='append',
+                index=False,
+                index_label=None
+            )
+
+    def calculate_date(self, start_date: bool = True):
+        if start_date:
+            return (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
+        else:
+            return (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
     def get_views(self) -> list:
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            sql = sqlalchemy.text(
-                """
-                SELECT DISTINCT
-                    view_id,
-                    property
-                FROM public.source_ga_views;
-                """
-            )
-            results = con.execute(sql).fetchall()
-            return [
-                dict(result) for result in results
-            ] if results else []
-
-    # noinspection PyUnresolvedReferences
-    def update_credentials(self, customizer: Customizer, ga_client: ga_package) -> Customizer:
-        """
-        Ensure the application database has the most recent data on-file for the client
-        and script / data source
-
-        :param customizer:
-        :param ga_client:
-        :return:
-        """
-        customizer.secrets_dat = ga_client.customizer.secrets_dat
-        customizer.secrets = ga_client.customizer.secrets
-        grc.set_customizer_secrets_dat(customizer=customizer)
-        return customizer
+        sql = sqlalchemy.text(
+            """
+            SELECT DISTINCT
+                view_id,
+                property
+            FROM public.source_ga_views;
+            """
+        )
+        with self.engine.connect() as con:
+            results = con.execute(
+                sql
+            ).fetchall()
+        return [
+            dict(result) for result in results
+        ] if results else []
 
 
 class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):

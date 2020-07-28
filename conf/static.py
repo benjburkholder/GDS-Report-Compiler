@@ -1,6 +1,8 @@
 """
 Static GRC Configuration
 """
+DEBUG = True
+DEBUG_SCRIPT_NAME = 'google_analytics_traffic'
 
 UPDATE_KEY = '32e58f63114435f643f2c88617a02a5ba03e1e91'
 UPDATE_USERNAME = 'jwschroeder330'
