@@ -61,7 +61,8 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
     # noinspection PyMethodMayBeStatic
     def rename(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Renames columns into pg/sql friendly aliases
+        Renames columns into pg/sql friendly aliases (specific to the traffic dataset)
+        ====================================================================================================
         :param df:
         :return:
         """
@@ -79,43 +80,20 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'newUsers': 'new_users'
         })
 
-    # noinspection PyMethodMayBeStatic
-    def type(self, df: pd.DataFrame) -> pd.DataFrame:
+    @staticmethod
+    def _get_post_processing_sql_list() -> list:
         """
-        Type columns for safe storage (respecting data type and if needed, length)
-        :param df:
+        If you wish to execute post-processing on the SOURCE table, enter sql commands in the list
+        provided below
+        ====================================================================================================
         :return:
         """
-
-        for column in self.get_attribute('schema')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        return df
-
-    def _get_post_processing_sql_list(self) -> list:
         return []
 
     def post_processing(self) -> None:
         """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        Handles custom SQL statements for the SOURCE table due to bad / mismatched data (if any)
+        ====================================================================================================
         :return:
         """
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -125,6 +103,11 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         return
 
     def pull(self):
+        """
+        Extracts data from Google Analytics API, transforms and loads it into the SQL database
+        ====================================================================================================
+        :return:
+        """
         if self.get_attribute('historical'):
             start_date = self.get_attribute('historical_start_date')
             end_date = self.get_attribute('historical_end_date')
@@ -165,11 +148,3 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                 self.ingest_by_view_id(view_id=view_id, df=df, start_date=start_date, end_date=end_date)
             else:
                 print(f'WARN: No data returned for view {view_id} for property {prop}')
-
-
-
-
-
-
-
-

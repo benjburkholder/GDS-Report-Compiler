@@ -87,6 +87,32 @@ class GoogleAnalytics(Customizer):
             dict(result) for result in results
         ] if results else []
 
+    # noinspection PyMethodMayBeStatic
+    def type(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Type columns for safe storage (respecting data type and if needed, length)
+        ====================================================================================================
+        :param df:
+        :return:
+        """
+        for column in self.get_attribute('schema')['columns']:
+            if column['name'] in df.columns:
+                if column['type'] == 'character varying':
+                    assert 'length' in column.keys()
+                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
+                elif column['type'] == 'bigint':
+                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                elif column['type'] == 'double precision':
+                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                elif column['type'] == 'date':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'timestamp without time zone':
+                    df[column['name']] = pd.to_datetime(df[column['name']])
+                elif column['type'] == 'datetime with time zone':
+                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
+        return df
+
+
 
 class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
 
@@ -142,33 +168,6 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
             'uniqueEvents': 'unique_events',
             'eventValue': 'event_value'
         })
-
-    # noinspection PyMethodMayBeStatic
-    def type(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Type columns for safe storage (respecting data type and if needed, length)
-        :param df:
-        :return:
-        """
-
-        for column in self.get_attribute('schema')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
 
@@ -258,33 +257,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'goal7Completions': 'dialogtech_calls',
 
         })
-
-    # noinspection PyMethodMayBeStatic
-    def type(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Type columns for safe storage (respecting data type and if needed, length)
-        :param df:
-        :return:
-        """
-
-        for column in self.get_attribute('schema')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
 
     def parse(self, df: pd.DataFrame) -> pd.DataFrame:
 

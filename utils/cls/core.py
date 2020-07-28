@@ -62,6 +62,11 @@ class Customizer:
             col for col in table[self.__columns_key] if col.get('entity_col')
         ]
 
+    def get_backfilter_columns_by_table(self, table: dict) -> list:
+        return [
+            col for col in table[self.__columns_key] if col.get('backfilter')
+        ]
+
     def generate_set_statement_by_entity_columns(self, entity_columns: list) -> str:
         statement = "SET\n"
         count = 1

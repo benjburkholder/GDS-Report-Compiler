@@ -36,7 +36,9 @@ def main(argv) -> int:
     if backfilter:
         customizer.backfilter()
     if ingest:
-        customizer.ingest()
+        # TODO: need to address the ingest workflow
+        # customizer.ingest()
+        pass
 
     # these stages happen at the end no matter what
     customizer.audit()
