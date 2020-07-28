@@ -11,9 +11,9 @@ from utils.dbms_helpers import postgres_helpers
 # CUSTOM IMPORTS
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics as GoogleAnalyticsClient
 IS_CLASS = True
-HISTORICAL = False
-HISTORICAL_START_DATE = '2020-06-01'
-HISTORICAL_END_DATE = '2020-06-30'
+HISTORICAL = True
+HISTORICAL_START_DATE = '2020-05-01'
+HISTORICAL_END_DATE = '2020-05-31'
 
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):

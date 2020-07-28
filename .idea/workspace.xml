@@ -3,9 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/stored/workbook.json" beforeDir="false" afterPath="$PROJECT_DIR$/conf/stored/workbook.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/script.py" beforeDir="false" afterPath="$PROJECT_DIR$/script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/core.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/ga.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/ga.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/cls/user/ga_traffic.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/ga_traffic.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -391,7 +390,14 @@
       <option name="project" value="LOCAL" />
       <updated>1595938111593</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="ga_traffic.py cleanup complete">
+      <created>1595938670634</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1595938670634</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -399,7 +405,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/GDS-Report-Compiler" />
     </ignored-roots>
-    <MESSAGE value="2020-02-28: Updates from Test Client (b2)" />
     <MESSAGE value="2020-02-28: Ideas for next iteration (b1)" />
     <MESSAGE value="2020-03-27: Get prefix dynamically" />
     <MESSAGE value="2020-03-27: Get prefix dynamically (build 2)" />
@@ -424,7 +429,8 @@
     <MESSAGE value="grc.py cleanup" />
     <MESSAGE value="GA Cleanup" />
     <MESSAGE value="Ga Traffic almost complete - new script template system in place" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ga Traffic almost complete - new script template system in place" />
+    <MESSAGE value="ga_traffic.py cleanup complete" />
+    <option name="LAST_COMMIT_MESSAGE" value="ga_traffic.py cleanup complete" />
   </component>
   <component name="WindowStateProjectService">
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595254451470">
@@ -435,10 +441,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595937142943" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595938110746">
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595938670123">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595938110746" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595938670123" />
     <state width="572" height="466" key="DebuggerActiveHint" timestamp="1595608367292">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -447,47 +453,47 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594826394496" />
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1595938875745">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
-    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595938875745" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1595938875745">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
-    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595938875745" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1595938875744">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
-    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595938875744" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1595938875745">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595938875745" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1595939150358">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595939150358" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1595939150358">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595939150358" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1595939150358">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1595938550847">
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595939150358" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1595939150358">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595938550847" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595939150358" />
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1595616226571" />
     <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595881258829">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595881258829" />
-    <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1595938407104">
+    <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1595939278572">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1595938407104" />
+    <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1595939278572" />
     <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1595609435084">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -529,6 +535,11 @@
           <url>file://$PROJECT_DIR$/utils/grc.py</url>
           <line>530</line>
           <option name="timeStamp" value="56" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/script.py</url>
+          <line>36</line>
+          <option name="timeStamp" value="65" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

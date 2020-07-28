@@ -509,7 +509,7 @@ def setup(script_name: str, expedited: int):
         # Dynamically inserts correct vertical specific alert slack channel to recipients list
         # TODO: CORRECT THIS
         # insert_vertical_specific_alert_channel(customizer=customizer)
-        '''
+
         # Build marketing data table
         build_marketing_table(customizer=customizer)
 
@@ -525,7 +525,7 @@ def setup(script_name: str, expedited: int):
         # Lookup table refresh
         print('Refreshing lookup tables...')
         refresh_lookup_tables(customizer=customizer)
-        '''
+
         # Source table refresh
         print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)

@@ -1035,10 +1035,26 @@
                         "name": "property",
                         "type": "character varying",
                         "length": 100,
+                        "default": "Non-Location Pages",
+                        "master_include": true
+                    },
+                    {
+                        "name": "community",
+                        "type": "character varying",
+                        "length": 100,
                         "entity_col": true,
                         "default": "Non-Location Pages",
                         "master_include": true
                     },
+                    {
+                        "name": "service_line",
+                        "type": "character varying",
+                        "length": 100,
+                        "entity_col": true,
+                        "default": "Non-Location Pages",
+                        "master_include": true
+                    },
+
                     {
                         "name": "view_id",
                         "type": "character varying",
@@ -1146,6 +1162,32 @@
                             },
                             {
                                 "name": "device",
+                                "sort": "asc",
+                                "nulls_last": true
+                            }
+                        ]
+                    },
+                    {
+                        "name": "iz_google_analytics_traffic_view_id",
+                        "tablespace": "pg_default",
+                        "clustered": false,
+                        "method": "btree",
+                        "columns": [
+                            {
+                                "name": "view_id",
+                                "sort": "asc",
+                                "nulls_last": true
+                            }
+                        ]
+                    },
+                                        {
+                        "name": "iz_google_analytics_traffic_url",
+                        "tablespace": "pg_default",
+                        "clustered": false,
+                        "method": "btree",
+                        "columns": [
+                            {
+                                "name": "url",
                                 "sort": "asc",
                                 "nulls_last": true
                             }
