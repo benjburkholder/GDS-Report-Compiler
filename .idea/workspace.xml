@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/conf/stored/workflow.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/queue_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/google_analytics_traffic.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/script.py" beforeDir="false" afterPath="$PROJECT_DIR$/script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/ga.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/ga.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/cls/user/ga_traffic.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/ga_traffic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -408,7 +402,14 @@
       <option name="project" value="LOCAL" />
       <updated>1595939448200</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="ga_traffic.py anti-sampling measures">
+      <created>1595941082052</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1595941082052</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -416,7 +417,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/GDS-Report-Compiler" />
     </ignored-roots>
-    <MESSAGE value="2020-03-27: Get prefix dynamically" />
     <MESSAGE value="2020-03-27: Get prefix dynamically (build 2)" />
     <MESSAGE value="2020-03-27: Set function prefixes dynamically" />
     <MESSAGE value="Remove trailing comma" />
@@ -441,7 +441,8 @@
     <MESSAGE value="Ga Traffic almost complete - new script template system in place" />
     <MESSAGE value="ga_traffic.py cleanup complete" />
     <MESSAGE value="ga_traffic.py add indexes and update backfiltering to be more meaningful" />
-    <option name="LAST_COMMIT_MESSAGE" value="ga_traffic.py add indexes and update backfiltering to be more meaningful" />
+    <MESSAGE value="ga_traffic.py anti-sampling measures" />
+    <option name="LAST_COMMIT_MESSAGE" value="ga_traffic.py anti-sampling measures" />
   </component>
   <component name="WindowStateProjectService">
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595254451470">
@@ -452,10 +453,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595937142943" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595939447682">
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595941081475">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595939447682" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595941081475" />
     <state width="572" height="466" key="DebuggerActiveHint" timestamp="1595608367292">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -530,11 +531,6 @@
           <url>file://$PROJECT_DIR$/google_analytics_events.py</url>
           <line>64</line>
           <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/cls/user/ga_traffic.py</url>
-          <line>124</line>
-          <option name="timeStamp" value="70" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
