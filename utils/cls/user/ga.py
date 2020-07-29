@@ -135,9 +135,9 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
                     assert 'length' in column.keys()
                     df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
                 elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                    df[column['name']] = df[column['name']].fillna('0').apply(lambda x: int(x) if x else None)
                 elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                    df[column['name']] = df[column['name']].fillna('0').apply(lambda x: float(x) if x else None)
                 elif column['type'] == 'date':
                     df[column['name']] = pd.to_datetime(df[column['name']])
                 elif column['type'] == 'timestamp without time zone':
@@ -245,9 +245,9 @@ class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
                     assert 'length' in column.keys()
                     df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
                 elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                    df[column['name']] = df[column['name']].fillna('0').apply(lambda x: int(x) if x else None)
                 elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                    df[column['name']] = df[column['name']].fillna('0').apply(lambda x: float(x) if x else None)
                 elif column['type'] == 'date':
                     df[column['name']] = pd.to_datetime(df[column['name']])
                 elif column['type'] == 'timestamp without time zone':
@@ -361,9 +361,9 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
                     assert 'length' in column.keys()
                     df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
                 elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
+                    df[column['name']] = df[column['name']].fillna('0').apply(lambda x: int(x) if x else None)
                 elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
+                    df[column['name']] = df[column['name']].fillna('0').apply(lambda x: float(x) if x else None)
                 elif column['type'] == 'date':
                     df[column['name']] = pd.to_datetime(df[column['name']])
                 elif column['type'] == 'timestamp without time zone':

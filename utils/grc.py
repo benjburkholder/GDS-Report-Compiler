@@ -591,6 +591,7 @@ def refresh_source_tables(customizer: custom.Customizer):
     return 0
 
 
+# TODO (bburkho) Update to load from workbook.json
 def systematic_procedure_execution() -> list:
     table_names = []
     for sheet in Customizer.configuration_workbook['sheets']:
