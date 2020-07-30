@@ -6,8 +6,23 @@ import os
 
 from utils.dbms_helpers import postgres_helpers
 from utils.cls.core import Customizer
+
+from googleanalyticspy.reporting.client.reporting import GoogleAnalytics as GoogleAnalyticsClient
 TABLE_SCHEMA = 'public'
 DATE_COL = 'report_date'
+
+
+def get_configured_item_by_view_id(view_id: str, lookup: dict):
+    if view_id in lookup.keys():
+        # support for customization by view id - aka "for view x use y"
+        if type(lookup[view_id]) == list:
+            return lookup[view_id]
+        # support for self-referencing lookup - aka "same as... x"
+        elif type(lookup[view_id]) == str:
+            return lookup[lookup[view_id]]
+        # checking to ensure the configuration was setup properly
+        else:
+            raise AssertionError("Invalid type for lookup entry on " + view_id)
 
 
 class GoogleAnalytics(Customizer):
@@ -15,17 +30,38 @@ class GoogleAnalytics(Customizer):
     credential_name = 'OAuthCredential'
     secrets_name = 'GoogleAnalytics'
 
-    supported_metrics = [
+    metrics = {
+        'global': []
+    }
 
-    ]
-    supported_dimensions = [
-        'date',
-        'channelGrouping',
-        'sourceMedium',
-        'deviceCategory',
-        'campaign',
-        'page',
-    ]
+    def __get_metrics(self, view_id: str):
+        return get_configured_item_by_view_id(view_id=view_id, lookup=self.metrics)
+
+    dimensions = {
+        'global': []
+    }
+
+    def __get_dimensions(self, view_id: str):
+        return get_configured_item_by_view_id(view_id=view_id, lookup=self.dimensions)
+
+    rename_map = {
+        'global': {}
+    }
+
+    def __get_rename_map(self, view_id: str):
+        return get_configured_item_by_view_id(view_id=view_id, lookup=self.rename_map)
+
+    post_processing_sql_list = []
+
+    def __get_post_processing_sql_list(self) -> list:
+        """
+        If you wish to execute post-processing on the SOURCE table, enter sql commands in the list
+        provided below
+        ====================================================================================================
+        :return:
+        """
+        # put this in a function to leave room for customization
+        return self.post_processing_sql_list
 
     def __init__(self):
         super().__init__()
@@ -64,7 +100,8 @@ class GoogleAnalytics(Customizer):
                 index_label=None
             )
 
-    def get_date_range(self, start_date: datetime.datetime, end_date: datetime.datetime) -> list:
+    @staticmethod
+    def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
         return pd.date_range(start=start_date, end=end_date).to_list()
 
     def calculate_date(self, start_date: bool = True) -> datetime.datetime:
@@ -121,175 +158,71 @@ class GoogleAnalytics(Customizer):
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
         return df
 
-
-
-class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
-
-    metrics = [
-        'totalEvents',
-        'uniqueEvents',
-        'eventValue'
-    ]
-
-    dimensions = [
-        'date',
-        'channelGrouping',
-        'sourceMedium',
-        'deviceCategory',
-        'campaign',
-        'pagePath',
-        'eventLabel',
-        'eventAction',
-    ]
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-01-02')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('metrics', self.metrics)
-        self.set_attribute('dimensions', self.dimensions)
-        self.set_attribute('data_source', 'Google Analytics - Events')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        return df.rename(columns={
-            'date': 'report_date',
-            'channelGrouping': 'medium',
-            'sourceMedium': 'source_medium',
-            'deviceCategory': 'device',
-            'pagePath': 'url',
-            'eventLabel': 'event_label',
-            'eventAction': 'event_action',
-            'totalEvents': 'total_events',
-            'uniqueEvents': 'unique_events',
-            'eventValue': 'event_value'
-        })
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        return df
-
     def post_processing(self) -> None:
         """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        Handles custom SQL statements for the SOURCE table due to bad / mismatched data (if any)
+        ====================================================================================================
         :return:
         """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
-            for query in custom_sql:
+            for query in self.__get_post_processing_sql_list():
                 con.execute(query)
-
         return
 
-
-class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
-    metrics = [
-            'goal5Completions',
-            'goal7Completions',
-            'goal6Completions',
-            'goal3Completions',
-            'goal4Completions',
-    ]
-
-    dimensions = [
-            'date',
-            'channelGrouping',
-            'sourceMedium',
-            'deviceCategory',
-            'campaign',
-            'pagePath'
-    ]
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-01-02')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('metrics', self.metrics)
-        self.set_attribute('dimensions', self.dimensions)
-        self.set_attribute('data_source', 'Google Analytics - Goals')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
+    def pull(self):
         """
-        Renames columns into pg/sql friendly aliases
-        :param df:
+        Extracts data from Google Analytics API, transforms and loads it into the SQL database
+        ====================================================================================================
         :return:
         """
-        # TODO(jschroeder) flesh out this example a bit more
-        return df.rename(columns={
-            'date': 'report_date',
-            'view_id': 'view_id',
-            'channelGrouping': 'medium',
-            'sourceMedium': 'source_medium',
-            'deviceCategory': 'device',
-            'campaign': 'campaign',
-            'pagePath': 'url',
-            'sessions': 'sessions',
-            'percentNewPageviews': 'percent_new_pageviews',
-            'pageviews': 'pageviews',
-            'goal3Completions': 'request_a_quote',
-            'goal4Completions': 'sidebar_contact_us',
-            'goal5Completions': 'contact_us_form_submission',
-            'goal6Completions': 'newsletter_signups',
-            'goal7Completions': 'dialogtech_calls',
+        start_date = self.calculate_date(start_date=True)
+        end_date = self.calculate_date(start_date=False)
+        # initialize the client module for connecting to GA
+        ga_client = GoogleAnalyticsClient(
+            customizer=self
+        )
+        # get all view that are configured
+        views = self.get_views()
+        assert views, "No " + self.__class__.__name__ + " views setup!"
+        # iterate over each date to pull, process and ingest to prevent sampling
+        date_idx = 0
+        date_range = self.get_date_range(start_date=start_date, end_date=end_date)
+        for _ in date_range:
+            if date_idx != 0:
+                start = date_range[date_idx - 1].strftime('%Y-%m-%d')
+                end = date_range[date_idx].strftime('%Y-%m-%d')
+                # for each, pull according to the dates, metrics and dimensions configured
+                for view in views:
+                    view_id = view['view_id']
+                    prop = view['property']
+                    dimensions = self.__get_dimensions(view_id=view_id)
+                    metrics = self.__get_metrics(view_id=view_id)
+                    rename_map = self.__get_rename_map(view_id=view_id)
+                    assert dimensions and metrics, \
+                        "Dimensions and metrics not properly configured for " + self.__class__.__name__
+                    df = ga_client.query(
+                        view_id=view_id,
+                        raw_dimensions=dimensions,
+                        raw_metrics=metrics,
+                        start_date=start,
+                        end_date=end
+                    )
 
-        })
+                    if df.shape[0]:
+                        df = df.rename(columns=rename_map, inplace=True)
+                        df = self.type(df=df)
+                        df['view_id'] = view_id
+                        df['property'] = prop
+                        df['data_source'] = self.get_attribute('data_source')
+                        self.ingest_by_view_id(view_id=view_id, df=df, start_date=start, end_date=end)
+                    else:
+                        print(f'WARN: No data returned for {start} for view {view_id} for property {prop}')
+            # always increments the date_range idx
+            date_idx += 1
 
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        return df
-
-    def post_processing(self) -> None:
-        """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
-        :return:
-        """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            for query in custom_sql:
-                con.execute(query)
-
-        return
+        # if we have valid secrets after the request loop, let's update the db with the latest
+        # we put the onus on the client library to refresh these credentials as needed
+        # and to store them where they belong
+        if getattr(self, 'secrets_dat', {}):
+            self.set_customizer_secrets_dat()

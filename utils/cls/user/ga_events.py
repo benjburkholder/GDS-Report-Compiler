@@ -7,14 +7,11 @@ from utils.cls.user.ga import GoogleAnalytics
 # CUSTOM IMPORTS
 IS_CLASS = True
 HISTORICAL = True
-HISTORICAL_START_DATE = '2019-08-27'
+HISTORICAL_START_DATE = '2019-01-01'
 HISTORICAL_END_DATE = '2020-07-28'
 
 
-class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
-    """
-    Handles Google Analytisc Traffic pulling, parsing and processing
-    """
+class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
 
     def __init__(self):
         super().__init__()
@@ -25,7 +22,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         self.set_attribute('table', self.prefix)
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
-        self.set_attribute('data_source', 'Google Analytics - Traffic')
+        self.set_attribute('data_source', 'Google Analytics - Events')
         self.set_attribute('schema', {'columns': []})
 
         # set whether this data source is being actively used or not
@@ -33,16 +30,9 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
 
     metrics = {
         'global': [
-            'sessions',
-            'percentNewSessions',
-            'pageviews',
-            'uniquePageviews',
-            'pageviewsPerSession',
-            'entrances',
-            'bounces',
-            'sessionDuration',
-            'users',
-            'newUsers'
+            'totalEvents',
+            'uniqueEvents',
+            'eventValue'
         ]
     }
 
@@ -54,21 +44,22 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
             'deviceCategory',
             'campaign',
             'pagePath',
+            'eventLabel',
+            'eventAction',
         ]
     }
 
     rename_map = {
         'global': {
             'date': 'report_date',
-            'sourceMedium': 'source_medium',
             'channelGrouping': 'medium',
+            'sourceMedium': 'source_medium',
             'deviceCategory': 'device',
             'pagePath': 'url',
-            'percentNewSessions': 'percent_new_sessions',
-            'percentNewPageviews': 'percent_new_pageviews',
-            'uniquePageviews': 'unique_pageviews',
-            'pageviewsPerSession': 'pageviews_per_session',
-            'sessionDuration': 'session_duration',
-            'newUsers': 'new_users'
+            'eventLabel': 'event_label',
+            'eventAction': 'event_action',
+            'totalEvents': 'total_events',
+            'uniqueEvents': 'unique_events',
+            'eventValue': 'event_value'
         }
     }
