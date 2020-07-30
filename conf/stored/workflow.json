@@ -1,6 +1,37 @@
 [
   {
     "name": "google_analytics_traffic",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  },
+  {
+    "name": "google_analytics_events",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  },
+  {
+    "name": "google_analytics_goals",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  },
+    {
+    "name": "google_my_business_reviews",
+    "active": 1,
     "args": {
       "pull": 1,
       "ingest": 1,

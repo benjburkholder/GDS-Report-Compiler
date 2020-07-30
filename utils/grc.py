@@ -454,7 +454,7 @@ def _get_value_from_args_by_flag(argv: list, flag: str, default: int = 1) -> int
     """
     argv = [arg for arg in argv if flag in arg]
     if argv:
-        return int(argv[0].replace(flag))
+        return int(argv[0].replace(flag, ''))
     else:
         return default
 

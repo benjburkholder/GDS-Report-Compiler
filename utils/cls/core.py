@@ -16,6 +16,21 @@ from ..stdlib import module_from_file
 from conf.static import ENTITY_COLS
 
 
+def get_configured_item_by_key(key: str, lookup: dict):
+    if key in lookup.keys():
+        # support for customization by view id - aka "for view x use y"
+        if type(lookup[key]) == list:
+            return lookup[key]
+        # support for self-referencing lookup - aka "same as... x"
+        elif type(lookup[key]) == str:
+            return lookup[lookup[key]]
+        # checking to ensure the configuration was setup properly
+        else:
+            raise AssertionError("Invalid type for lookup entry on " + key)
+    else:
+        return lookup['global']
+
+
 class Customizer:
     """
     Required to run scripts

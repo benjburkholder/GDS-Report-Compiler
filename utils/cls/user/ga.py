@@ -5,24 +5,11 @@ import datetime
 import os
 
 from utils.dbms_helpers import postgres_helpers
-from utils.cls.core import Customizer
+from utils.cls.core import Customizer, get_configured_item_by_key
 
 from googleanalyticspy.reporting.client.reporting import GoogleAnalytics as GoogleAnalyticsClient
 TABLE_SCHEMA = 'public'
 DATE_COL = 'report_date'
-
-
-def get_configured_item_by_view_id(view_id: str, lookup: dict):
-    if view_id in lookup.keys():
-        # support for customization by view id - aka "for view x use y"
-        if type(lookup[view_id]) == list:
-            return lookup[view_id]
-        # support for self-referencing lookup - aka "same as... x"
-        elif type(lookup[view_id]) == str:
-            return lookup[lookup[view_id]]
-        # checking to ensure the configuration was setup properly
-        else:
-            raise AssertionError("Invalid type for lookup entry on " + view_id)
 
 
 class GoogleAnalytics(Customizer):
@@ -35,21 +22,21 @@ class GoogleAnalytics(Customizer):
     }
 
     def __get_metrics(self, view_id: str):
-        return get_configured_item_by_view_id(view_id=view_id, lookup=self.metrics)
+        return get_configured_item_by_key(key=view_id, lookup=self.metrics)
 
     dimensions = {
         'global': []
     }
 
     def __get_dimensions(self, view_id: str):
-        return get_configured_item_by_view_id(view_id=view_id, lookup=self.dimensions)
+        return get_configured_item_by_key(key=view_id, lookup=self.dimensions)
 
     rename_map = {
         'global': {}
     }
 
     def __get_rename_map(self, view_id: str):
-        return get_configured_item_by_view_id(view_id=view_id, lookup=self.rename_map)
+        return get_configured_item_by_key(key=view_id, lookup=self.rename_map)
 
     post_processing_sql_list = []
 
@@ -210,7 +197,7 @@ class GoogleAnalytics(Customizer):
                     )
 
                     if df.shape[0]:
-                        df = df.rename(columns=rename_map, inplace=True)
+                        df.rename(columns=rename_map, inplace=True)
                         df = self.type(df=df)
                         df['view_id'] = view_id
                         df['property'] = prop

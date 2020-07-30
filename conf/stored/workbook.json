@@ -1392,27 +1392,17 @@
                         "master_include": true
                     },
                     {
-                        "name": "request_a_quote",
+                        "name": "contact_us_form",
                         "type": "bigint",
                         "master_include": true
                     },
                     {
-                        "name": "sidebar_contact_us",
+                        "name": "brochure_form",
                         "type": "bigint",
                         "master_include": true
                     },
                     {
-                        "name": "contact_us_form_submission",
-                        "type": "bigint",
-                        "master_include": true
-                    },
-                    {
-                        "name": "newsletter_signups",
-                        "type": "bigint",
-                        "master_include": true
-                    },
-                    {
-                        "name": "dialogtech_calls",
+                        "name": "ppc_form",
                         "type": "bigint",
                         "master_include": true
                     }

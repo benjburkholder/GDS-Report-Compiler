@@ -15,26 +15,27 @@ def main() -> None:
 
     # for each script in workflow.json
     for work_item in workflow:
-        name = work_item['name']
-        args = work_item['args']
-        pull = args['pull']
-        ingest = args['ingest']
-        backfilter = args['backfilter']
-        expedited = args['expedited']
-        # execute with the configured command line args
-        call_args = [
-            venv_path,
-            script_path,
-            name,
-            f'--pull={pull}',
-            f'--ingest={ingest}',
-            f'--backfilter={backfilter}',
-            f'--expedited={expedited}'
-        ]
-        print(call_args)
-        subprocess.call(
-            call_args
-        )
+        if work_item['active']:
+            name = work_item['name']
+            args = work_item['args']
+            pull = args['pull']
+            ingest = args['ingest']
+            backfilter = args['backfilter']
+            expedited = args['expedited']
+            # execute with the configured command line args
+            call_args = [
+                venv_path,
+                script_path,
+                name,
+                f'--pull={pull}',
+                f'--ingest={ingest}',
+                f'--backfilter={backfilter}',
+                f'--expedited={expedited}'
+            ]
+            print(call_args)
+            subprocess.call(
+                call_args
+            )
     return
 
 

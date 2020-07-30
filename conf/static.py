@@ -21,6 +21,11 @@ REQUIRED_PACKAGES = [
         'name': 'google-analytics-py',
         'pip_alias': 'googleanalyticspy',
         'version': 'latest'
+    },
+    {
+        'name': 'google-my-business-py',
+        'pip_alias': 'googlemybusiness',
+        'version': 'latest'
     }
 ]
 
