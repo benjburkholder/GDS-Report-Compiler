@@ -1,6 +1,7 @@
 """
 Platform Functions
 """
+import platform
 import datetime
 import json
 import os
@@ -665,3 +666,23 @@ def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ing
 
 def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
     customizer.recipients.append(customizer.vertical_specific_slack_alerts[customizer.vertical])
+
+
+def build_path_by_os(root):
+    client_os = platform.system()
+
+    if client_os == 'Windows':
+        venv_path = os.path.join(root, 'venv', 'Scripts', 'python.exe')
+
+    elif client_os == 'Darwin':
+        venv_path = os.path.join(root, 'venv', 'bin', 'python')
+
+    elif client_os == 'Linux':
+        venv_path = os.path.join(root, 'venv', 'bin', 'python')
+
+    else:
+        venv_path = None
+
+    assert venv_path, "Unknown OS detected, or return value from 'platform.systems()' function has changed."
+
+    return venv_path
