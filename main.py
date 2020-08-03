@@ -2,26 +2,42 @@
 Main Reporting Workflow Script
 """
 import os
+import sys
 import subprocess
+from utils import grc
 from utils.queue_manager import QueueManager
 
 
-def main() -> None:
+def main(argv) -> None:
     workflow = QueueManager().get()
 
     root = os.path.abspath(os.path.dirname(__file__))
-    venv_path = os.path.join(root, 'venv', 'Scripts', 'python.exe')
+    venv_path = grc.build_path_by_os(root=root)
     script_path = os.path.join(root, 'script.py')
 
-    # for each script in workflow.json
+    # single logical branch - either get the args or use what is provided
+    if len(argv) > 1:
+        use_args = False
+        pull, ingest, backfilter, expedited = grc.get_args(argv=argv)
+    else:
+        use_args = True
+        pull = None
+        ingest = None
+        backfilter = None
+        expedited = None
+
+    # iterate and pull each script in workflow.json
     for work_item in workflow:
         if work_item['active']:
             name = work_item['name']
             args = work_item['args']
-            pull = args['pull']
-            ingest = args['ingest']
-            backfilter = args['backfilter']
-            expedited = args['expedited']
+            
+            # only extract items from the workflow if args have not already been sent
+            pull = args['pull'] if use_args else pull
+            ingest = args['ingest'] if use_args else ingest
+            backfilter = args['backfilter'] if use_args else backfilter
+            expedited = args['expedited'] if use_args else expedited
+            
             # execute with the configured command line args
             call_args = [
                 venv_path,
@@ -32,7 +48,6 @@ def main() -> None:
                 f'--backfilter={backfilter}',
                 f'--expedited={expedited}'
             ]
-            print(call_args)
             subprocess.call(
                 call_args
             )
@@ -40,4 +55,4 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    main(argv=sys.argv)
