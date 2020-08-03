@@ -15,53 +15,43 @@ def main(argv) -> None:
     venv_path = grc.build_path_by_os(root=root)
     script_path = os.path.join(root, 'script.py')
 
+    # single logical branch - either get the args or use what is provided
     if len(argv) > 1:
-        # for each script in workflow.json
-        for work_item in workflow:
-            if work_item['active']:
-                name = work_item['name']
-                pull, ingest, backfilter, expedited = grc.get_args(argv=argv)
-
-                # execute with the configured command line args
-                call_args = [
-                    venv_path,
-                    script_path,
-                    name,
-                    f'--pull={pull}',
-                    f'--ingest={ingest}',
-                    f'--backfilter={backfilter}',
-                    f'--expedited={expedited}'
-                ]
-                subprocess.call(
-                    call_args
-                )
-        return
-
+        use_args = False
+        pull, ingest, backfilter, expedited = grc.get_args(argv=argv)
     else:
-        # for each script in workflow.json
-        for work_item in workflow:
-            if work_item['active']:
-                name = work_item['name']
-                args = work_item['args']
-                pull = args['pull']
-                ingest = args['ingest']
-                backfilter = args['backfilter']
-                expedited = args['expedited']
-                # execute with the configured command line args
-                call_args = [
-                    venv_path,
-                    script_path,
-                    name,
-                    f'--pull={pull}',
-                    f'--ingest={ingest}',
-                    f'--backfilter={backfilter}',
-                    f'--expedited={expedited}'
-                ]
-                print(call_args)
-                subprocess.call(
-                    call_args
-                )
-        return
+        use_args = True
+        pull = None
+        ingest = None
+        backfilter = None
+        expedited = None
+
+    # iterate and pull each script in workflow.json
+    for work_item in workflow:
+        if work_item['active']:
+            name = work_item['name']
+            args = work_item['args']
+            
+            # only extract items from the workflow if args have not already been sent
+            pull = args['pull'] if use_args else pull
+            ingest = args['ingest'] if use_args else ingest
+            backfilter = args['backfilter'] if use_args else backfilter
+            expedited = args['expedited'] if use_args else expedited
+            
+            # execute with the configured command line args
+            call_args = [
+                venv_path,
+                script_path,
+                name,
+                f'--pull={pull}',
+                f'--ingest={ingest}',
+                f'--backfilter={backfilter}',
+                f'--expedited={expedited}'
+            ]
+            subprocess.call(
+                call_args
+            )
+    return
 
 
 if __name__ == '__main__':
