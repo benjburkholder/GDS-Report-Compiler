@@ -31,6 +31,9 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         # set whether this data source is being actively used or not
         self.set_attribute('active', True)
 
+    # place custom sql here
+    post_processing_sql_list = []
+        
     metrics = {
         'global': [
             'sessions',
