@@ -39,6 +39,16 @@
       "expedited": 1
     }
   },
+  {
+    "name": "google_my_business_insights",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  },
     {
     "name": "google_search_console_analytics",
     "active": 0,

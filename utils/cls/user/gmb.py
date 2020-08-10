@@ -1,12 +1,16 @@
 import pandas as pd
 import numpy as np
 import sqlalchemy
+import datetime
 import pathlib
 import os
 
-from utils.cls.core import Customizer, get_configured_item_by_key
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer, get_configured_item_by_key
+
 from googlemybusiness.reporting.client.listing_report import GoogleMyBusinessReporting
+TABLE_SCHEMA = 'public'
+DATE_COL = 'report_date'
 
 
 class GoogleMyBusiness(Customizer):
@@ -18,13 +22,90 @@ class GoogleMyBusiness(Customizer):
         'global': {}
     }
 
-    def __get_rename_map(self, account_name: str):
+    def get_rename_map(self, account_name: str):
         return get_configured_item_by_key(key=account_name, lookup=self.rename_map)
+
+    post_processing_sql_list = []
+
+    def __get_post_processing_sql_list(self) -> list:
+        """
+        If you wish to execute post-processing on the SOURCE table, enter sql commands in the list
+        provided below
+        ====================================================================================================
+        :return:
+        """
+        # put this in a function to leave room for customization
+        return self.post_processing_sql_list
 
     def __init__(self):
         super().__init__()
         self.set_attribute("secrets_path", str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
         self.get_secrets(include_dat=True)
+        self.set_attribute('table_schema', TABLE_SCHEMA)
+        self.set_attribute('date_col', DATE_COL)
+
+        # if we have valid secrets after the request loop, let's update the db with the latest
+        # we put the onus on the client library to refresh these credentials as needed
+        # and to store them where they belong
+        if getattr(self, 'secrets_dat', {}):
+            self.set_customizer_secrets_dat()
+
+    def ingest_by_listing_id(self, listing_id: str, df: pd.DataFrame, start_date: str, end_date: str) -> None:
+        table_schema = self.get_attribute('table_schema')
+        table = self.get_attribute('table')
+        date_col = self.get_attribute('date_col')
+
+        with self.engine.begin() as con:
+            if 'reviews' not in table:  # if executing data source is not GMB reviews
+                con.execute(
+                    sqlalchemy.text(
+                        f"""
+                        DELETE FROM
+                        {table_schema}.{table}
+                        WHERE {date_col} BETWEEN :start_date AND :end_date
+                        AND listing_id = :listing_id;
+                        """
+                    ),
+                    start_date=start_date,
+                    end_date=end_date,
+                    listing_id=listing_id
+                )
+
+            else:  # if data source is GMB reviews
+                con.execute(
+                    sqlalchemy.text(
+                        f"""
+                        DELETE FROM
+                        {table_schema}.{table}
+                        WHERE listing_id = :listing_id;
+                        """
+                    ),
+                    listing_id=listing_id
+                )
+
+            df.to_sql(
+                table,
+                con=con,
+                if_exists='append',
+                index=False,
+                index_label=None
+            )
+
+    @staticmethod
+    def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
+        return pd.date_range(start=start_date, end=end_date).to_list()
+
+    def calculate_date(self, start_date: bool = True) -> datetime.datetime:
+        if self.get_attribute('historical'):
+            if start_date:
+                return datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
+            else:
+                return datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
+        else:
+            if start_date:
+                return datetime.datetime.today() - datetime.timedelta(7)
+            else:
+                return datetime.datetime.today() - datetime.timedelta(1)
 
     def get_gmb_accounts(self) -> list:
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -48,22 +129,25 @@ class GoogleMyBusiness(Customizer):
         For each review in the dataset
         """
         df.sort_values(
-            by='Date',
+            by='create_time',
             ascending=False,
             inplace=True
         )
         df['Average_Rating'] = None
-        first_review_date = df['Date'].unique()[-1]
-        for date in df['Date'].unique()[::-1]:
+        first_review_date = df['create_time'].unique()[-1]
+        for date in df['create_time'].unique()[::-1]:
             # get all reviews up to and including the ones on this date
-            reviews = df.loc[df['Date'] > first_review_date, ['Date', 'Rating']]
-            reviews = reviews.loc[reviews['Date'] <= date, :]
+            reviews = df.loc[df['create_time'] > first_review_date, ['create_time', 'star_rating']]
+            reviews = reviews.loc[reviews['create_time'] <= date, :]
             # compute the mean
-            average_rating = np.mean(list(reviews['Rating']))
+            average_rating = np.mean(list(reviews['star_rating']))
             # assign the mean for this date
-            df['Average_Rating'][df['Date'] == date] = average_rating
+            df['Average_Rating'][df['create_time'] == date] = average_rating
         # round to double precision
-        df['Average_Rating'] = df['Average_Rating'].apply(lambda x: round(x, 2))
+        df['Average_Rating'] = df['Average_Rating'].apply(lambda x: round(x, 2) if x else None)
+        # fill empty cells with star_rating value
+        df['Average_Rating'].fillna(df['star_rating'], inplace=True)
+
         return df
 
     def get_filtered_accounts(self, gmb_client: GoogleMyBusinessReporting) -> list:
@@ -71,68 +155,15 @@ class GoogleMyBusiness(Customizer):
         all_accounts = gmb_client.get_accounts()
         return [
             account for account in all_accounts
-            if account['name'] in conf_accounts
+            if account['account_name'] in conf_accounts
         ]
 
-
-class GoogleMyBusinessInsights(GoogleMyBusiness):
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-01-02')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Google My Business - Insights')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        # TODO: with a new version of GA that accepts function pointers
-        return '{"msg": "i am json credentials"}'
-
-    # noinspection PyMethodMayBeStatic
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        return df.rename(columns={
-            'Date': 'report_date',
-            'Listing_ID': 'listing_id',
-            'Listing_Name': 'listing_name',
-            'VIEWS_MAPS': 'maps_views',
-            'VIEWS_SEARCH': 'search_views',
-            'ACTIONS_WEBSITE': 'website_click_actions',
-            'ACTIONS_PHONE': 'phone_call_actions',
-            'ACTIONS_DRIVING_DIRECTIONS': 'driving_direction_actions',
-            'PHOTOS_VIEWS_CUSTOMERS': 'photo_views_customers',
-            'PHOTOS_VIEWS_MERCHANT': 'photo_views_merchant',
-            'QUERIES_CHAIN': 'branded_searches',
-            'QUERIES_DIRECT': 'direct_searches',
-            'QUERIES_INDIRECT': 'discovery_searches',
-            'LOCAL_POST_VIEWS_SEARCH': 'post_views_on_search',
-            # 'LOCAL_POST_ACTIONS_CALL_TO_ACTION': 'post_cta_actions'
-        })
-
-    # noinspection PyMethodMayBeStatic
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
-        :return:
+        :return: df
         """
-
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -149,38 +180,23 @@ class GoogleMyBusinessInsights(GoogleMyBusiness):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        df['photo_views'] = (df['photo_views_customers'] + df['photo_views_merchant'])
-        del df['photo_views_customers']
-        del df['photo_views_merchant']
-
         return df
 
     def post_processing(self) -> None:
         """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        Handles custom SQL statements for the SOURCE table due to bad / mismatched data (if any)
+        ====================================================================================================
         :return:
         """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
-            for query in custom_sql:
+            for query in self.__get_post_processing_sql_list():
                 con.execute(query)
-
         return
 
+    def backfilter(self):
+        pass
+
+    def ingest(self):
+        pass
 

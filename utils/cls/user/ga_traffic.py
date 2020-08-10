@@ -9,6 +9,7 @@ IS_CLASS = True
 HISTORICAL = True
 HISTORICAL_START_DATE = '2019-08-27'
 HISTORICAL_END_DATE = '2020-07-28'
+DATA_SOURCE = 'Google Analytics - Traffic'
 
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
@@ -25,7 +26,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         self.set_attribute('table', self.prefix)
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
-        self.set_attribute('data_source', 'Google Analytics - Traffic')
+        self.set_attribute('data_source', DATA_SOURCE)
         self.set_attribute('schema', {'columns': []})
 
         # set whether this data source is being actively used or not

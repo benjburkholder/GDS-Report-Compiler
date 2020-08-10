@@ -1529,11 +1529,6 @@
                         "name": "post_views_on_search",
                         "type": "bigint",
                         "master_include": true
-                    },
-                    {
-                        "name": "post_cta_actions",
-                        "type": "bigint",
-                        "master_include": true
                     }
                 ],
                 "indexes": [
@@ -1616,11 +1611,6 @@
                     },
                     {
                         "name": "rating",
-                        "type": "double precision",
-                        "master_include": true
-                    },
-                    {
-                        "name": "review_count",
                         "type": "double precision",
                         "master_include": true
                     },

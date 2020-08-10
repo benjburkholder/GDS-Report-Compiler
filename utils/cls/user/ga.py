@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlalchemy
-import pathlib
 import datetime
+import pathlib
 import os
 
 from utils.dbms_helpers import postgres_helpers
@@ -57,9 +57,11 @@ class GoogleAnalytics(Customizer):
         self.set_attribute('table_schema', TABLE_SCHEMA)
         self.set_attribute('date_col', DATE_COL)
 
-    table = None
-    table_schema = None
-    date_col = 'report_date'
+        # if we have valid secrets after the request loop, let's update the db with the latest
+        # we put the onus on the client library to refresh these credentials as needed
+        # and to store them where they belong
+        if getattr(self, 'secrets_dat', {}):
+            self.set_customizer_secrets_dat()
 
     def ingest_by_view_id(self, view_id: str, df: pd.DataFrame, start_date: str, end_date: str) -> None:
         table_schema = self.get_attribute('table_schema')
@@ -214,8 +216,4 @@ class GoogleAnalytics(Customizer):
     def ingest(self):
         pass
 
-        # if we have valid secrets after the request loop, let's update the db with the latest
-        # we put the onus on the client library to refresh these credentials as needed
-        # and to store them where they belong
-        if getattr(self, 'secrets_dat', {}):
-            self.set_customizer_secrets_dat()
+
