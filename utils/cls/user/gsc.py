@@ -194,9 +194,3 @@ class GoogleSearchConsole(Customizer):
 
     def ingest(self):
         pass
-
-        # if we have valid secrets after the request loop, let's update the db with the latest
-        # we put the onus on the client library to refresh these credentials as needed
-        # and to store them where they belong
-        if getattr(self, 'secrets_dat', {}):
-            self.set_customizer_secrets_dat()
