@@ -1661,7 +1661,7 @@
         },
         {
             "table": {
-                "name": "google_search_console_monthly",
+                "name": "google_search_console_analytics",
                 "schema": "public",
                 "type": "reporting",
                 "tablespace": [
@@ -1739,7 +1739,7 @@
                 ],
                 "indexes": [
                     {
-                        "name": "ix_google_search_console_monthly",
+                        "name": "ix_google_search_console_analytics",
                         "tablespace": "pg_default",
                         "clustered": true,
                         "method": "btree",
