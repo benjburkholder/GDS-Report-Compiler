@@ -3,6 +3,7 @@ GMB Reviews Customizer Module
 """
 
 import pandas as pd
+import datetime
 
 # PLATFORM IMPORTS
 from utils.cls.user.gmb import GoogleMyBusiness
@@ -46,10 +47,13 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
         # set whether this data source is being actively used or not
         self.set_attribute('active', True)
 
-    def pull(self):
+    def __calculate_date_range(self, df: pd.DataFrame) -> (str, str):
+        start_date = df['report_date'].min().split('T')[0]
+        end_date = df['report_date'].max().split('T')[0]
 
-        start_date = self.calculate_date(start_date=True).strftime('%Y-%m-%d')
-        end_date = self.calculate_date(start_date=False).strftime('%Y-%m-%d')
+        return start_date, end_date
+
+    def pull(self):
 
         # TODO update gmb library to pass a customizer with credentials
 
@@ -80,6 +84,7 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
                     df['property'] = None
                     df.rename(columns=self.get_rename_map(account_name=account_name), inplace=True)
                     df = df[['reviewer', 'rating', 'report_date', 'average_rating', 'listing_id', 'listing_name', 'data_source', 'property']]
+                    start_date, end_date = self.__calculate_date_range(df=df)
                     self.ingest_by_listing_id(listing_id=listing_id, df=df, start_date=start_date, end_date=end_date)
                 else:
                     print('INFO: No data returned for ' + str(listing))

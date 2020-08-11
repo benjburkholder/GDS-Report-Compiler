@@ -56,33 +56,19 @@ class GoogleMyBusiness(Customizer):
         date_col = self.get_attribute('date_col')
 
         with self.engine.begin() as con:
-            if 'reviews' not in table:  # if executing data source is not GMB reviews
-                con.execute(
-                    sqlalchemy.text(
-                        f"""
-                        DELETE FROM
-                        {table_schema}.{table}
-                        WHERE {date_col} BETWEEN :start_date AND :end_date
-                        AND listing_id = :listing_id;
-                        """
-                    ),
-                    start_date=start_date,
-                    end_date=end_date,
-                    listing_id=listing_id
-                )
-
-            else:  # if data source is GMB reviews
-                con.execute(
-                    sqlalchemy.text(
-                        f"""
-                        DELETE FROM
-                        {table_schema}.{table}
-                        WHERE listing_id = :listing_id;
-                        """
-                    ),
-                    listing_id=listing_id
-                )
-
+            con.execute(
+                sqlalchemy.text(
+                    f"""
+                    DELETE FROM
+                    {table_schema}.{table}
+                    WHERE {date_col} BETWEEN :start_date AND :end_date
+                    AND listing_id = :listing_id;
+                    """
+                ),
+                start_date=start_date,
+                end_date=end_date,
+                listing_id=listing_id
+            )
             df.to_sql(
                 table,
                 con=con,
