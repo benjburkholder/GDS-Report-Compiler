@@ -80,7 +80,7 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
                     df['Listing_ID'] = listing_id
                     df['Listing_Name'] = listing['location_name']
                     df['account_name'] = account_name
-                    df['data_source'] = self.get_attribute('data_source')
+                    df['data_source'] = DATA_SOURCE
                     df['property'] = None
                     df.rename(columns=self.get_rename_map(account_name=account_name), inplace=True)
                     df = df[['reviewer', 'rating', 'report_date', 'average_rating', 'listing_id', 'listing_name', 'data_source', 'property']]

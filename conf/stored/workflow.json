@@ -58,5 +58,35 @@
       "backfilter": 1,
       "expedited": 1
     }
+  },
+    {
+    "name": "moz_pro_rankings",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  },
+   {
+    "name": "moz_pro_serp",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  },
+   {
+    "name": "moz_local_visibility",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
   }
 ]
