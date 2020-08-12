@@ -1,7 +1,6 @@
 import pandas as pd
 import sqlalchemy
 import datetime
-import sys
 
 from utils.dbms_helpers import postgres_helpers
 from utils.cls.core import Customizer, get_configured_item_by_key
@@ -98,7 +97,6 @@ class Moz(Customizer):
 
             else:
                 print('Nothing to run, not the proper day')
-                sys.exit()
 
     def calculate_date(self, start_date: bool = True) -> datetime.datetime:
         if self.get_attribute('historical'):
