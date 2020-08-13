@@ -91,9 +91,24 @@ class GoogleMyBusinessInsightsCustomizer(GoogleMyBusiness):
                     df.rename(columns=self.get_rename_map(account_name=account_name), inplace=True)
                     df = self.type(df=df)
                     df['photo_views'] = (df['photo_views_customers'] + df['photo_views_merchant'])
-                    df = df[['report_date', 'data_source', 'property', 'listing_name', 'listing_id', 'maps_views', 'search_views',
-                             'website_click_actions', 'phone_call_actions', 'driving_direction_actions', 'photo_views', 'branded_searches',
-                             'direct_searches', 'direct_searches', 'discovery_searches', 'post_views_on_search']]
+
+                    df = df[['report_date',
+                             'data_source',
+                             'property',
+                             'listing_name',
+                             'listing_id',
+                             'maps_views',
+                             'search_views',
+                             'website_click_actions',
+                             'phone_call_actions',
+                             'driving_direction_actions',
+                             'photo_views',
+                             'branded_searches',
+                             'direct_searches',
+                             'direct_searches',
+                             'discovery_searches',
+                             'post_views_on_search']]
+
                     self.ingest_by_listing_id(listing_id=listing_id, df=df, start_date=start_date, end_date=end_date)
                 else:
                     print('INFO: No data returned for ' + str(listing))

@@ -88,5 +88,15 @@
       "backfilter": 1,
       "expedited": 1
     }
+  },
+  {
+    "name": "dialogtech_call_detail",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
   }
 ]
