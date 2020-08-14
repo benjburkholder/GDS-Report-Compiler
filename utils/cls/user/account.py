@@ -2,28 +2,60 @@ import pandas as pd
 import sqlalchemy
 import calendar
 import datetime
-import pathlib
-import os
 
-from utils import grc
-from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer
+
+TABLE_SCHEMA = 'public'
+DATE_COL = 'report_date'
 
 
 class AccountCost(Customizer):
 
+    rename_map = {
+        'global': {
+
+        }
+    }
+
+    post_processing_sql_list = []
+
+    def __get_post_processing_sql_list(self) -> list:
+        """
+        If you wish to execute post-processing on the SOURCE table, enter sql commands in the list
+        provided below
+        ====================================================================================================
+        :return:
+        """
+        # put this in a function to leave room for customization
+        return self.post_processing_sql_list
+
     def __init__(self):
         super().__init__()
-        self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+        self.set_attribute('table_schema', TABLE_SCHEMA)
+        self.set_attribute('date_col', DATE_COL)
 
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('data_source', 'Account - Cost')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('class', True)
-        self.set_attribute('schema', {'columns': []})
+    def ingest_all(self, df: pd.DataFrame) -> None:
+        table_schema = self.get_attribute('table_schema')
+        table = self.get_attribute('table')
 
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
+        with self.engine.begin() as con:
+            con.execute(
+                sqlalchemy.text(
+                    f"""
+                    DELETE FROM
+                    {table_schema}.{table};
+                    """
+                )
+            )
+
+            df.to_sql(
+                table,
+                con=con,
+                if_exists='append',
+                index=False,
+                index_label=None
+            )
 
     def pull_account_cost(self):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -68,39 +100,12 @@ class AccountCost(Customizer):
                 })
         return pd.DataFrame(data)
 
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        # TODO: with a new version of GA that accepts function pointers
-        return '{"msg": "i am json credentials"}'
-
-    # noinspection PyMethodMayBeStatic
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        return df.rename(columns={
-                'Date': 'report_date',
-                'Property': 'property',
-                'Medium': 'medium',
-                'Daily_Cost': 'daily_cost'
-        })
-
-    # noinspection PyMethodMayBeStatic
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
-        :return:
+        :return: df
         """
-
-        grc.dynamic_typing(customizer=self)
-
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -117,36 +122,22 @@ class AccountCost(Customizer):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        # float dtypes
-        df['daily_cost'] = df['daily_cost'].astype(float)
-        df['daily_cost'] = df['daily_cost'].apply(lambda x: round(x, 2))
-
         return df
 
     def post_processing(self) -> None:
         """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        Handles custom SQL statements for the SOURCE table due to bad / mismatched data (if any)
+        ====================================================================================================
         :return:
         """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
-            for query in custom_sql:
+            for query in self.__get_post_processing_sql_list():
                 con.execute(query)
-
         return
+
+    def backfilter(self):
+        pass
+
+    def ingest(self):
+        pass
