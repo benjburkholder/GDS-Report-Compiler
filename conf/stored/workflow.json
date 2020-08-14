@@ -98,5 +98,25 @@
       "backfilter": 1,
       "expedited": 1
     }
+  },
+  {
+    "name": "google_ads_campaign",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
+  },
+  {
+    "name": "account_cost",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
   }
 ]

@@ -37,13 +37,11 @@ class Dialogtech(Customizer):
         self.set_attribute('table_schema', TABLE_SCHEMA)
         self.set_attribute('date_col', DATE_COL)
 
-    # formatted so method can be utilized by both moz pro and moz local
     def ingest_by_phone_label(self, df: pd.DataFrame, phone_label: str, start_date: datetime.datetime, end_date: datetime.datetime) -> None:
         table_schema = self.get_attribute('table_schema')
         table = self.get_attribute('table')
         date_col = self.get_attribute('date_col')
 
-        # uses report_date presence to determine if calling data source is moz pro or moz local
         with self.engine.begin() as con:
             con.execute(
                 sqlalchemy.text(
