@@ -4,6 +4,7 @@ import datetime
 import pathlib
 import os
 
+from utils import grc
 from utils.dbms_helpers import postgres_helpers
 from utils.cls.core import Customizer, get_configured_item_by_key
 
@@ -211,9 +212,12 @@ class GoogleAnalytics(Customizer):
             date_idx += 1
 
     def backfilter(self):
-        pass
+        self.backfilter_statement()
+        print('SUCCESS: Table Backfiltered.')
 
     def ingest(self):
-        pass
+        self.ingest_statement()
+        print('SUCCESS: Table Ingested.')
+
 
 

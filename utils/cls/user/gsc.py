@@ -190,7 +190,9 @@ class GoogleSearchConsole(Customizer):
                 print(f'WARN: No data returned for {report_date} for property_url{property_url}.')
 
     def backfilter(self):
-        pass
+        self.backfilter_statement()
+        print('SUCCESS: Table Backfiltered.')
 
     def ingest(self):
-        pass
+        self.ingest_statement()
+        print('SUCCESS: Table Ingested.')

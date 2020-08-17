@@ -85,11 +85,16 @@ class Customizer:
     def generate_set_statement_by_entity_columns(self, entity_columns: list) -> str:
         statement = "SET\n"
         count = 1
-        for col in entity_columns:
+        for col in enumerate(entity_columns, start=1):
             if count == len(entity_columns):
-                statement += f"{col['name']} = LOOKUP.{col['name']}\n"
+                statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
             else:
-                statement += f"{col['name']} = LOOKUP.{col['name']},\n"
+                if len(entity_columns) == col[0]:
+                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
+
+                else:
+                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']},\n"
+
         return statement
 
     def create_backfilter_statement(
@@ -215,7 +220,7 @@ class Customizer:
         if not self.get_attribute(attrib='historical'):
             delete_stmt = f"""
                           DELETE FROM public.{self.marketing_data['table']['name']}
-                          WHERE {ingest_indicator} = f'{self.get_attribute(attrib=ingest_indicator)}';
+                          WHERE {ingest_indicator} = '{self.get_attribute(attrib=ingest_indicator)}';
                           """
         else:
             start_date = self.get_attribute(attrib='historical_start_date')
@@ -225,7 +230,7 @@ class Customizer:
 
             delete_stmt = f"""
                            DELETE FROM public.{self.marketing_data['table']['name']}
-                           WHERE {ingest_indicator} = f'{self.get_attribute(attrib=ingest_indicator)}'
+                           WHERE {ingest_indicator} = '{self.get_attribute(attrib=ingest_indicator)}'
                            """
 
             delete_stmt += date_range
@@ -566,7 +571,7 @@ class Customizer:
                 )
         return
 
-    def backfilter(self):
+    def backfilter_statement(self):
         target_sheets = [
             sheet for sheet in self.configuration_workbook['sheets']
             if sheet['table']['name'] == self.get_attribute('table')
@@ -579,7 +584,7 @@ class Customizer:
             for statement in statements:
                 con.execute(sqlalchemy.text(statement))
 
-    def ingest(self):
+    def ingest_statement(self):
         master_columns = []
         for sheets in self.configuration_workbook['sheets']:
             if sheets['table']['type'] == 'reporting':

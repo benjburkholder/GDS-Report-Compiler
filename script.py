@@ -36,9 +36,7 @@ def main(argv) -> int:
     if backfilter:
         customizer.backfilter()
     if ingest:
-        # TODO: need to address the ingest workflow
-        # customizer.ingest()
-        pass
+        customizer.ingest()
 
     # these stages happen at the end no matter what
     # todo: wait until data is fully backfilled to do this

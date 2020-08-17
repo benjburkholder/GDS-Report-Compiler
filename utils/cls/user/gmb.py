@@ -181,8 +181,10 @@ class GoogleMyBusiness(Customizer):
         return
 
     def backfilter(self):
-        pass
+        self.backfilter_statement()
+        print('SUCCESS: Table Backfiltered.')
 
     def ingest(self):
-        pass
+        self.ingest_statement()
+        print('SUCCESS: Table Ingested.')
 

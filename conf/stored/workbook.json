@@ -2166,7 +2166,7 @@
                 "type": "reporting",
                 "audit_cadence": false,
                 "backfilter_cadence": false,
-                "active": true,
+                "active": false,
                 "ingest_only": true,
                 "columns": [
                     {
@@ -2378,7 +2378,7 @@
                 "type": "reporting",
                 "audit_cadence": false,
                 "backfilter_cadence": false,
-                "active": true,
+                "active": false,
                 "ingest_only": true,
                 "columns": [
                     {
@@ -2595,7 +2595,7 @@
                 "type": "reporting",
                 "audit_cadence": false,
                 "backfilter_cadence": false,
-                "active": true,
+                "active": false,
                 "ingest_only": true,
                 "columns": [
                     {
@@ -2807,7 +2807,7 @@
                 "type": "reporting",
                 "audit_cadence": false,
                 "backfilter_cadence": false,
-                "active": true,
+                "active": false,
                 "ingest_only": true,
                 "columns": [
                     {
@@ -3020,7 +3020,7 @@
                 "ingest_defaults": [],
                 "audit_cadence": false,
                 "backfilter_cadence": false,
-                "active": true,
+                "active": false,
                 "ingest_only": true,
                 "columns": [
                     {
@@ -3218,7 +3218,7 @@
                 "ingest_defaults": [],
                 "audit_cadence": false,
                 "backfilter_cadence": false,
-                "active": true,
+                "active": false,
                 "ingest_only": true,
                 "columns": [
                     {
