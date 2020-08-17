@@ -623,7 +623,7 @@ def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
         else:
             slack_vertical_present = False
 
-    assert slack_vertical_present, f'No slack address found for vertical: "{customizer.vertical}".'
+    assert slack_vertical_present, f'No slack address found for vertical: "{customizer.vertical}", check vertical field in app.json.'
     customizer.recipients.append(customizer.vertical_specific_slack_alerts[core_vertical])
 
 
