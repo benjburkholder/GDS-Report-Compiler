@@ -508,8 +508,7 @@ def setup(script_name: str, expedited: int):
     if not expedited:
 
         # Dynamically inserts correct vertical specific alert slack channel to recipients list
-        # TODO: CORRECT THIS
-        # insert_vertical_specific_alert_channel(customizer=customizer)
+        insert_vertical_specific_alert_channel(customizer=customizer)
 
         # Build marketing data table
         build_marketing_table(customizer=customizer)
@@ -614,7 +613,18 @@ def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ing
 
 
 def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
-    customizer.recipients.append(customizer.vertical_specific_slack_alerts[customizer.vertical])
+    for slack_vertical in customizer.vertical_specific_slack_alerts:
+        core_vertical = customizer.vertical.replace(' ', '_').lower()
+
+        if core_vertical == slack_vertical:
+            slack_vertical_present = True
+            break
+
+        else:
+            slack_vertical_present = False
+
+    assert slack_vertical_present, f'No slack address found for vertical: "{customizer.vertical}".'
+    customizer.recipients.append(customizer.vertical_specific_slack_alerts[core_vertical])
 
 
 def build_path_by_os(root):
