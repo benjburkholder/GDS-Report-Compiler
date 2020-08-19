@@ -118,5 +118,15 @@
       "backfilter": 1,
       "expedited": 1
     }
+  },
+  {
+    "name": "inquiry_web_goals",
+    "active": 0,
+    "args": {
+      "pull": 1,
+      "ingest": 1,
+      "backfilter": 1,
+      "expedited": 1
+    }
   }
 ]

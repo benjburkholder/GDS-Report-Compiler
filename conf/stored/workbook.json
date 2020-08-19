@@ -216,6 +216,76 @@
                 "owner": "postgres"
             }
         },
+        {   "sheet": "Inquiry Goals",
+            "table": {
+                "name": "inquiry_web_goals",
+                "schema": "public",
+                "type": "reporting",
+                "audit_cadence": false,
+                "backfilter_cadence": false,
+                "active": true,
+                "ingest_only": false,
+                "columns": [
+                    {
+                        "name": "report_date",
+                        "type": "date",
+                        "master_include": true
+                    },
+                    {
+                        "name": "data_source",
+                        "type": "character varying",
+                        "length": 100,
+                        "master_include": true,
+                        "ingest_indicator": true
+                    },
+                    {
+                        "name": "property",
+                        "type": "character varying",
+                        "length": 100,
+                        "master_include": true
+                    },
+                    {
+                        "name": "community",
+                        "type": "character varying",
+                        "length": 100,
+                        "master_include": true
+                    },
+                    {
+                        "name": "ownership_group",
+                        "type": "character varying",
+                        "length": 150,
+                        "master_include": true
+                    },
+                    {
+                        "name": "region",
+                        "type": "character varying",
+                        "length": 100,
+                        "master_include": true
+                    },
+                    {
+                        "name": "daily_cost",
+                        "type": "double precision",
+                        "master_include": true
+                    }
+                ],
+                "indexes": [
+                    {
+                        "name": "ix__inquiry_web_goals",
+                        "tablespace": "pg_default",
+                        "clustered": true,
+                        "method": "btree",
+                        "columns": [
+                            {
+                                "name": "report_date",
+                                "sort": "asc",
+                                "nulls_last": true
+                            }
+                        ]
+                    }
+                ],
+                "owner": "postgres"
+            }
+        },
         {
             "sheet": "Moz Directory Exclusions",
             "table": {
@@ -3289,76 +3359,6 @@
                     }
                 ],
                 "indexes": [],
-                "owner": "postgres"
-            }
-        },
-        {
-            "table": {
-                "name": "inquiry_goals",
-                "schema": "public",
-                "type": "reporting",
-                "audit_cadence": false,
-                "backfilter_cadence": false,
-                "active": true,
-                "ingest_only": false,
-                "columns": [
-                    {
-                        "name": "report_date",
-                        "type": "date",
-                        "master_include": true
-                    },
-                    {
-                        "name": "data_source",
-                        "type": "character varying",
-                        "length": 100,
-                        "master_include": true,
-                        "ingest_indicator": true
-                    },
-                    {
-                        "name": "property",
-                        "type": "character varying",
-                        "length": 100,
-                        "master_include": true
-                    },
-                    {
-                        "name": "community",
-                        "type": "character varying",
-                        "length": 100,
-                        "master_include": true
-                    },
-                    {
-                        "name": "ownership_group",
-                        "type": "character varying",
-                        "length": 150,
-                        "master_include": true
-                    },
-                    {
-                        "name": "region",
-                        "type": "character varying",
-                        "length": 100,
-                        "master_include": true
-                    },
-                    {
-                        "name": "inquiry_goal",
-                        "type": "double precision",
-                        "master_include": true
-                    }
-                ],
-                "indexes": [
-                    {
-                        "name": "ix__inquiry_goals",
-                        "tablespace": "pg_default",
-                        "clustered": true,
-                        "method": "btree",
-                        "columns": [
-                            {
-                                "name": "report_date",
-                                "sort": "asc",
-                                "nulls_last": true
-                            }
-                        ]
-                    }
-                ],
                 "owner": "postgres"
             }
         },
