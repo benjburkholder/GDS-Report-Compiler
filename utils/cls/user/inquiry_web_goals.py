@@ -120,15 +120,8 @@ class InquiryWebGoals(Customizer):
 
     def pull(self):
 
-        gs = GoogleSheetsManager()
-        gs = grc.get_customizer_secrets(
-            customizer=gs,
-            include_dat=False
-        )
-        # noinspection PyUnresolvedReferences
-        client = gs.create_client()
-        df = GoogleSheetsManager().get_spreadsheet_by_name(
-            client=client,
+        gs = grc.get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
+        df = gs.get_spreadsheet_by_name(
             worksheet_name='Inquiry Goals',
             workbook_name='National Church Residences | Configuration Workbook (v2020.2.1)'
         )

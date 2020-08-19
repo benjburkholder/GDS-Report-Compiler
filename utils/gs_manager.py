@@ -33,12 +33,12 @@ class GoogleSheetsManager(Customizer):
         creds = ServiceAccountCredentials.from_json_keyfile_dict(self.secrets, self.scope)
         return gspread.authorize(creds)
 
-    def get_spreadsheet_by_name(self, workbook_name: str, worksheet_name: str, client) -> pd.DataFrame:
+    def get_spreadsheet_by_name(self, workbook_name: str, worksheet_name: str) -> pd.DataFrame:
         """
         High-level helper method to get a spreadsheet by name
         Returns list of dictionaries (record format)
         """
-        client = client
+        client = self.create_client()
         data_dict = client.open(
             workbook_name
         ).worksheet(

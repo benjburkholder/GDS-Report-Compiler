@@ -385,8 +385,10 @@ def refresh_lookup_tables(customizer) -> int:
                     # 2020-07-27: patch by jws to handle dynamic credential retrieval
                     gs = get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
                     raw_lookup_data = gs.get_spreadsheet_by_name(
+
                         workbook_name=customizer.configuration_workbook['config_sheet_name'],
-                        worksheet_name=sheet['sheet']
+                        worksheet_name=sheet['sheet'],
+
                     )
 
                     clear_lookup_table_data(customizer=customizer, sheet=sheet)
