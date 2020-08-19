@@ -97,7 +97,7 @@ class GoogleSearchConsole(Customizer):
         else:
             today = datetime.date.today()
 
-            if today.day in [2, 5, 15, 19]:
+            if today.day in [2, 5, 15]:
                 if today.month == 1:
                     last_month = 12
                     last_month_year = (today.year - 1)
@@ -200,7 +200,7 @@ class GoogleSearchConsole(Customizer):
                     df['property_url'] = property_url
                     df['data_source'] = self.get_attribute('data_source')
                     self.ingest_by_property_url(property_url=property_url, df=df, report_date=report_date)
-                    
+
                 else:
                     print(f'WARN: No data returned for {report_date} for property_url {property_url}.')
 
