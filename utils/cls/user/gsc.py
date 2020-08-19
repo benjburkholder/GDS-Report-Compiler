@@ -77,17 +77,23 @@ class GoogleSearchConsole(Customizer):
     def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
         return pd.date_range(start=start_date, end=end_date).to_list()
 
-    def transform_historical_date(self, date):
+    @staticmethod
+    def transform_historical_date(date) -> str:
+        """
+        Transforms date string to always return last day of month to align with date needed for db lookup.
+        :param date:
+        :return: str
+        """
         historical_date = datetime.datetime.strptime(date, '%Y-%m-%d')
         last_day_of_month = calendar.monthrange(historical_date.year, historical_date.month)
 
-        report_date = datetime.date(historical_date.year, historical_date.month, last_day_of_month[1])
+        report_date = datetime.date(historical_date.year, historical_date.month, last_day_of_month[1]).strftime('%Y-%m-%d')
 
         return report_date
 
     def calculate_date(self) -> (datetime.datetime, datetime.datetime):
         if self.get_attribute('historical'):
-            historical_date = datetime.datetime.strptime(self.get_attribute(self.get_attribute('historical_start_date')), '%Y-%m-%d')
+            historical_date = datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
             last_day_of_month = calendar.monthrange(historical_date.year, historical_date.month)
 
             report_date = datetime.date(historical_date.year, historical_date.month, last_day_of_month[1])
