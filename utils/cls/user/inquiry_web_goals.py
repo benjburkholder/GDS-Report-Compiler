@@ -9,9 +9,9 @@ from utils.cls.user.inquiry import Inquiry
 HISTORICAL = False
 HISTORICAL_START_DATE = '2020-01-01'
 HISTORICAL_END_DATE = '2020-07-01'
-TABLE_SCHEMA = 'public'
-DATE_COL = 'report_date'
 DATA_SOURCE = 'Goals - Web Inquiries'
+WORKBOOK_NAME = 'National Church Residences | Configuration Workbook (v2020.2.1)'
+WORKSHEET_NAME = 'Inquiry Goals'
 
 
 class InquiryWebGoals(Inquiry):
@@ -43,11 +43,9 @@ class InquiryWebGoals(Inquiry):
 
     def __init__(self):
         super().__init__()
-        self.set_attribute('table_schema', TABLE_SCHEMA)
         self.set_attribute('historical', HISTORICAL)
         self.set_attribute('historical_start_date', HISTORICAL_START_DATE)
         self.set_attribute('historical_end_date', HISTORICAL_END_DATE)
-        self.set_attribute('date_col', DATE_COL)
         self.set_attribute('table', self.prefix)
         self.set_attribute('class', True)
         self.set_attribute('data_source', DATA_SOURCE)
@@ -59,8 +57,8 @@ class InquiryWebGoals(Inquiry):
     def pull(self):
         gs = self.create_gs_object()
         df = gs.get_spreadsheet_by_name(
-            worksheet_name='Inquiry Goals',
-            workbook_name='National Church Residences | Configuration Workbook (v2020.2.1)'
+            worksheet_name=WORKSHEET_NAME,
+            workbook_name=WORKBOOK_NAME
         )
 
         if df.shape[0]:
