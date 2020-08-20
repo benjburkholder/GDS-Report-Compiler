@@ -600,6 +600,7 @@ class Customizer:
             for statement in ingest_procedure:
                 con.execute(statement)
 
+    # TODO: since we're moving to unit testing, are these safe to remove?
     def audit(self):
         for sheets in self.configuration_workbook['sheets']:
             if sheets['table']['type'] == 'reporting':

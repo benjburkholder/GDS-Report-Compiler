@@ -13,6 +13,9 @@ DATA_SOURCE = 'Google Analytics - Traffic'
 
 
 class GoogleAnalyticsEventsCustomizer(GoogleAnalytics):
+    """
+    Handles Google Analytics Events pulling, parsing and processing
+    """
 
     def __init__(self):
         super().__init__()

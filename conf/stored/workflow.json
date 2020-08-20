@@ -125,7 +125,7 @@
     "args": {
       "pull": 1,
       "ingest": 1,
-      "backfilter": 1,
+      "backfilter": 0,
       "expedited": 1
     }
   }
