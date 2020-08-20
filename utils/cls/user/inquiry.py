@@ -65,24 +65,6 @@ class Inquiry(Customizer):
                 index_label=None
             )
 
-    def pull_moz_local_accounts(self):
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            sql = sqlalchemy.text(
-                f"""
-                SELECT *
-                FROM public.source_moz_localaccountmaster;
-                """
-            )
-
-            result = con.execute(sql)
-            accounts_raw = result.fetchall()
-
-            accounts_cleaned = [{'account': account[0], 'label': account[1]} for account in accounts_raw if
-                                accounts_raw]
-
-            return accounts_cleaned
-
     @staticmethod
     def calculate_inquiry_web_goals(raw_web_goals):
         data = []
