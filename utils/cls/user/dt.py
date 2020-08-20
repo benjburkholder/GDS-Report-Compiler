@@ -1,18 +1,85 @@
 import pandas as pd
 import sqlalchemy
 import datetime
-import pathlib
-import os
 
-from utils.cls.core import Customizer
 from utils.dbms_helpers import postgres_helpers
+from utils.cls.core import Customizer, get_configured_item_by_key
+
+TABLE_SCHEMA = 'public'
+DATE_COL = 'report_date'
 
 
-class DialogTech(Customizer):
+class Dialogtech(Customizer):
+
+    rename_map = {
+        'global': {
+
+        }
+    }
+
+    def get_rename_map(self, phone_label: str):
+        return get_configured_item_by_key(key=phone_label, lookup=self.rename_map)
+
+    post_processing_sql_list = []
+
+    def __get_post_processing_sql_list(self) -> list:
+        """
+        If you wish to execute post-processing on the SOURCE table, enter sql commands in the list
+        provided below
+        ====================================================================================================
+        :return:
+        """
+        # put this in a function to leave room for customization
+        return self.post_processing_sql_list
 
     def __init__(self):
         super().__init__()
-        self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+        self.set_attribute('table_schema', TABLE_SCHEMA)
+        self.set_attribute('date_col', DATE_COL)
+
+    def ingest_by_phone_label(self, df: pd.DataFrame, phone_label: str, start_date: datetime.datetime, end_date: datetime.datetime) -> None:
+        table_schema = self.get_attribute('table_schema')
+        table = self.get_attribute('table')
+        date_col = self.get_attribute('date_col')
+
+        with self.engine.begin() as con:
+            con.execute(
+                sqlalchemy.text(
+                    f"""
+                    DELETE FROM
+                    {table_schema}.{table}
+                    WHERE {date_col} BETWEEN :start_date AND :end_date
+                    AND phone_label = :phone_label;
+                    """
+                ),
+                start_date=start_date,
+                end_date=end_date,
+                phone_label=phone_label
+            )
+
+            df.to_sql(
+                table,
+                con=con,
+                if_exists='append',
+                index=False,
+                index_label=None
+            )
+
+    @staticmethod
+    def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
+        return pd.date_range(start=start_date, end=end_date).to_list()
+
+    def calculate_date(self, start_date: bool = True) -> datetime.datetime:
+        if self.get_attribute('historical'):
+            if start_date:
+                return datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
+            else:
+                return datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
+        else:
+            if start_date:
+                return datetime.datetime.today() - datetime.timedelta(7)
+            else:
+                return datetime.datetime.today() - datetime.timedelta(1)
 
     def pull_dialogtech_labels(self):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -26,55 +93,21 @@ class DialogTech(Customizer):
             results = con.execute(sql).fetchall()
 
             return [
-                result for result in results
+                {
+                    'phone_label': result[0],
+                    'medium': result[1],
+                    'property': result[2],
+                    'exact': result[3]
+                }
+                for result in results
             ] if results else []
 
-
-class DialogtechCallDetail(DialogTech):
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True)
-        self.set_attribute('debug', True)
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
-        self.set_attribute('historical_end_date', datetime.date(2020, 2, 1))
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'DialogTech - Call Details')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        # TODO: with a new version of GA that accepts function pointers
-        return '{"msg": "i am json credentials"}'
-
-    # noinspection PyMethodMayBeStatic
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        return df.rename(columns={
-            'call_date': 'report_date',
-
-        })
-
-    # noinspection PyMethodMayBeStatic
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
-        :return:
+        :return: df
         """
-
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -91,47 +124,25 @@ class DialogtechCallDetail(DialogTech):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        df = df[[
-            'report_date',
-            'data_source',
-            'property',
-            'campaign',
-            'medium',
-            'number_dialed',  # call tracking number
-            'caller_id',
-            'call_duration',
-            'transfer_to_number',  # terminating number
-            'phone_label',
-            'call_transfer_status',
-            'client_id'
-        ]]
-
         return df
 
     def post_processing(self) -> None:
         """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        Handles custom SQL statements for the SOURCE table due to bad / mismatched data (if any)
+        ====================================================================================================
         :return:
         """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
-            for query in custom_sql:
+            for query in self.__get_post_processing_sql_list():
                 con.execute(query)
-
         return
+
+    def backfilter(self):
+        self.backfilter_statement()
+        print('SUCCESS: Table Backfiltered.')
+
+    def ingest(self):
+        self.ingest_statement()
+        print('SUCCESS: Table Ingested.')
+

@@ -14,7 +14,7 @@ DATA_SOURCE = 'Google Analytics - Traffic'
 
 class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
     """
-    Handles Google Analytisc Traffic pulling, parsing and processing
+    Handles Google Analytics Traffic pulling, parsing and processing
     """
 
     def __init__(self):

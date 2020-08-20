@@ -48,7 +48,7 @@ class GoogleSearchConsole(Customizer):
     table_schema = None
     date_col = 'report_date'
 
-    def ingest_by_property_url(self, property_url: str, df: pd.DataFrame, report_date: datetime.datetime) -> None:
+    def ingest_by_property_url(self, property_url: str, df: pd.DataFrame, report_date: datetime.date) -> None:
         table_schema = self.get_attribute('table_schema')
         table = self.get_attribute('table')
         date_col = self.get_attribute('date_col')
@@ -77,11 +77,27 @@ class GoogleSearchConsole(Customizer):
     def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
         return pd.date_range(start=start_date, end=end_date).to_list()
 
-    def calculate_date(self) -> datetime.datetime:
+    @staticmethod
+    def transform_historical_date(date) -> str:
+        """
+        Transforms date string to always return last day of month to align with date needed for db lookup.
+        :param date:
+        :return: str
+        """
+        historical_date = datetime.datetime.strptime(date, '%Y-%m-%d')
+        last_day_of_month = calendar.monthrange(historical_date.year, historical_date.month)
+
+        report_date = datetime.date(historical_date.year, historical_date.month, last_day_of_month[1]).strftime('%Y-%m-%d')
+
+        return report_date
+
+    def calculate_date(self) -> (datetime.datetime, datetime.datetime):
         if self.get_attribute('historical'):
-            historical_date = datetime.datetime.strptime(self.get_attribute('historical_report_date'), '%Y-%m-%d')
+            historical_date = datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
             last_day_of_month = calendar.monthrange(historical_date.year, historical_date.month)
+
             report_date = datetime.date(historical_date.year, historical_date.month, last_day_of_month[1])
+
             return report_date
 
         else:
@@ -101,6 +117,9 @@ class GoogleSearchConsole(Customizer):
                     calendar.monthrange(last_month_year, last_month)[1])
 
                 return report_date
+
+            else:
+                return None
     
     def get_property_urls(self) -> list:
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -164,33 +183,40 @@ class GoogleSearchConsole(Customizer):
         report_date = self.calculate_date()
         # initialize the client module for connecting to GSC
 
-        gsc_client = SearchAnalyticsClient()
+        if report_date:
+            gsc_client = SearchAnalyticsClient()
 
-        # get all property_urls that are configured
-        property_urls = self.get_property_urls()
-        assert property_urls, "No " + self.__class__.__name__ + " property_urls setup!"
-        # iterate over each date to pull, process and ingest to prevent sampling
+            # get all property_urls that are configured
+            property_urls = self.get_property_urls()
+            assert property_urls, "No " + self.__class__.__name__ + " property_urls setup!"
+            # iterate over each date to pull, process and ingest to prevent sampling
 
-        for property_url in property_urls:
-            property_url = property_url['property_url']
-            rename_map = self.__get_rename_map(property_url=property_url)
+            for property_url in property_urls:
+                property_url = property_url['property_url']
+                rename_map = self.__get_rename_map(property_url=property_url)
 
-            df = gsc_client.get_monthly_search_analytics(
-                report_date=report_date,
-                property_url=property_url
-            )
+                df = gsc_client.get_monthly_search_analytics(
+                    report_date=report_date,
+                    property_url=property_url
+                )
 
-            if df.shape[0]:
-                df.rename(columns=rename_map, inplace=True)
-                df = self.type(df=df)
-                df['property_url'] = property_url
-                df['data_source'] = self.get_attribute('data_source')
-                self.ingest_by_property_url(property_url=property_url, df=df, report_date=report_date)
-            else:
-                print(f'WARN: No data returned for {report_date} for property_url{property_url}.')
+                if df.shape[0]:
+                    df.rename(columns=rename_map, inplace=True)
+                    df = self.type(df=df)
+                    df['property_url'] = property_url
+                    df['data_source'] = self.get_attribute('data_source')
+                    self.ingest_by_property_url(property_url=property_url, df=df, report_date=report_date)
+
+                else:
+                    print(f'WARN: No data returned for {report_date} for property_url {property_url}.')
+
+        else:
+            print('Not listed day to run.')
 
     def backfilter(self):
-        pass
+        self.backfilter_statement()
+        print('SUCCESS: Table Backfiltered.')
 
     def ingest(self):
-        pass
+        self.ingest_statement()
+        print('SUCCESS: Table Ingested.')

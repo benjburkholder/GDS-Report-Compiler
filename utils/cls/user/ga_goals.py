@@ -18,6 +18,9 @@ DATA_SOURCE = 'Google Analytics - Goals'
 
 
 class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
+    """
+    Handles Google Analytics Goals pulling, parsing and processing
+    """
 
     def __init__(self):
         super().__init__()

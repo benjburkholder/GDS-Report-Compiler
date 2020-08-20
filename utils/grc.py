@@ -385,8 +385,10 @@ def refresh_lookup_tables(customizer) -> int:
                     # 2020-07-27: patch by jws to handle dynamic credential retrieval
                     gs = get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
                     raw_lookup_data = gs.get_spreadsheet_by_name(
+
                         workbook_name=customizer.configuration_workbook['config_sheet_name'],
-                        worksheet_name=sheet['sheet']
+                        worksheet_name=sheet['sheet'],
+
                     )
 
                     clear_lookup_table_data(customizer=customizer, sheet=sheet)
@@ -508,8 +510,7 @@ def setup(script_name: str, expedited: int):
     if not expedited:
 
         # Dynamically inserts correct vertical specific alert slack channel to recipients list
-        # TODO: CORRECT THIS
-        # insert_vertical_specific_alert_channel(customizer=customizer)
+        insert_vertical_specific_alert_channel(customizer=customizer)
 
         # Build marketing data table
         build_marketing_table(customizer=customizer)
@@ -567,57 +568,6 @@ def dynamic_typing(customizer: custom.Customizer):
             customizer.get_attribute('schema')['columns'].append(sheet['table']['columns'])
 
 
-def table_backfilter(customizer: custom.Customizer):
-    print('INFO: Running a backfilter for Customizer instance ' + customizer.__class__.__name__)
-    engine = build_postgresql_engine(customizer=customizer)
-    target_sheets = [
-        sheet for sheet in customizer.configuration_workbook['sheets']
-        if sheet['table']['name'] == customizer.get_attribute('table')
-    ]
-    assert len(target_sheets) == 1
-    sheet = target_sheets[0]
-    assert sheet['table']['type'] == 'reporting'
-    statements = customizer.build_backfilter_statements()
-    with engine.connect() as con:
-        for statement in statements:
-            con.execute(sqlalchemy.text(statement))
-    print('SUCCESS: Table Backfiltered.')
-
-
-def ingest_procedures(customizer: custom.Customizer):
-    engine = build_postgresql_engine(customizer=customizer)
-
-    master_columns = []
-    for sheets in customizer.configuration_workbook['sheets']:
-        if sheets['table']['type'] == 'reporting':
-            if sheets['table']['active']:
-                for column in sheets['table']['columns']:
-                    if column['master_include']:
-                        master_columns.append(column)
-    target_sheets = [
-        sheet for sheet in customizer.configuration_workbook['sheets']
-        if sheet['table']['name'] == customizer.get_attribute('table')]
-    ingest_procedure = customizer.create_ingest_statement(customizer, master_columns, target_sheets)
-    with engine.connect() as con:
-        for statement in ingest_procedure:
-            con.execute(statement)
-    print('SUCCESS: Table Ingested.')
-
-
-def audit_automation(customizer: custom.Customizer):
-    for sheets in customizer.configuration_workbook['sheets']:
-        if sheets['table']['type'] == 'reporting':
-            if sheets['table']['audit_cadence']:
-                if sheets['table']['name'] == customizer.get_attribute('table'):
-                    audit_automation_indicator = [
-                        column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column
-                    ][0]
-                    customizer.audit_automation_procedure(
-                        index_column=customizer.get_attribute(audit_automation_indicator),
-                        cadence=sheets['table']['audit_cadence']
-                    )
-
-
 def refresh_source_tables(customizer: custom.Customizer):
     today = datetime.date.today()
 
@@ -665,7 +615,18 @@ def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ing
 
 
 def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
-    customizer.recipients.append(customizer.vertical_specific_slack_alerts[customizer.vertical])
+    for slack_vertical in customizer.vertical_specific_slack_alerts:
+        core_vertical = customizer.vertical.replace(' ', '_').lower()
+
+        if core_vertical == slack_vertical:
+            slack_vertical_present = True
+            break
+
+        else:
+            slack_vertical_present = False
+
+    assert slack_vertical_present, f'No slack address found for vertical: "{customizer.vertical}", check vertical field in app.json.'
+    customizer.recipients.append(customizer.vertical_specific_slack_alerts[core_vertical])
 
 
 def build_path_by_os(root):
@@ -686,3 +647,7 @@ def build_path_by_os(root):
     assert venv_path, "Unknown OS detected, or return value from 'platform.systems()' function has changed."
 
     return venv_path
+
+
+
+

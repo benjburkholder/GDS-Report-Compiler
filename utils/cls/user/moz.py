@@ -1,19 +1,114 @@
 import pandas as pd
 import sqlalchemy
 import datetime
-import pathlib
-import os
 
 from utils.dbms_helpers import postgres_helpers
-from utils.cls.core import Customizer
-from utils import grc
+from utils.cls.core import Customizer, get_configured_item_by_key
+
+TABLE_SCHEMA = 'public'
+DATE_COL = 'report_date'
 
 
 class Moz(Customizer):
 
+    rename_map = {
+        'global': {}
+    }
+
+    def get_rename_map(self, account_name: str):
+        return get_configured_item_by_key(key=account_name, lookup=self.rename_map)
+
+    post_processing_sql_list = []
+
+    def __get_post_processing_sql_list(self) -> list:
+        """
+        If you wish to execute post-processing on the SOURCE table, enter sql commands in the list
+        provided below
+        ====================================================================================================
+        :return:
+        """
+        # put this in a function to leave room for customization
+        return self.post_processing_sql_list
+
     def __init__(self):
         super().__init__()
-        self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+        self.set_attribute('table_schema', TABLE_SCHEMA)
+        self.set_attribute('date_col', DATE_COL)
+
+    # formatted so method can be utilized by both moz pro and moz local
+    def ingest_by_custom_indicator(self, df: pd.DataFrame, id_value: str, report_date=None) -> None:
+        table_schema = self.get_attribute('table_schema')
+        table = self.get_attribute('table')
+        date_col = self.get_attribute('date_col')
+
+        # uses report_date presence to determine if calling data source is moz pro or moz local
+        with self.engine.begin() as con:
+            if report_date:
+                con.execute(
+                    sqlalchemy.text(
+                        f"""
+                        DELETE FROM
+                        {table_schema}.{table}
+                        WHERE {date_col} = :report_date
+                        AND campaign_id = :id_value;
+                        """
+                    ),
+                    report_date=report_date,
+                    id_value=id_value
+                )
+
+            else:
+                con.execute(
+                    sqlalchemy.text(
+                        f"""
+                        DELETE FROM
+                        {table_schema}.{table}
+                        WHERE listing_id = :id_value;
+                        """
+                    ),
+                    id_value=id_value
+                )
+
+            df.to_sql(
+                table,
+                con=con,
+                if_exists='append',
+                index=False,
+                index_label=None
+            )
+
+    def get_date_range(self) -> datetime:
+        if self.get_attribute('historical'):
+            start = datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
+            end = datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
+
+            date_range = pd.date_range(start=start, end=end, freq='M')
+
+            return date_range
+
+        else:
+            # automated setup - last month by default
+            today = datetime.date.today()
+
+            if today.day in [2, 3, 7, 15]:
+                report_date = datetime.date(today.year, today.month, 1)
+
+                return report_date
+
+            else:
+                print('Nothing to run, not the proper day')
+
+    def calculate_date(self, start_date: bool = True) -> datetime.datetime:
+        if self.get_attribute('historical'):
+            if start_date:
+                return datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
+            else:
+                return datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
+        else:
+            if start_date:
+                return datetime.datetime.today() - datetime.timedelta(7)
+            else:
+                return datetime.datetime.today() - datetime.timedelta(1)
 
     def pull_moz_local_accounts(self):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -50,30 +145,6 @@ class Moz(Customizer):
 
             return campaign_ids
 
-    def clear_moz_local(self, listing_id):
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            sql = sqlalchemy.text(
-                """
-                DELETE
-                FROM public.moz_local_visibility
-                WHERE listing_id = :listing_id;
-                """
-            )
-            con.execute(sql,
-                        listing_id=str(listing_id['listing_id']))
-
-    def push_moz_local(self, df):
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            df.to_sql(
-                'moz_local_visibility',
-                con=con,
-                if_exists='append',
-                index=True,
-                index_label='report_date'
-            )
-
     def exclude_moz_directories(self, df):
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
@@ -99,56 +170,12 @@ class Moz(Customizer):
 
             return df_cleaned if True else df
 
-
-class MozProRankingsCustomizer(Moz):
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True),
-        self.set_attribute('debug', True),
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
-        self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Moz Pro - Rankings')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
-
-        # noinspection PyMethodMayBeStatic
-
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        # TODO(jschroeder) flesh out this example a bit more
-        return df.rename(columns={
-            'date': 'report_date',
-
-        })
-
-        # noinspection PyMethodMayBeStatic
-
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
-        :return:
+        :return: df
         """
-
-        grc.dynamic_typing(customizer=self)
-
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -165,328 +192,25 @@ class MozProRankingsCustomizer(Moz):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
         return df
 
     def post_processing(self) -> None:
         """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        Handles custom SQL statements for the SOURCE table due to bad / mismatched data (if any)
+        ====================================================================================================
         :return:
         """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
-            for query in custom_sql:
+            for query in self.__get_post_processing_sql_list():
                 con.execute(query)
-
         return
 
-
-class MozProSerpCustomizer(Moz):
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True),
-        self.set_attribute('debug', True),
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', datetime.date(2020, 1, 1))
-        self.set_attribute('historical_end_date', datetime.date(2020, 4, 1))
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Moz Pro - SERP')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-        # noinspection PyMethodMayBeStatic
-
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
-
-        # noinspection PyMethodMayBeStatic
-
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        # TODO(jschroeder) flesh out this example a bit more
-        return df.rename(columns={
-            'date': 'report_date',
-
-        })
-
-        # noinspection PyMethodMayBeStatic
-
-    def type(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Type columns for safe storage (respecting data type and if needed, length)
-        :param df:
-        :return:
-        """
-
-        grc.dynamic_typing(customizer=self)
-
-        for column in self.get_attribute('schema')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        return df
-
-    def post_processing(self) -> None:
-        """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
-        :return:
-        """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            for query in custom_sql:
-                con.execute(query)
-
-        return
-
-
-class MozLocalVisibilityCustomizer(Moz):
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True),
-        self.set_attribute('debug', True),
-        self.set_attribute('historical', True)
-        self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-04-08')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Moz Local - Visibility Report')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-        # noinspection PyMethodMayBeStatic
-
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
-
-        # noinspection PyMethodMayBeStatic
-
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        # TODO(jschroeder) flesh out this example a bit more
-
-        return df.rename(columns={
-            'date': 'report_date',
-
-
-        })
-
-        # noinspection PyMethodMayBeStatic
-
-    def type(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Type columns for safe storage (respecting data type and if needed, length)
-        :param df:
-        :return:
-        """
-
-        grc.dynamic_typing(customizer=self)
-
-        for column in self.get_attribute('schema')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        return df
-
-    def post_processing(self) -> None:
-        """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
-        :return:
-        """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            for query in custom_sql:
-                con.execute(query)
-
-        return
-
-
-class MozLocalSyncCustomizer(Moz):
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True),
-        self.set_attribute('debug', True),
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2020-01-01')
-        self.set_attribute('historical_end_date', '2020-01-02')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Moz Local - Sync Report')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-        # noinspection PyMethodMayBeStatic
-
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        return '{"msg": "i am json credentials"}'
-
-        # noinspection PyMethodMayBeStatic
-
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        # TODO(jschroeder) flesh out this example a bit more
-        return df.rename(columns={
-            'date': 'report_date',
-
-        })
-
-        # noinspection PyMethodMayBeStatic
-
-    def type(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Type columns for safe storage (respecting data type and if needed, length)
-        :param df:
-        :return:
-        """
-
-        grc.dynamic_typing(customizer=self)
-
-        for column in self.get_attribute('schema')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        return df
-
-    def post_processing(self) -> None:
-        """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
-        :return:
-        """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            for query in custom_sql:
-                con.execute(query)
-
-        return
-
-
+    def backfilter(self):
+        self.backfilter_statement()
+        print('SUCCESS: Table Backfiltered.')
+
+    def ingest(self):
+        self.ingest_statement()
+        print('SUCCESS: Table Ingested.')
 
