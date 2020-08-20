@@ -5,14 +5,87 @@ import pathlib
 import os
 
 from utils.dbms_helpers import postgres_helpers
-from utils.cls.core import Customizer
+from utils.cls.core import Customizer, get_configured_item_by_key
+
+TABLE_SCHEMA = 'public'
+DATE_COL = 'report_date'
 
 
 class GoogleAds(Customizer):
 
+    credential_name = ''
+    secrets_name = ''
+
+    rename_map = {
+        'global': {
+
+        }
+    }
+
+    def get_rename_map(self, account_id: str):
+        return get_configured_item_by_key(key=account_id, lookup=self.rename_map)
+
+    post_processing_sql_list = []
+
+    def __get_post_processing_sql_list(self) -> list:
+        """
+        If you wish to execute post-processing on the SOURCE table, enter sql commands in the list
+        provided below
+        ====================================================================================================
+        :return:
+        """
+        # put this in a function to leave room for customization
+        return self.post_processing_sql_list
+
     def __init__(self):
         super().__init__()
         self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
+        self.set_attribute('table_schema', TABLE_SCHEMA)
+        self.set_attribute('date_col', DATE_COL)
+
+    def ingest_by_account_id(self, df: pd.DataFrame, account_id: str, start_date: str, end_date: str) -> None:
+        table_schema = self.get_attribute('table_schema')
+        table = self.get_attribute('table')
+        date_col = self.get_attribute('date_col')
+
+        with self.engine.begin() as con:
+            con.execute(
+                sqlalchemy.text(
+                    f"""
+                    DELETE FROM
+                    {table_schema}.{table}
+                    WHERE {date_col} BETWEEN :start_date AND :end_date
+                    AND account_id = :account_id;
+                    """
+                ),
+                start_date=start_date,
+                end_date=end_date,
+                account_id=account_id
+            )
+
+            df.to_sql(
+                table,
+                con=con,
+                if_exists='append',
+                index=False,
+                index_label=None
+            )
+
+    @staticmethod
+    def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
+        return pd.date_range(start=start_date, end=end_date).to_list()
+
+    def calculate_date(self, start_date: bool = True) -> str:
+        if self.get_attribute('historical'):
+            if start_date:
+                return self.get_attribute('historical_start_date')
+            else:
+                return self.get_attribute('historical_end_date')
+        else:
+            if start_date:
+                return (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
+            else:
+                return (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
     def get_account_ids(self) -> list:
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
@@ -29,64 +102,12 @@ class GoogleAds(Customizer):
                 result['account_id'] for result in results
             ] if results else []
 
-
-class GoogleAdsCampaign(GoogleAds):
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True),
-        self.set_attribute('debug', True),
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2018-01-01')
-        self.set_attribute('historical_end_date', '2018-04-22')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('data_source', 'Google Ads - Campaign')
-        self.set_attribute('schema', {'columns': []})
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        # TODO: with a new version of GA that accepts function pointers
-        return '{"msg": "i am json credentials"}'
-
-    # noinspection PyMethodMayBeStatic
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        return df.rename(columns={
-            'Date': 'report_date',
-            'Campaign': 'campaign',
-            'Campaign_ID': 'campaign_id',
-            'Clicks': 'clicks',
-            'Cost': 'cost',
-            'Device': 'device',
-            'Impressions': 'impressions',
-            'Search_Impression_Share': 'search_impression_share',
-            'Search_Budget_Lost_Impression_Share': 'search_budget_lost_impression_share',
-            'Search_Rank_Lost_Impression_Share': 'search_rank_lost_impression_share',
-            'Content_Impression_Share': 'content_impression_share',
-            'Content_Budget_Lost_Impression_Share': 'content_budget_lost_impression_share',
-            'Content_Rank_Lost_Impression_Share': 'content_rank_lost_impression_share',
-            'Medium': 'advertising_channel_type',
-        })
-
-    # noinspection PyMethodMayBeStatic
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Type columns for safe storage (respecting data type and if needed, length)
         :param df:
-        :return:
+        :return: df
         """
-
         for column in self.get_attribute('schema')['columns']:
             if column['name'] in df.columns:
                 if column['type'] == 'character varying':
@@ -103,148 +124,25 @@ class GoogleAdsCampaign(GoogleAds):
                 elif column['type'] == 'datetime with time zone':
                     # TODO(jschroeder) how better to interpret timezone data?
                     df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-
         return df
 
     def post_processing(self) -> None:
         """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
+        Handles custom SQL statements for the SOURCE table due to bad / mismatched data (if any)
+        ====================================================================================================
         :return:
         """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
-            for query in custom_sql:
+            for query in self.__get_post_processing_sql_list():
                 con.execute(query)
-
         return
 
+    def backfilter(self):
+        self.backfilter_statement()
+        print('SUCCESS: Table Backfiltered.')
 
-class GoogleAdsKeyword(GoogleAds):
+    def ingest(self):
+        self.ingest_statement()
+        print('SUCCESS: Table Ingested.')
 
-    # Area for adding key / value pairs for columns which vary client to client
-    # These columns are built out in the creation of the table, this simply assigns the proper default values to them
-    custom_columns = [
-        {'data_source': 'Google Ads - Campaign'},
-        {'property': None},
-        # {'service_line': None}
-    ]
-
-    def __init__(self):
-        super().__init__()
-        self.set_attribute('class', True),
-        self.set_attribute('debug', True),
-        self.set_attribute('historical', False)
-        self.set_attribute('historical_start_date', '2018-01-01')
-        self.set_attribute('historical_end_date', '2018-04-22')
-        self.set_attribute('table', self.prefix)
-        self.set_attribute('schema', {'columns': []})
-        self.set_attribute('data_source', 'Google Ads - Keyword')
-
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-        # Used to set columns which vary from data source and client vertical
-        self.set_attribute('custom_columns', self.custom_columns)
-
-    # noinspection PyMethodMayBeStatic
-    def getter(self) -> str:
-        """
-        Pass to GoogleAnalyticsReporting constructor as retrieval method for json credentials
-        :return:
-        """
-        # TODO: with a new version of GA that accepts function pointers
-        return '{"msg": "i am json credentials"}'
-
-    # noinspection PyMethodMayBeStatic
-    def rename(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Renames columns into pg/sql friendly aliases
-        :param df:
-        :return:
-        """
-        return df.rename(columns={
-            'date': 'report_date',
-            'sourceMedium': 'source_medium',
-            'channelGrouping': 'medium',
-            'deviceCategory': 'device',
-            'pagePath': 'url',
-            'percentNewSessions': 'percent_new_sessions',
-            'percentNewPageviews': 'percent_new_pageviews',
-            'uniquePageviews': 'unique_pageviews',
-            'pageviewsPerSession': 'pageviews_per_session',
-            'sessionDuration': 'session_duration',
-            'newUsers': 'new_users'
-        })
-
-    # noinspection PyMethodMayBeStatic
-    def type(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Type columns for safe storage (respecting data type and if needed, length)
-        :param df:
-        :return:
-        """
-
-        for column in self.get_attribute('schema')['columns']:
-            if column['name'] in df.columns:
-                if column['type'] == 'character varying':
-                    assert 'length' in column.keys()
-                    df[column['name']] = df[column['name']].apply(lambda x: str(x)[:column['length']] if x else None)
-                elif column['type'] == 'bigint':
-                    df[column['name']] = df[column['name']].apply(lambda x: int(x) if x else None)
-                elif column['type'] == 'double precision':
-                    df[column['name']] = df[column['name']].apply(lambda x: float(x) if x else None)
-                elif column['type'] == 'date':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'timestamp without time zone':
-                    df[column['name']] = pd.to_datetime(df[column['name']])
-                elif column['type'] == 'datetime with time zone':
-                    # TODO(jschroeder) how better to interpret timezone data?
-                    df[column['name']] = pd.to_datetime(df[column['name']], utc=True)
-
-        return df
-
-    def parse(self, df: pd.DataFrame) -> pd.DataFrame:
-        if getattr(self, f'{self.prefix}_custom_columns'):
-            for row in getattr(self, f'{self.prefix}_custom_columns'):
-                for key, value in row.items():
-                    df[key] = value
-
-        return df
-
-    def post_processing(self) -> None:
-        """
-        Handles custom sql UPDATE / JOIN post-processing needs for reporting tables,
-        :return:
-        """
-
-        # CUSTOM SQL QUERIES HERE, ADD AS MANY AS NEEDED
-        sql = """ CUSTOM SQL HERE """
-
-        sql2 = """ CUSTOM SQL HERE """
-
-        custom_sql = [
-            sql,
-            sql2
-        ]
-
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            for query in custom_sql:
-                con.execute(query)
-
-        return
