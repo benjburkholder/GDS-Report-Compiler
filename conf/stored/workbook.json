@@ -2084,7 +2084,7 @@
         },
         {
             "table": {
-                "name": "google_ads_keyword",
+                "name": "google_ads_keyword_performance",
                 "schema": "public",
                 "type": "reporting",
                 "tablespace": [
@@ -2117,7 +2117,7 @@
                     {
                         "name": "account_id",
                         "type": "character varying",
-                        "length": 25,
+                        "length": 50,
                         "master_include": true
                     },
                     {
@@ -2146,6 +2146,12 @@
                         "master_include": true
                     },
                     {
+                        "name": "keyword",
+                        "type": "character varying",
+                        "length": 50,
+                        "master_include": true
+                    },
+                    {
                         "name": "cost",
                         "type": "double precision",
                         "master_include": true
@@ -2159,51 +2165,119 @@
                         "name": "impressions",
                         "type": "bigint",
                         "master_include": true
+                    }
+                ],
+                "indexes": [
+                    {
+                        "name": "ix_google_ads_keyword_performance",
+                        "tablespace": "pg_default",
+                        "clustered": true,
+                        "method": "btree",
+                        "columns": [
+                            {
+                                "name": "report_date",
+                                "sort": "asc",
+                                "nulls_last": true
+                            },
+                            {
+                                "name": "campaign_id",
+                                "sort": "asc",
+                                "nulls_last": true
+                            },
+                            {
+                                "name": "device",
+                                "sort": "asc",
+                                "nulls_last": true
+                            }
+                        ]
+                    }
+                ],
+                "owner": "postgres"
+            }
+        },
+        {
+            "table": {
+                "name": "google_ads_campaign_conversions",
+                "schema": "public",
+                "type": "reporting",
+                "tablespace": [
+                    "google_ads"
+                ],
+                "audit_cadence": false,
+                "backfilter_cadence": false,
+                "active": true,
+                "columns": [
+                    {
+                        "name": "report_date",
+                        "type": "date",
+                        "master_include": true
                     },
                     {
-                        "name": "search_available_impressions",
+                        "name": "data_source",
+                        "type": "character varying",
+                        "length": 100,
+                        "master_include": true,
+                        "ingest_indicator": true
+                    },
+                    {
+                        "name": "property",
+                        "type": "character varying",
+                        "length": 100,
+                        "entity_col": true,
+                        "default": "Non-Location Pages",
+                        "master_include": true
+                    },
+                    {
+                        "name": "account_id",
+                        "type": "character varying",
+                        "length": 50,
+                        "master_include": true
+                    },
+                    {
+                        "name": "advertising_channel_type",
+                        "type": "character varying",
+                        "length": 100,
+                        "master_include": true
+                    },
+                    {
+                        "name": "device",
+                        "type": "character varying",
+                        "length": 50,
+                        "master_include": true
+                    },
+                    {
+                        "name": "campaign",
+                        "type": "character varying",
+                        "length": 250,
+                        "backfilter": true,
+                        "master_include": true
+                    },
+                    {
+                        "name": "campaign_id",
+                        "type": "character varying",
+                        "length": 25,
+                        "master_include": true
+                    },
+                    {
+                        "name": "goal_name",
+                        "type": "character varying",
+                        "length": 150,
+                        "master_include": true
+                    },
+                    {
+                        "name": "goal_completions",
                         "type": "double precision",
                         "master_include": true
                     },
                     {
-                        "name": "search_impression_share",
-                        "type": "double precision",
-                        "master_include": true
-                    },
-                    {
-                        "name": "search_budget_lost_impression_share",
-                        "type": "double precision",
-                        "master_include": true
-                    },
-                    {
-                        "name": "search_rank_lost_impression_share",
-                        "type": "double precision",
-                        "master_include": true
-                    },
-                    {
-                        "name": "content_available_impressions",
-                        "type": "double precision",
-                        "master_include": true
-                    },
-                    {
-                        "name": "content_impression_share",
-                        "type": "double precision",
-                        "master_include": true
-                    },
-                    {
-                        "name": "content_budget_lost_impression_share",
-                        "type": "double precision",
-                        "master_include": true
-                    },
-                    {
-                        "name": "content_rank_lost_impression_share",
+                        "name": "all_goal_completions",
                         "type": "double precision",
                         "master_include": true
                     }
                 ],
                 "indexes": [
                     {
-                        "name": "ix_google_ads_keyword",
+                        "name": "ix_google_ads_campaign_conversions",
                         "tablespace": "pg_default",
                         "clustered": true,
                         "method": "btree",
