@@ -47,10 +47,6 @@ def main(argv) -> int:
     return 0
 
 
-def audit_workflow(customizer: Customizer) -> None:
-    grc.audit_automation(customizer=customizer)
-
-
 def post_processing_workflow(script_name: str) -> None:
     execute_post_processing_scripts_for_process(
         script_filter=script_name
@@ -72,5 +68,4 @@ if __name__ == '__main__':
                 engine=grc.create_application_sql_engine()
             )
             '''
-            pass
         raise
