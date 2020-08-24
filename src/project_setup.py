@@ -198,6 +198,9 @@ def generate_new_app_file(stored_json_directory, converted_json, client_db_name,
 
     with open(stored_json_directory / 'app.json', 'w') as file:
         json.dump(new_configured_app_file, file)
+
+    print("SUCCESS: APP CONFIGURATION GENERATED.")
+
 # ~~~~~~~~~~~~~ END: APP.JSON UPDATES ~~~~~~~~~~~~~
 
 
