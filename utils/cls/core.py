@@ -124,6 +124,7 @@ class Customizer:
 
             return exact_stmt
 
+        # we want to be able to use indexes to optimize fuzzy updates
         elif update_type == 'fuzzy':
             fuzzy_lookup = """AND LOOKUP.exact = 0;"""
 
@@ -131,7 +132,7 @@ class Customizer:
                 UPDATE {table['schema']}.{table['name']} TARGET
                     {set_statement}
                 FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
-                WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT('%', LOOKUP.{backfilter_column['name']}, '%')
+                WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT(LOOKUP.{backfilter_column['name']}, '%')
                 """
 
             if self.get_attribute(attrib='historical'):
@@ -189,6 +190,154 @@ class Customizer:
                 )
         statements.extend(self.create_set_default_statements(table=table))
         return statements
+
+    def __construct_mv_select_statement(
+            self,
+            target_table: dict,
+            lookup_table: dict,
+            stmt: str = ''
+    ) -> str:
+
+        target_table_name = target_table['name']
+        target_table_schema = target_table['schema']
+        columns = target_table['columns']
+
+        lookup_table_name = lookup_table['name']
+        lookup_table_schema = lookup_table['schema']
+
+        # get the columns we are setting
+        entity_column_names = [
+            x['name'] for x in columns
+            if x.get('entity_col')
+        ]
+
+        backfilter = None
+
+        if not stmt:
+            stmt = '\tSELECT\n'
+            for column in columns:
+                column_name = column['name']
+                if column.get('backfilter'):
+                    backfilter = column['backfilter']
+                if column_name in entity_column_names:
+                    stmt += f'\t\tlookup.{column_name}\n'
+                else:
+                    stmt += f'\t\ttarget.{column_name}\n'
+            stmt += f'\tFROM {target_table_schema}.{target_table_name} target\n'
+            stmt += f'\tLEFT JOIN {lookup_table_schema}.{lookup_table_name} lookup\n'
+            assert backfilter, "backfilter column not assigned"
+            stmt += f'\t\tON target.{backfilter} = lookup.{backfilter}'
+        else:
+            outer = 'SELECT\n'
+            for column in columns:
+                column_name = column['name']
+                column_default = column.get('default')
+                if column.get('backfilter'):
+                    backfilter = column['backfilter']
+                if column_name in entity_column_names:
+                    outer += f'\tCASE\n'
+                    outer += f'WHEN t1.{column_name} IS NOT NULL THEN t1.{column_name}\n'
+                    if column_default:
+                        outer += f'ELSE COALESCE(lookup.{column_name}, {column_default})'
+                else:
+                    outer += f'\t\tt1.{column_name}\n'
+            outer += 'FROM (\n'
+            outer += stmt
+            outer += '\n) t1\n'
+            outer += f'LEFT JOIN {lookup_table_schema}.{lookup_table_name} lookup\n'
+            assert backfilter, "backfilter column not assigned"
+            stmt += f"\t\tON target.{backfilter} ILIKE CONCAT(lookup.{backfilter}, '%')"
+            assert backfilter, "backfilter column not assigned"
+        return stmt
+
+    def _create_mv(self, name: str) -> None:
+        """
+        Creates an optimized materialized view using the available rules in the configuration workbook
+        ====================================================================================================
+        :param name:
+        :return:
+        """
+        table = self.get_table_dictionary_by_name(self.get_attribute('table'))
+        lookup_table = self.get_lookup_table_by_tablespace(
+            tablespace=table['tablespace']
+        )
+
+        stmt = ''
+        for _ in lookup_table['update_types']:
+            stmt = self.__construct_mv_select_statement(
+                stmt=stmt,
+                target_table=table,
+                lookup_table=lookup_table
+            )
+
+        with self.engine.connect() as con:
+            con.execute(
+                f"""
+                CREATE MATERIALIZED VIEW public.{name}
+                    TABLESPACE pg_default
+                    AS   
+                    {stmt}  
+                WITH DATA;
+                """
+            )
+            con.execute(
+                f"ALTER TABLE public.{name} OWNER TO postgres;"
+            )
+
+        return
+
+    def _check_mv_exists(self, name: str) -> bool:
+        """
+        Query the active database for the existence of a materialized view
+        ====================================================================================================
+
+        :param name:
+        :return:
+        """
+        sql = sqlalchemy.text(
+            """
+            SELECT COUNT(*) AS view_count
+            FROM pg_matviews
+            WHERE matviewname = :name;  
+            """
+        )
+        with self.engine.connect() as con:
+            result = con.execute(
+                sql,
+                name=name
+            ).first()
+        return result['view_count'] if result else False
+
+    def _refresh_mv(self, mv: str) -> None:
+        """
+        Refresh a materialized view by name
+
+        :param mv:
+        :return:
+        """
+        with self.engine.connect() as con:
+            con.execute(
+                f"REFRESH MATERIALIZED VIEW public.{mv};"
+            )
+
+    def compile(self, mv: str):
+        """
+        Generate or refresh the materialized view for the given Customizer instance
+
+        :param mv:
+        :return:
+        """
+        # check whether the materialized view exists or not
+        if not self._check_mv_exists(name=mv):
+            # if it does not, create the materialized view (under postgres)
+            self._create_mv(name=mv)
+
+        # if it does, execute a refreshment
+        self._refresh_mv(mv=mv)
+
+
+
+
 
     def create_ingest_statement(self, master_columns, target_sheets) -> list:
 
