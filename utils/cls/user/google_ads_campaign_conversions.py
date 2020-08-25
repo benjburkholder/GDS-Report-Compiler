@@ -1,11 +1,8 @@
 """
 Google Ads Campaign Conversions Customizer Module
 """
-
 # PLATFORM IMPORTS
-import pathlib
-from utils.cls.user.gads import GoogleAds
-from googleadspy.reporting.client.reporting import GoogleAdsReporting
+from utils.cls.user.google_ads import GoogleAds
 
 # CUSTOM IMPORTS
 IS_CLASS = True
@@ -13,10 +10,6 @@ HISTORICAL = False
 HISTORICAL_START_DATE = '2020-01-01'
 HISTORICAL_END_DATE = '2020-07-01'
 DATA_SOURCE = 'Google Ads - Campaign Conversions'
-CUSTOMER_ID = '9664678140'
-
-# TODO: replace once GAds package is updated for dynamic cred retrieval
-yaml_path = pathlib.Path('secrets')
 
 
 class GoogleAdsCampaignConversionsCustomizer(GoogleAds):
@@ -27,19 +20,12 @@ class GoogleAdsCampaignConversionsCustomizer(GoogleAds):
     rename_map = {
         'global': {
 
-            'Date': 'report_date',
-            'Campaign': 'campaign',
-            'Campaign_ID': 'campaign_id',
-            'Conversion_Name': 'goal_name',
-            'Conversions': 'goal_completions',
-            'Conversions_All': 'all_goal_completions',
-            'Account_ID': 'account_id',
-            'Device': 'device',
-            'Medium': 'advertising_channel_type',
-            'Market': 'property',
-            'Store': 'community',
-            'Data_Source': 'data_source'
-
+            'date': 'report_date',
+            'campaign_name': 'campaign',
+            'campaign_id': 'campaign_id',
+            'conversion_name': 'goal_name',
+            'conversions': 'goal_completions',
+            'all_conversions': 'all_goal_completions'
         }
     }
 
@@ -61,15 +47,16 @@ class GoogleAdsCampaignConversionsCustomizer(GoogleAds):
         start_date = self.calculate_date(start_date=True)
         end_date = self.calculate_date(start_date=False)
 
-        # TODO: replace once GAds package is updated for dynamic cred retrieval
-        gads = GoogleAdsReporting(customer_id=CUSTOMER_ID, yaml_path=yaml_path)
-        account_ids = self.get_account_ids()
+        account_pairs = self.get_account_ids()
 
-        for account_id in account_ids:
-            df = gads.campaign_conversions_performance(
-                customer_id=account_id,
+        for pair in account_pairs:
+            manager_account_id = pair['manager_account_id']
+            account_id = pair['account_id']
+            client = self.build_client(manager_customer_id=manager_account_id)
+            df = client.campaign_conversions_performance(
                 start_date=start_date,
-                end_date=end_date
+                end_date=end_date,
+                customer_id=account_id
             )
 
             if df.shape[0]:
@@ -80,6 +67,10 @@ class GoogleAdsCampaignConversionsCustomizer(GoogleAds):
                 rename_map = self.get_rename_map(account_id=account_id)
                 df.rename(columns=rename_map, inplace=True)
 
+                # remove unecessary column from standardized report
+                if 'conversion_action' in df.columns:
+                    del df['conversion_action']
+
                 self.ingest_by_account_id(
                     df=df,
                     account_id=account_id,
@@ -89,4 +80,3 @@ class GoogleAdsCampaignConversionsCustomizer(GoogleAds):
 
             else:
                 print('INFO: No data returned for ' + str(account_id))
-

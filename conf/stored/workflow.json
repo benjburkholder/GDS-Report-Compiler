@@ -101,7 +101,7 @@
   },
   {
     "name": "google_ads_campaign",
-    "active": 0,
+    "active": 1,
     "args": {
       "pull": 1,
       "ingest": 1,
@@ -120,7 +120,7 @@
     }
   },
   {
-    "name": "google_ads_keyword_performance",
+    "name": "google_ads_keyword",
     "active": 0,
     "args": {
       "pull": 1,

@@ -610,6 +610,7 @@ class Customizer:
         assert self.valid_global_configuration(), self.global_configuration_message
         self.engine = build_postgresql_engine(customizer=self)
         self.build_application_engine()
+        setattr(self, f"{os.path.basename(__file__).replace('.py', '')}_class", True)
 
     def build_application_engine(self):
         database = self.db['DATABASE']

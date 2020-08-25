@@ -2,12 +2,14 @@ apiclient==1.0.4
 cachetools==4.1.0
 certifi==2020.4.5.1
 chardet==3.0.4
-google-ads==5.1.0
+dialogtech==2019.1.0
+google-ads==6.0.0
 google-api-core==1.17.0
 google-api-python-client==1.8.3
 google-auth==1.14.3
 google-auth-httplib2==0.0.3
 google-auth-oauthlib==0.4.1
+googleadspy==2020.3.2
 googleapis-common-protos==1.51.0
 grpcio==1.29.0
 gspread==3.6.0

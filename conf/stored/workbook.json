@@ -166,6 +166,11 @@
                         "name": "account_id",
                         "type": "character varying",
                         "length": 150
+                    },
+                    {
+                        "name": "manager_account_id",
+                        "type": "character varying",
+                        "length": 150
                     }
                 ],
                 "owner": "postgres"
@@ -2084,7 +2089,7 @@
         },
         {
             "table": {
-                "name": "google_ads_keyword_performance",
+                "name": "google_ads_keyword",
                 "schema": "public",
                 "type": "reporting",
                 "tablespace": [
@@ -2169,7 +2174,7 @@
                 ],
                 "indexes": [
                     {
-                        "name": "ix_google_ads_keyword_performance",
+                        "name": "ix_google_ads_keyword",
                         "tablespace": "pg_default",
                         "clustered": true,
                         "method": "btree",

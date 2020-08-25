@@ -1,11 +1,12 @@
 import pandas as pd
 import sqlalchemy
 import datetime
-import pathlib
-import os
 
 from utils.dbms_helpers import postgres_helpers
 from utils.cls.core import Customizer, get_configured_item_by_key
+
+# LMPY PACKAGES
+from googleadspy.reporting.client.reporting import GoogleAdsReporting
 
 TABLE_SCHEMA = 'public'
 DATE_COL = 'report_date'
@@ -13,7 +14,7 @@ DATE_COL = 'report_date'
 
 class GoogleAds(Customizer):
 
-    credential_name = ''
+    credential_name = 'GoogleAdsYaml'
     secrets_name = ''
 
     rename_map = {
@@ -37,10 +38,24 @@ class GoogleAds(Customizer):
         # put this in a function to leave room for customization
         return self.post_processing_sql_list
 
+    def build_client(self, manager_customer_id: str) -> GoogleAdsReporting:
+        """
+        Datasource-specific method to construct the client using preconfigured secrets
+        ====================================================================================================
+        :return:
+        """
+        self.get_secrets(include_dat=False)
+        return GoogleAdsReporting(
+            manager_customer_id=manager_customer_id,
+            client_id=self.secrets['client_id'],
+            client_secret=self.secrets['client_secret'],
+            developer_token=self.secrets['developer_token'],
+            refresh_token=self.secrets['refresh_token'],
+            user_agent=self.secrets['user_agent']
+        )
+
     def __init__(self):
         super().__init__()
-        # TODO: Can remove once dynamic cred retrieval is implemented for GADs package
-        self.set_attribute('secrets_path', str(pathlib.Path(os.path.dirname(os.path.abspath(__file__))).parents[2]))
         self.set_attribute('table_schema', TABLE_SCHEMA)
         self.set_attribute('date_col', DATE_COL)
 
@@ -94,13 +109,14 @@ class GoogleAds(Customizer):
             sql = sqlalchemy.text(
                 """
                 SELECT DISTINCT
+                    manager_account_id,
                     account_id
                 FROM public.source_gads_accountmaster;
                 """
             )
             results = con.execute(sql).fetchall()
             return [
-                result['account_id'] for result in results
+                dict(result) for result in results
             ] if results else []
 
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
