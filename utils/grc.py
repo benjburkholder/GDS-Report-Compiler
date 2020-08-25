@@ -1,7 +1,7 @@
 """
 Platform Functions
 """
-import copy
+import platform
 import datetime
 import json
 import os
@@ -302,13 +302,17 @@ def build_marketing_table(customizer) -> int:
                 if sheets['table']['active']:
                     for column in sheets['table']['columns']:
                         if column['master_include']:
-                            if not any(column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']):
+                            if not any(
+                                    column['name'] == d['name'] for d in customizer.marketing_data['table']['columns']
+                            ):
                                 customizer.marketing_data['table']['columns'].append(column)
 
         # Add custom columns to end of marketing table
         if customizer.custom_marketing_data_columns['table']['active']:
             if customizer.custom_marketing_data_columns['table']['columns']:
-                customizer.marketing_data['table']['columns'].append(customizer.custom_marketing_data_columns['table']['columns'])
+                customizer.marketing_data['table']['columns'].append(
+                    customizer.custom_marketing_data_columns['table']['columns']
+                )
 
         create_table_from_schema(customizer, schema=customizer.marketing_data)
 
@@ -378,8 +382,14 @@ def refresh_lookup_tables(customizer) -> int:
         for sheet in customizer.configuration_workbook['sheets']:
             if sheet['table']['type'] == 'lookup':
                 if sheet['table']['active']:
-                    raw_lookup_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.configuration_workbook['config_sheet_name'],
-                                                                                                     worksheet_name=sheet['sheet'])
+                    # 2020-07-27: patch by jws to handle dynamic credential retrieval
+                    gs = get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
+                    raw_lookup_data = gs.get_spreadsheet_by_name(
+
+                        workbook_name=customizer.configuration_workbook['config_sheet_name'],
+                        worksheet_name=sheet['sheet'],
+
+                    )
 
                     clear_lookup_table_data(customizer=customizer, sheet=sheet)
                     df = reshape_lookup_data(df=raw_lookup_data, customizer=customizer, sheet=sheet)
@@ -420,7 +430,68 @@ def create_table_from_schema(customizer, schema) -> int:
         raise ValueError(f"{customizer.__class__.__name__} specifies unsupported 'dbms' {customizer.dbms}")
 
 
-def setup(script_name: str, required_attributes: list, refresh_indicator, expedited: bool = False):
+def get_sheets_for_tablespace(customizer: Customizer, tablespace: str) -> list:
+    keep_sheets = []
+    tablespace = tablespace
+    assert tablespace, "No tablespace setup for " + customizer.__class__.__name__
+    sheets = customizer.configuration_workbook['sheets']
+    for sheet in sheets:
+        table = sheet['table']
+        if tablespace in table['tablespace']:
+            keep_sheets.append(sheet)
+    return keep_sheets
+
+
+def check_stages_and_attributes(stages: list, attributes: list) -> None:
+    assert stages and attributes, \
+        "One of startup variables are empty (PROCESSING_STAGES, REQUIRED_ATTRIBUTES)"
+
+
+def _get_value_from_args_by_flag(argv: list, flag: str, default: int = 1) -> int:
+    """
+    Under the premise that flags are used to disable functionality, we assume the functionality is set to 1
+    unless otherwise stated by the given flag
+    :param argv:
+    :param flag:
+    :return:
+    """
+    argv = [arg for arg in argv if flag in arg]
+    if argv:
+        return int(argv[0].replace(flag, ''))
+    else:
+        return default
+
+
+def get_pull_from_args(argv: list) -> int:
+    flag = '--pull='
+    return _get_value_from_args_by_flag(argv=argv, flag=flag)
+
+
+def get_ingest_from_args(argv: list) -> int:
+    flag = '--ingest='
+    return _get_value_from_args_by_flag(argv=argv, flag=flag)
+
+
+def get_backfilter_from_args(argv: list) -> int:
+    flag = '--backfilter='
+    return _get_value_from_args_by_flag(argv=argv, flag=flag)
+
+
+def get_expedited_from_args(argv: list) -> int:
+    flag = '--expedited='
+    return _get_value_from_args_by_flag(argv=argv, flag=flag, default=0)
+
+
+def get_args(argv: list) -> tuple:
+    pull = get_pull_from_args(argv=argv)
+    ingest_only = get_ingest_from_args(argv=argv)
+    backfilter_only = get_backfilter_from_args(argv=argv)
+    expedited = get_expedited_from_args(argv=argv)
+    print(f'ingest_only: {ingest_only}, backfilter_only: {backfilter_only}, expedited: {expedited}')
+    return pull, ingest_only, backfilter_only, expedited
+
+
+def setup(script_name: str, expedited: int):
     """
     Before allowing any root-level script to execute
     Get the Customizer instance configured for script_name
@@ -435,18 +506,6 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
     """
     customizer = custom.get_customizer(calling_file=script_name)
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
-    run_configuration_check(script_name=script_name, required_attributes=required_attributes, customizer=customizer)
-
-    # check if command there are more than one command line argument
-    if len(refresh_indicator) > 1:
-
-        # 'Run' means it's the first script being run
-        if 'run' in refresh_indicator:
-            expedited = False
-
-        # Else skip the table checks
-        else:
-            expedited = True
 
     if not expedited:
 
@@ -473,10 +532,6 @@ def setup(script_name: str, required_attributes: list, refresh_indicator, expedi
         print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)
 
-    # Delete extra arguments (necessary for GMB API)
-    if len(refresh_indicator) > 1:
-        del refresh_indicator[1:]
-
     return customizer
 
 
@@ -497,10 +552,6 @@ def run_configuration_check(script_name: str, required_attributes: list, customi
         raise
 
 
-def run_prestart_assertion(script_name: str, attribute: list, label: str):
-    assert attribute, f"{script_name} | Global error, {label} either not defined or empty"
-
-
 def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_stages: list):
     for stage in processing_stages:
         print(f'Checking for processing stage {stage}...')
@@ -511,64 +562,10 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
     return df
 
 
-def run_post_processing(customizer: custom.Customizer, processing_stages: list):
-    for stage in processing_stages:
-        print(f'Checking for processing stage {stage}...')
-        if get_optional_attribute(cls=customizer, attribute=stage):
-            if stage == 'post_processing':
-                print(f'\tNow processing stage {stage}')
-                get_optional_attribute(cls=customizer, attribute=stage)()
-
-
 def dynamic_typing(customizer: custom.Customizer):
     for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['name'] == customizer.get_attribute('table'):
             customizer.get_attribute('schema')['columns'].append(sheet['table']['columns'])
-
-
-def table_backfilter(customizer: custom.Customizer):
-    engine = build_postgresql_engine(customizer=customizer)
-    target_sheets = [
-        sheet for sheet in customizer.configuration_workbook['sheets']
-        if sheet['table']['name'] == customizer.get_attribute('table')
-    ]
-    assert len(target_sheets) == 1
-    sheet = target_sheets[0]
-    assert sheet['table']['type'] == 'reporting'
-    statements = customizer.build_backfilter_statements()
-    with engine.connect() as con:
-        for statement in statements:
-            con.execute(sqlalchemy.text(statement))
-    print('SUCCESS: Table Backfiltered.')
-
-
-def ingest_procedures(customizer: custom.Customizer):
-    engine = build_postgresql_engine(customizer=customizer)
-
-    master_columns = []
-    for sheets in customizer.configuration_workbook['sheets']:
-        if sheets['table']['type'] == 'reporting':
-            if sheets['table']['active']:
-                for column in sheets['table']['columns']:
-                    if column['master_include']:
-                        master_columns.append(column)
-    target_sheets = [
-        sheet for sheet in customizer.configuration_workbook['sheets']
-        if sheet['table']['name'] == customizer.get_attribute('table')]
-    ingest_procedure = customizer.create_ingest_statement(customizer, master_columns, target_sheets)
-    with engine.connect() as con:
-        for statement in ingest_procedure:
-            con.execute(statement)
-    print('SUCCESS: Table Ingested.')
-
-
-def audit_automation(customizer: custom.Customizer):
-    for sheets in customizer.configuration_workbook['sheets']:
-        if sheets['table']['type'] == 'reporting':
-            if sheets['table']['audit_cadence']:
-                if sheets['table']['name'] == customizer.get_attribute('table'):
-                    audit_automation_indicator = [column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column][0]
-                    customizer.audit_automation_procedure(index_column=customizer.get_attribute(audit_automation_indicator), cadence=sheets['table']['audit_cadence'])
 
 
 def refresh_source_tables(customizer: custom.Customizer):
@@ -578,7 +575,12 @@ def refresh_source_tables(customizer: custom.Customizer):
         for sheet in customizer.configuration_workbook['sheets']:
             if sheet['table']['type'] == 'source':
                 if sheet['table']['active']:
-                    raw_source_data = GoogleSheetsManager(customizer.client).get_spreadsheet_by_name(workbook_name=customizer.configuration_workbook['config_sheet_name'], worksheet_name=sheet['sheet'])
+                    # 2020-07-27: patch by jws to handle dynamic credential retrieval
+                    gs = get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
+                    raw_source_data = gs.get_spreadsheet_by_name(
+                        workbook_name=customizer.configuration_workbook['config_sheet_name'],
+                        worksheet_name=sheet['sheet']
+                    )
 
                     clear_source_table_data(customizer=customizer, sheet=sheet)
                     df = reshape_source_table_data(customizer=customizer, df=raw_source_data, sheet=sheet)
@@ -593,7 +595,7 @@ def refresh_source_tables(customizer: custom.Customizer):
 
 def systematic_procedure_execution() -> list:
     table_names = []
-    for sheet in Customizer.configuration_workbook['sheets']:
+    for sheet in Customizer().configuration_workbook['sheets']:
         if sheet['table']['type'] == 'reporting':
             if sheet['table']['active']:
                 table_names.append(sheet['table']['name'])
@@ -613,7 +615,39 @@ def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ing
 
 
 def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
-    customizer.recipients.append(customizer.vertical_specific_slack_alerts[customizer.vertical])
+    for slack_vertical in customizer.vertical_specific_slack_alerts:
+        core_vertical = customizer.vertical.replace(' ', '_').lower()
+
+        if core_vertical == slack_vertical:
+            slack_vertical_present = True
+            break
+
+        else:
+            slack_vertical_present = False
+
+    assert slack_vertical_present, f'No slack address found for vertical: "{customizer.vertical}", check vertical field in app.json.'
+    customizer.recipients.append(customizer.vertical_specific_slack_alerts[core_vertical])
+
+
+def build_path_by_os(root):
+    client_os = platform.system()
+
+    if client_os == 'Windows':
+        venv_path = os.path.join(root, 'venv', 'Scripts', 'python.exe')
+
+    elif client_os == 'Darwin':
+        venv_path = os.path.join(root, 'venv', 'bin', 'python')
+
+    elif client_os == 'Linux':
+        venv_path = os.path.join(root, 'venv', 'bin', 'python')
+
+    else:
+        venv_path = None
+
+    assert venv_path, "Unknown OS detected, or return value from 'platform.systems()' function has changed."
+
+    return venv_path
+
 
 
 

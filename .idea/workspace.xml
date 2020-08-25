@@ -2,10 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dee7ff5-5cc2-48d1-afc0-4cc7a8dfe513" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/sys_update.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_install_proprietary_packages.py" beforeDir="false" afterPath="$PROJECT_DIR$/sys_install_proprietary_packages.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/update.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/stored/workbook.json" beforeDir="false" afterPath="$PROJECT_DIR$/conf/stored/workbook.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conf/stored/workflow.json" beforeDir="false" afterPath="$PROJECT_DIR$/conf/stored/workflow.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/script.py" beforeDir="false" afterPath="$PROJECT_DIR$/script.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/core.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/core.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/user/gads.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/google_ads.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/user/gads_campaign.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/google_ads_campaign.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/user/gads_campaign_conversions.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/google_ads_campaign_conversions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cls/user/gads_keyword_performance.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cls/user/google_ads_keyword.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,6 +40,7 @@
             <value>
               <list>
                 <branch-info repo="$PROJECT_DIR$" source="origin/hotfix" />
+                <branch-info repo="$PROJECT_DIR$" source="origin/develop-ncr" />
               </list>
             </value>
           </entry>
@@ -59,22 +66,22 @@
     <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../clients/SeniorLiving/FranciscanMinistries/Reporting/Integrations/GDS/202009" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../offline-conversion-service-py" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Repositories\GDS-Report-Compiler\conf\stored" />
       <recent name="C:\Repositories\GDS-Report-Compiler\utils\scripts\post_processing" />
       <recent name="C:\Repositories\GDS-Report-Compiler\utils\dbms_helpers" />
       <recent name="C:\Repositories\gds-report-compiler" />
     </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Repositories\GDS-Report-Compiler\utils" />
+    </key>
   </component>
-  <component name="RunManager" selected="Python.sys_install_proprietary_packages">
-    <configuration name="google_analytics_events" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Python.script">
+    <configuration name="google_analytics_traffic" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gds-report-compiler" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -82,11 +89,74 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/utils/update_manager.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/google_analytics_traffic.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="gds-report-compiler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="script" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="gds-report-compiler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/script.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="sys_initialize_workbook" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="gds-report-compiler" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sys_initialize_workbook.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -116,55 +186,17 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Unittests for test_update_manager.TestUpdateManager.test_clear_update_zone" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="gds-report-compiler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_update_manager.TestUpdateManager.test_clear_update_zone&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for test_update_manager.TestUpdateManager.test_download_latest" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="gds-report-compiler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_update_manager.TestUpdateManager.test_download_latest&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Unittests for test_update_manager.TestUpdateManager.test_perform_update" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <module name="gds-report-compiler" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils/tests" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_update_manager.TestUpdateManager.test_perform_update&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.script" />
         <item itemvalue="Python.sys_install_proprietary_packages" />
-        <item itemvalue="Python.google_analytics_events" />
+        <item itemvalue="Python.main" />
+        <item itemvalue="Python.google_analytics_traffic" />
+        <item itemvalue="Python.sys_initialize_workbook" />
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -337,7 +369,84 @@
       <option name="project" value="LOCAL" />
       <updated>1595854609320</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Add script for running updates">
+      <created>1595854856992</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1595854856992</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Automated Config Sheet Creation">
+      <created>1595881256227</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1595881256227</updated>
+    </task>
+    <task id="LOCAL-00026" summary="grc.py cleanup">
+      <created>1595881811051</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1595881811051</updated>
+    </task>
+    <task id="LOCAL-00027" summary="GA Cleanup">
+      <created>1595934649344</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1595934649344</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Ga Traffic almost complete - new script template system in place">
+      <created>1595938111593</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1595938111593</updated>
+    </task>
+    <task id="LOCAL-00029" summary="ga_traffic.py cleanup complete">
+      <created>1595938670634</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1595938670634</updated>
+    </task>
+    <task id="LOCAL-00030" summary="ga_traffic.py add indexes and update backfiltering to be more meaningful">
+      <created>1595939448200</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1595939448200</updated>
+    </task>
+    <task id="LOCAL-00031" summary="ga_traffic.py anti-sampling measures">
+      <created>1595941082052</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1595941082052</updated>
+    </task>
+    <task id="LOCAL-00032" summary="main script setup">
+      <created>1595942242739</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1595942242739</updated>
+    </task>
+    <task id="LOCAL-00033" summary="ga refactoring - allow configuration to be customized by view id">
+      <created>1596110394611</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1596110394611</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Checkpoint">
+      <created>1596144554941</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1596144554941</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -345,14 +454,6 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$/GDS-Report-Compiler" />
     </ignored-roots>
-    <MESSAGE value="Updates from Test Client" />
-    <MESSAGE value="2020-02-28: Updates from Test Client" />
-    <MESSAGE value="2020-02-28: Updates from Test Client (b2)" />
-    <MESSAGE value="2020-02-28: Ideas for next iteration (b1)" />
-    <MESSAGE value="2020-03-27: Get prefix dynamically" />
-    <MESSAGE value="2020-03-27: Get prefix dynamically (build 2)" />
-    <MESSAGE value="2020-03-27: Set function prefixes dynamically" />
-    <MESSAGE value="Remove trailing comma" />
     <MESSAGE value="Update Statement Generation Updates" />
     <MESSAGE value="Checkpoint - adding functionality to auto-install lmpy dependencies (and track installed packages locally)" />
     <MESSAGE value="Checkpoint - installing and uninstalling packages using simply python" />
@@ -367,96 +468,120 @@
     <MESSAGE value="Successful Update Test II" />
     <MESSAGE value="Testing new file comparison method" />
     <MESSAGE value="Documentation" />
-    <option name="LAST_COMMIT_MESSAGE" value="Documentation" />
+    <MESSAGE value="Add script for running updates" />
+    <MESSAGE value="Automated Config Sheet Creation" />
+    <MESSAGE value="grc.py cleanup" />
+    <MESSAGE value="GA Cleanup" />
+    <MESSAGE value="Ga Traffic almost complete - new script template system in place" />
+    <MESSAGE value="ga_traffic.py cleanup complete" />
+    <MESSAGE value="ga_traffic.py add indexes and update backfiltering to be more meaningful" />
+    <MESSAGE value="ga_traffic.py anti-sampling measures" />
+    <MESSAGE value="main script setup" />
+    <MESSAGE value="ga refactoring - allow configuration to be customized by view id" />
+    <MESSAGE value="Checkpoint" />
+    <option name="LAST_COMMIT_MESSAGE" value="Checkpoint" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1595254451470">
+    <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1596121129700">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1595254451470" />
-    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1595608765581">
+    <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1596121129700" />
+    <state x="715" y="223" key="#xdebugger.evaluate" timestamp="1596122396644">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1595608765581" />
-    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1595854608872">
+    <state x="715" y="223" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1596122396644" />
+    <state x="530" y="9" key="CommitChangelistDialog2" timestamp="1596144554286">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1595854608872" />
+    <state x="530" y="9" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1596144554286" />
     <state width="572" height="466" key="DebuggerActiveHint" timestamp="1595608367292">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="572" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1595608367292" />
-    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1594826394496">
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1598359751970">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1594826394496" />
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1595854784110">
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1598359751970" />
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom" timestamp="1598371155181">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
-    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1595854784110">
+    <state width="1877" height="348" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1598371155181" />
+    <state width="1877" height="348" key="GridCell.Tab.0.center" timestamp="1598371155181">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
-    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1595854784110">
+    <state width="1877" height="348" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1598371155181" />
+    <state width="1877" height="348" key="GridCell.Tab.0.left" timestamp="1598371155181">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
-    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1595854784110">
+    <state width="1877" height="348" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1598371155181" />
+    <state width="1877" height="348" key="GridCell.Tab.0.right" timestamp="1598371155181">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1595854784110">
+    <state width="1877" height="348" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1598371155181" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom" timestamp="1598371148518">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
-    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1595854784110">
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1598371148518" />
+    <state width="1877" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1080@0.0.1920.1080" timestamp="1595950168071" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center" timestamp="1598371148518">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
-    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1595854784110">
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1598371148518" />
+    <state width="1877" height="348" key="GridCell.Tab.1.center/0.0.1920.1080@0.0.1920.1080" timestamp="1595950168071" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left" timestamp="1598371148517">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
-    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1595854784110">
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1598371148517" />
+    <state width="1877" height="348" key="GridCell.Tab.1.left/0.0.1920.1080@0.0.1920.1080" timestamp="1595950168071" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right" timestamp="1598371148518">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1595854784110" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1598371148518" />
+    <state width="1877" height="348" key="GridCell.Tab.1.right/0.0.1920.1080@0.0.1920.1080" timestamp="1595950168071" />
     <state x="461" y="165" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1595616226571" />
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1595854611051">
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2" timestamp="1596144557076">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595854611051" />
-    <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1595263601723">
+    <state x="451" y="183" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1596144557076" />
+    <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1595939278572">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1595263601723" />
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1595609435084">
+    <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1595939278572" />
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1598312213742">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1595609435084" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1595254247643">
+    <state x="769" y="434" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1598312213742" />
+    <state x="512" y="249" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1598369982994">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1595254247643" />
+    <state x="512" y="249" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1920.1040@0.0.1920.1040" timestamp="1598369982994" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1595935684090">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1595935684090" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/google_analytics_events.py</url>
-          <line>66</line>
-          <option name="timeStamp" value="9" />
+          <url>file://$PROJECT_DIR$/utils/cls/user/gmb.py</url>
+          <line>140</line>
+          <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/google_analytics_events.py</url>
-          <line>64</line>
-          <option name="timeStamp" value="10" />
+          <url>file://$PROJECT_DIR$/utils/cls/user/gmb_reviews.py</url>
+          <line>62</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/utils/grc.py</url>
-          <line>70</line>
-          <option name="timeStamp" value="14" />
+          <url>file://$PROJECT_DIR$/venv/Lib/site-packages/googlemybusiness/reporting/client/listing_report.py</url>
+          <line>109</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/utils/cls/user/google_ads_campaign_conversions.py</url>
+          <line>73</line>
+          <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

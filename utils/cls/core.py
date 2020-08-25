@@ -16,6 +16,21 @@ from ..stdlib import module_from_file
 from conf.static import ENTITY_COLS
 
 
+def get_configured_item_by_key(key: str, lookup: dict):
+    if key in lookup.keys():
+        # support for customization by view id - aka "for view x use y"
+        if type(lookup[key]) == list:
+            return lookup[key]
+        # support for self-referencing lookup - aka "same as... x"
+        elif type(lookup[key]) == str:
+            return lookup[lookup[key]]
+        # checking to ensure the configuration was setup properly
+        else:
+            raise AssertionError("Invalid type for lookup entry on " + key)
+    else:
+        return lookup['global']
+
+
 class Customizer:
     """
     Required to run scripts
@@ -34,7 +49,7 @@ class Customizer:
     secrets = {}
     secrets_dat = {}
     application_engine = None
-
+    application_database = 'applications'
     # columns used for entity mapping
     entity_cols = ENTITY_COLS
 
@@ -62,14 +77,24 @@ class Customizer:
             col for col in table[self.__columns_key] if col.get('entity_col')
         ]
 
+    def get_backfilter_columns_by_table(self, table: dict) -> list:
+        return [
+            col for col in table[self.__columns_key] if col.get('backfilter')
+        ]
+
     def generate_set_statement_by_entity_columns(self, entity_columns: list) -> str:
         statement = "SET\n"
         count = 1
-        for col in entity_columns:
+        for col in enumerate(entity_columns, start=1):
             if count == len(entity_columns):
-                statement += f"{col['name']} = LOOKUP.{col['name']}\n"
+                statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
             else:
-                statement += f"{col['name']} = LOOKUP.{col['name']},\n"
+                if len(entity_columns) == col[0]:
+                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
+
+                else:
+                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']},\n"
+
         return statement
 
     def create_backfilter_statement(
@@ -99,6 +124,7 @@ class Customizer:
 
             return exact_stmt
 
+        # we want to be able to use indexes to optimize fuzzy updates
         elif update_type == 'fuzzy':
             fuzzy_lookup = """AND LOOKUP.exact = 0;"""
 
@@ -106,7 +132,7 @@ class Customizer:
                 UPDATE {table['schema']}.{table['name']} TARGET
                     {set_statement}
                 FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
-                WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT('%', LOOKUP.{backfilter_column['name']}, '%')
+                WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT(LOOKUP.{backfilter_column['name']}, '%')
                 """
 
             if self.get_attribute(attrib='historical'):
@@ -165,13 +191,162 @@ class Customizer:
         statements.extend(self.create_set_default_statements(table=table))
         return statements
 
-    def create_ingest_statement(self, customizer, master_columns, target_sheets) -> list:
+    def __construct_mv_select_statement(
+            self,
+            target_table: dict,
+            lookup_table: dict,
+            stmt: str = ''
+    ) -> str:
+
+        target_table_name = target_table['name']
+        target_table_schema = target_table['schema']
+        columns = target_table['columns']
+
+        lookup_table_name = lookup_table['name']
+        lookup_table_schema = lookup_table['schema']
+
+        # get the columns we are setting
+        entity_column_names = [
+            x['name'] for x in columns
+            if x.get('entity_col')
+        ]
+
+        backfilter = None
+
+        if not stmt:
+            stmt = '\tSELECT\n'
+            for column in columns:
+                column_name = column['name']
+                if column.get('backfilter'):
+                    backfilter = column['backfilter']
+                if column_name in entity_column_names:
+                    stmt += f'\t\tlookup.{column_name}\n'
+                else:
+                    stmt += f'\t\ttarget.{column_name}\n'
+            stmt += f'\tFROM {target_table_schema}.{target_table_name} target\n'
+            stmt += f'\tLEFT JOIN {lookup_table_schema}.{lookup_table_name} lookup\n'
+            assert backfilter, "backfilter column not assigned"
+            stmt += f'\t\tON target.{backfilter} = lookup.{backfilter}'
+        else:
+            outer = 'SELECT\n'
+            for column in columns:
+                column_name = column['name']
+                column_default = column.get('default')
+                if column.get('backfilter'):
+                    backfilter = column['backfilter']
+                if column_name in entity_column_names:
+                    outer += f'\tCASE\n'
+                    outer += f'WHEN t1.{column_name} IS NOT NULL THEN t1.{column_name}\n'
+                    if column_default:
+                        outer += f'ELSE COALESCE(lookup.{column_name}, {column_default})'
+                else:
+                    outer += f'\t\tt1.{column_name}\n'
+            outer += 'FROM (\n'
+            outer += stmt
+            outer += '\n) t1\n'
+            outer += f'LEFT JOIN {lookup_table_schema}.{lookup_table_name} lookup\n'
+            assert backfilter, "backfilter column not assigned"
+            stmt += f"\t\tON target.{backfilter} ILIKE CONCAT(lookup.{backfilter}, '%')"
+            assert backfilter, "backfilter column not assigned"
+        return stmt
+
+    def _create_mv(self, name: str) -> None:
+        """
+        Creates an optimized materialized view using the available rules in the configuration workbook
+        ====================================================================================================
+        :param name:
+        :return:
+        """
+        table = self.get_table_dictionary_by_name(self.get_attribute('table'))
+        lookup_table = self.get_lookup_table_by_tablespace(
+            tablespace=table['tablespace']
+        )
+
+        stmt = ''
+        for _ in lookup_table['update_types']:
+            stmt = self.__construct_mv_select_statement(
+                stmt=stmt,
+                target_table=table,
+                lookup_table=lookup_table
+            )
+
+        with self.engine.connect() as con:
+            con.execute(
+                f"""
+                CREATE MATERIALIZED VIEW public.{name}
+                    TABLESPACE pg_default
+                    AS   
+                    {stmt}  
+                WITH DATA;
+                """
+            )
+            con.execute(
+                f"ALTER TABLE public.{name} OWNER TO postgres;"
+            )
+
+        return
+
+    def _check_mv_exists(self, name: str) -> bool:
+        """
+        Query the active database for the existence of a materialized view
+        ====================================================================================================
+
+        :param name:
+        :return:
+        """
+        sql = sqlalchemy.text(
+            """
+            SELECT COUNT(*) AS view_count
+            FROM pg_matviews
+            WHERE matviewname = :name;  
+            """
+        )
+        with self.engine.connect() as con:
+            result = con.execute(
+                sql,
+                name=name
+            ).first()
+        return result['view_count'] if result else False
+
+    def _refresh_mv(self, mv: str) -> None:
+        """
+        Refresh a materialized view by name
+
+        :param mv:
+        :return:
+        """
+        with self.engine.connect() as con:
+            con.execute(
+                f"REFRESH MATERIALIZED VIEW public.{mv};"
+            )
+
+    def compile(self, mv: str):
+        """
+        Generate or refresh the materialized view for the given Customizer instance
+
+        :param mv:
+        :return:
+        """
+        # check whether the materialized view exists or not
+        if not self._check_mv_exists(name=mv):
+            # if it does not, create the materialized view (under postgres)
+            self._create_mv(name=mv)
+
+        # if it does, execute a refreshment
+        self._refresh_mv(mv=mv)
+
+
+
+
+
+    def create_ingest_statement(self, master_columns, target_sheets) -> list:
+
         default_ingest_statements = self.__get_ingest_defaults(target_sheet=target_sheets)
         target_columns = self.__isolate_target_columns(target_sheets=target_sheets)
-        delete_statement = self.__create_delete_from_statement(customizer=customizer, target_columns=target_columns)
-        insert_statement = self.__create_insert_statement(customizer, master_columns=master_columns, target_columns=target_columns, ingest_defaults=default_ingest_statements)
+        delete_statement = self.__create_delete_from_statement(target_columns=target_columns)
+        insert_statement = self.__create_insert_statement(master_columns=master_columns, target_columns=target_columns, ingest_defaults=default_ingest_statements)
         group_by_columns = self.__create_group_by_statement(target_sheet_columns=target_sheets)
-        historical_date_range = self.__create_historical_range_statement(customizer=customizer)
+        historical_date_range = self.__create_historical_range_statement()
 
         # Specifying date range for ingest statement
         if self.get_attribute(attrib='historical'):
@@ -187,14 +362,14 @@ class Customizer:
         assert len(target_sheets) == 1, "Only one client sheet should be present, check config workbook sheet name matches only one table name"
         return target_sheets[0]['table']['columns']
 
-    def __create_delete_from_statement(self, customizer, target_columns):
+    def __create_delete_from_statement(self, target_columns):
         assert len([col for col in target_columns if "ingest_indicator" in col]) == 1, "'ingest_indicator' attribute not assigned to table column used in ingest procedure"
         ingest_indicator = [column['name'] for column in target_columns if 'ingest_indicator' in column][0]
 
         if not self.get_attribute(attrib='historical'):
             delete_stmt = f"""
-                          DELETE FROM public.{customizer.marketing_data['table']['name']}
-                          WHERE {ingest_indicator} = f'{self.get_attribute(attrib=ingest_indicator)}';
+                          DELETE FROM public.{self.marketing_data['table']['name']}
+                          WHERE {ingest_indicator} = '{self.get_attribute(attrib=ingest_indicator)}';
                           """
         else:
             start_date = self.get_attribute(attrib='historical_start_date')
@@ -203,8 +378,8 @@ class Customizer:
             date_range = f"""AND report_date BETWEEN '{start_date}' AND '{end_date}';"""
 
             delete_stmt = f"""
-                           DELETE FROM public.{customizer.marketing_data['table']['name']}
-                           WHERE {ingest_indicator} = f'{self.get_attribute(attrib=ingest_indicator)}'
+                           DELETE FROM public.{self.marketing_data['table']['name']}
+                           WHERE {ingest_indicator} = '{self.get_attribute(attrib=ingest_indicator)}'
                            """
 
             delete_stmt += date_range
@@ -224,7 +399,7 @@ class Customizer:
 
         return list(set(target_keys))
 
-    def __create_insert_statement(self, customizer, master_columns, target_columns, ingest_defaults):
+    def __create_insert_statement(self, master_columns, target_columns, ingest_defaults):
         # Converts both to dataframes for easier comparison via column selection
 
         target_column_keys = self.__compile_target_keys(target_columns=target_columns)
@@ -283,7 +458,7 @@ class Customizer:
                 insert_statement += f'{col},'
 
         return f"""
-                INSERT INTO public.{customizer.marketing_data['table']['name']}
+                INSERT INTO public.{self.marketing_data['table']['name']}
                 SELECT
                 {insert_statement}
                 FROM public.{self.get_attribute('table')}
@@ -315,9 +490,9 @@ class Customizer:
                 {group_by_statement}
                 """ if group_by_statement else None
 
-    def __create_historical_range_statement(self, customizer):
-        start_date = getattr(customizer, f'{self.prefix}_historical_start_date')
-        end_date = getattr(customizer, f'{self.prefix}_historical_end_date')
+    def __create_historical_range_statement(self):
+        start_date = self.get_attribute('historical_start_date')
+        end_date = self.get_attribute('historical_end_date')
 
         return f"""
                 WHERE report_date BETWEEN '{start_date}' AND '{end_date}';
@@ -434,6 +609,160 @@ class Customizer:
         self._load_test_configuration()
         assert self.valid_global_configuration(), self.global_configuration_message
         self.engine = build_postgresql_engine(customizer=self)
+        self.build_application_engine()
+        setattr(self, f"{os.path.basename(__file__).replace('.py', '')}_class", True)
+
+    def build_application_engine(self):
+        database = self.db['DATABASE']
+        self.db['DATABASE'] = self.application_database
+        self.application_engine = build_postgresql_engine(self)
+        self.db['DATABASE'] = database
+
+    def get_secrets(self, include_dat: bool = True) -> None:
+        self.__get_secrets()
+        if include_dat:
+            self.__get_secrets_dat()
+        return
+
+    def __get_secrets(self) -> None:
+        name_value = getattr(self, 'credential_name')
+        assert name_value, f"Invalid name_value {name_value} provided"
+        with self.application_engine.connect() as con:
+            result = con.execute(
+                sqlalchemy.text(
+                    """
+                    SELECT content_value
+                    FROM public.gds_compiler_credentials
+                    WHERE name_value = :name_value;
+                    """
+                ),
+                name_value=name_value
+            ).first()
+        self.secrets = result['content_value'] if result else {}
+        return
+
+    def __get_secrets_dat(self) -> None:
+        name_value = getattr(self, 'secrets_name')
+        assert name_value, f"Invalid name_value {name_value} provided"
+        with self.application_engine.connect() as con:
+            result = con.execute(
+                sqlalchemy.text(
+                    """
+                    SELECT
+                        client_name,
+                        name_value,
+                        content_value
+                    FROM public.gds_compiler_credentials_dat
+                    WHERE client_name = :client_name
+                    AND name_value = :name_value;
+                    """
+                ),
+                client_name=self.client,  # camel-case client name
+                name_value=name_value
+            ).first()
+        self.secrets_dat = json.dumps(result['content_value']) if result else {}
+        return
+
+    def set_customizer_secrets_dat(self) -> None:
+        client_name = getattr(self, 'client')  # camel-case client name
+        name_value = getattr(self, 'secrets_name', '')
+        assert name_value, f"Invalid name_value {name_value} provided"
+        content_value = getattr(self, 'secrets_dat', '')
+        assert content_value, f"Invalid content_value {content_value} provided"
+        content_value = json.dumps(content_value) if type(content_value) == dict else content_value
+        with self.application_engine.connect() as con:
+            count_result = con.execute(
+                sqlalchemy.text(
+                    """
+                    SELECT COUNT(*) as count_value
+                    FROM public.gds_compiler_credentials_dat
+                    WHERE client_name = :client_name
+                    AND name_value = :name_value;
+                    """
+                ),
+                client_name=client_name,
+                name_value=name_value
+            ).first()
+            if count_result['count_value'] == 0:
+                con.execute(
+                    sqlalchemy.text(
+                        """
+                        INSERT INTO public.gds_compiler_credentials_dat
+                        (
+                            client_name,
+                            name_value,
+                            content_value
+                        )
+                        VALUES
+                        (
+                            :client_name, 
+                            :name_value,
+                            :content_value
+                        );
+                        """
+                    ),
+                    client_name=client_name,
+                    name_value=name_value,
+                    content_value=content_value
+                )
+            else:
+                con.execute(
+                    sqlalchemy.text(
+                        """
+                        UPDATE public.gds_compiler_credentials_dat
+                        SET content_value = :content_value
+                        WHERE client_name = :client_name
+                        AND name_value = :name_value;
+                        """
+                    ),
+                    client_name=client_name,
+                    name_value=name_value,
+                    content_value=content_value
+                )
+        return
+
+    def backfilter_statement(self):
+        target_sheets = [
+            sheet for sheet in self.configuration_workbook['sheets']
+            if sheet['table']['name'] == self.get_attribute('table')
+        ]
+        assert len(target_sheets) == 1
+        sheet = target_sheets[0]
+        assert sheet['table']['type'] == 'reporting'
+        statements = self.build_backfilter_statements()
+        with self.engine.connect() as con:
+            for statement in statements:
+                con.execute(sqlalchemy.text(statement))
+
+    def ingest_statement(self):
+        master_columns = []
+        for sheets in self.configuration_workbook['sheets']:
+            if sheets['table']['type'] == 'reporting':
+                if sheets['table']['active']:
+                    for column in sheets['table']['columns']:
+                        if column['master_include']:
+                            master_columns.append(column)
+        target_sheets = [
+            sheet for sheet in self.configuration_workbook['sheets']
+            if sheet['table']['name'] == self.get_attribute('table')]
+        ingest_procedure = self.create_ingest_statement(master_columns, target_sheets)
+        with self.engine.connect() as con:
+            for statement in ingest_procedure:
+                con.execute(statement)
+
+    # TODO: since we're moving to unit testing, are these safe to remove?
+    def audit(self):
+        for sheets in self.configuration_workbook['sheets']:
+            if sheets['table']['type'] == 'reporting':
+                if sheets['table']['audit_cadence']:
+                    if sheets['table']['name'] == self.get_attribute('table'):
+                        audit_automation_indicator = [
+                            column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column
+                        ][0]
+                        self.audit_automation_procedure(
+                            index_column=self.get_attribute(audit_automation_indicator),
+                            cadence=sheets['table']['audit_cadence']
+                        )
 
     def __get_base_path(self):
         return pathlib.Path(__file__).parents[2]
@@ -514,23 +843,3 @@ class Customizer:
                 setattr(self, prefix_func, getattr(self, func))
                 assert hasattr(self, prefix_func)
         return
-
-    def get_secrets(self) -> dict:
-        """
-        Get OAuth credentials by the client and credential_name
-        ====================================================================================================
-        :return:
-        """
-        name_value = getattr(self, 'credential_name')
-        with self.application_engine.connect() as con:
-            result = con.execute(
-                sqlalchemy.text(
-                    """
-                    SELECT content_value
-                    FROM public.gds_compiler_credentials
-                    WHERE name_value = :name_value;
-                    """
-                ),
-                name_value=name_value
-            ).first()
-        return result['content_value'] if result else {}

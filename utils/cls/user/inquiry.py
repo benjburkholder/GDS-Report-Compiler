@@ -2,23 +2,23 @@ import pandas as pd
 import sqlalchemy
 import datetime
 
+from utils import grc
 from utils.dbms_helpers import postgres_helpers
+from utils.gs_manager import GoogleSheetsManager
 from utils.cls.core import Customizer, get_configured_item_by_key
 
 TABLE_SCHEMA = 'public'
 DATE_COL = 'report_date'
 
 
-class Dialogtech(Customizer):
+class Inquiry(Customizer):
 
     rename_map = {
-        'global': {
-
-        }
+        'global': {}
     }
 
-    def get_rename_map(self, phone_label: str):
-        return get_configured_item_by_key(key=phone_label, lookup=self.rename_map)
+    def get_rename_map(self, account_name: str):
+        return get_configured_item_by_key(key=account_name, lookup=self.rename_map)
 
     post_processing_sql_list = []
 
@@ -37,24 +37,24 @@ class Dialogtech(Customizer):
         self.set_attribute('table_schema', TABLE_SCHEMA)
         self.set_attribute('date_col', DATE_COL)
 
-    def ingest_by_phone_label(self, df: pd.DataFrame, phone_label: str, start_date: datetime.datetime, end_date: datetime.datetime) -> None:
+    @staticmethod
+    def create_gs_object():
+        gs = grc.get_customizer_secrets(GoogleSheetsManager(), include_dat=False)
+
+        return gs
+
+    def ingest_all(self, df: pd.DataFrame) -> None:
         table_schema = self.get_attribute('table_schema')
         table = self.get_attribute('table')
-        date_col = self.get_attribute('date_col')
 
         with self.engine.begin() as con:
             con.execute(
                 sqlalchemy.text(
                     f"""
                     DELETE FROM
-                    {table_schema}.{table}
-                    WHERE {date_col} BETWEEN :start_date AND :end_date
-                    AND phone_label = :phone_label;
+                    {table_schema}.{table};
                     """
                 ),
-                start_date=start_date,
-                end_date=end_date,
-                phone_label=phone_label
             )
 
             df.to_sql(
@@ -66,41 +66,39 @@ class Dialogtech(Customizer):
             )
 
     @staticmethod
-    def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
-        return pd.date_range(start=start_date, end=end_date).to_list()
+    def calculate_inquiry_web_goals(raw_web_goals):
+        data = []
+        for row in raw_web_goals.iterrows():
+            start_date = datetime.datetime.strptime(row[1]['Date Start'], '%Y-%m-%d')
+            end_date = datetime.datetime.strptime(row[1]['Date End'], '%Y-%m-%d')
+            mapped_property = row[1]['Property']
+            mapped_community = row[1]['Community']
+            ownership_group = row[1]['Ownership Group']
+            region = row[1]['Region']
+            inquiry_goal = float(row[1]['Inquiry Goal'].replace('$', '').replace(',', ''))
 
-    def calculate_date(self, start_date: bool = True) -> datetime.datetime:
-        if self.get_attribute('historical'):
-            if start_date:
-                return datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
-            else:
-                return datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
-        else:
-            if start_date:
-                return datetime.datetime.today() - datetime.timedelta(7)
-            else:
-                return datetime.datetime.today() - datetime.timedelta(1)
+            if end_date is None:
+                end_date = ''
 
-    def pull_dialogtech_labels(self):
-        engine = postgres_helpers.build_postgresql_engine(customizer=self)
-        with engine.connect() as con:
-            sql = sqlalchemy.text(
-                """
-                SELECT DISTINCT *
-                FROM public.lookup_dt_mapping;
-                """
-            )
-            results = con.execute(sql).fetchall()
+            if end_date == '':
+                end_date = datetime.date.today()
 
-            return [
-                {
-                    'phone_label': result[0],
-                    'medium': result[1],
-                    'property': result[2],
-                    'exact': result[3]
-                }
-                for result in results
-            ] if results else []
+            # historical, iterate over a range of dates
+            for iter_date in pd.date_range(start_date, end_date):
+                start = datetime.date(start_date.year, start_date.month, start_date.day)
+                end = datetime.date(end_date.year, end_date.month, end_date.day)
+                max_days = (end - start).days
+
+                daily_cost = (inquiry_goal / max_days)
+                data.append({
+                    'Date': iter_date,
+                    'Property': mapped_property,
+                    'Community': mapped_community,
+                    'Ownership_Group': ownership_group,
+                    'Region': region,
+                    'Daily_Cost': daily_cost
+                })
+        return pd.DataFrame(data)
 
     def type(self, df: pd.DataFrame) -> pd.DataFrame:
         """
