@@ -69,5 +69,5 @@ class WorkbookSetupClass(MainSetupClass):
         with open(self.stored_json_directory / 'workbook.json', 'w') as file:
             json.dump(self.converted_workbook_json, file)
 
-        print("SUCCESS: WORKBOOK CONFIGURATION GENERATED.")
+        print("SUCCESS: DATA-SOURCE SCHEMA CONFIGURATION COMPLETE.")
 
