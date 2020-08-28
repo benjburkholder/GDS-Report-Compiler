@@ -6,14 +6,11 @@ This script will:
  - Prompt user to enter app level values, generating app.json from template.
  - Create a brand new workbook from the configuration given in workbook.json.
 
-
 """
-from utils import grc
-from utils.config_manager import ConfigManager
-from utils.gs_manager import GoogleSheetsManager
 
 from src.setup_cls.workbook_setup import WorkbookSetupClass
 from src.setup_cls.app_setup import AppSetupClass
+from sys_initialize_workbook import workbook_creation
 
 
 def main() -> None:
@@ -26,18 +23,8 @@ def main() -> None:
     app_cls = AppSetupClass()
     app_cls.app_flow()
 
-    # start workbook initialization
-    gs = GoogleSheetsManager()
-    gs = grc.get_customizer_secrets(
-        customizer=gs,
-        include_dat=False
-    )
-    # noinspection PyUnresolvedReferences
-    client = gs.create_client()
-
-    # create a google sheets client with the help of GoogleSheetsManager
-    ConfigManager(client=client).initialize_workbook()
-    return
+    # start workbook creation
+    workbook_creation()
 
 
 if __name__ == '__main__':
