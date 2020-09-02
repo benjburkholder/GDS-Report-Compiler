@@ -1,11 +1,8 @@
 """
 Google Ads Campaign Customizer Module
 """
-
 # PLATFORM IMPORTS
-import pathlib
-from utils.cls.user.gads import GoogleAds
-from googleadspy.reporting.client.reporting import GoogleAdsReporting
+from utils.cls.user.google_ads import GoogleAds
 
 # CUSTOM IMPORTS
 IS_CLASS = True
@@ -13,10 +10,6 @@ HISTORICAL = False
 HISTORICAL_START_DATE = '2020-01-01'
 HISTORICAL_END_DATE = '2020-07-01'
 DATA_SOURCE = 'Google Ads - Campaign'
-CUSTOMER_ID = '9664678140'
-
-# TODO: replace once GAds package is updated for dynamic cred retrieval
-yaml_path = pathlib.Path('secrets')
 
 
 class GoogleAdsCampaignCustomizer(GoogleAds):
@@ -26,22 +19,14 @@ class GoogleAdsCampaignCustomizer(GoogleAds):
 
     rename_map = {
         'global': {
-
-            'Date': 'report_date',
-            'Campaign': 'campaign',
-            'Campaign_ID': 'campaign_id',
-            'Clicks': 'clicks',
-            'Cost': 'cost',
-            'Device': 'device',
-            'Impressions': 'impressions',
-            'Search_Impression_Share': 'search_impression_share',
-            'Search_Budget_Lost_Impression_Share': 'search_budget_lost_impression_share',
-            'Search_Rank_Lost_Impression_Share': 'search_rank_lost_impression_share',
-            'Content_Impression_Share': 'content_impression_share',
-            'Content_Budget_Lost_Impression_Share': 'content_budget_lost_impression_share',
-            'Content_Rank_Lost_Impression_Share': 'content_rank_lost_impression_share',
-            'Medium': 'advertising_channel_type'
-
+            'date': 'report_date',
+            'campaign_name': 'campaign',
+            'campaign_id': 'campaign_id',
+            'clicks': 'clicks',
+            'cost': 'cost',
+            'device': 'device',
+            'impressions': 'impressions',
+            'advertising_channel_type': 'advertising_channel_type'
         }
     }
 
@@ -63,15 +48,16 @@ class GoogleAdsCampaignCustomizer(GoogleAds):
         start_date = self.calculate_date(start_date=True)
         end_date = self.calculate_date(start_date=False)
 
-        # TODO: replace once GAds package is updated for dynamic cred retrieval
-        gads = GoogleAdsReporting(customer_id=CUSTOMER_ID, yaml_path=yaml_path)
-        account_ids = self.get_account_ids()
+        account_pairs = self.get_account_ids()
 
-        for account_id in account_ids:
-            df = gads.campaign_performance(
-                customer_id=account_id,
+        for pair in account_pairs:
+            manager_account_id = pair['manager_account_id']
+            account_id = pair['account_id']
+            client = self.build_client(manager_customer_id=manager_account_id)
+            df = client.campaign_performance(
                 start_date=start_date,
-                end_date=end_date
+                end_date=end_date,
+                customer_id=account_id
             )
 
             if df.shape[0]:
@@ -91,4 +77,3 @@ class GoogleAdsCampaignCustomizer(GoogleAds):
 
             else:
                 print('INFO: No data returned for ' + str(account_id))
-

@@ -1,11 +1,8 @@
 """
 Google Ads Keyword Performance Customizer Module
 """
-
 # PLATFORM IMPORTS
-import pathlib
-from utils.cls.user.gads import GoogleAds
-from googleadspy.reporting.client.reporting import GoogleAdsReporting
+from utils.cls.user.google_ads import GoogleAds
 
 # CUSTOM IMPORTS
 IS_CLASS = True
@@ -13,40 +10,18 @@ HISTORICAL = False
 HISTORICAL_START_DATE = '2020-01-01'
 HISTORICAL_END_DATE = '2020-07-01'
 DATA_SOURCE = 'Google Ads - Keyword Performance'
-CUSTOMER_ID = '9664678140'
-
-# TODO: replace once GAds package is updated for dynamic cred retrieval
-yaml_path = pathlib.Path('secrets')
 
 
-class GoogleAdsKeywordPerformanceCustomizer(GoogleAds):
+class GoogleAdsKeywordCustomizer(GoogleAds):
     """
     Handles GAds pulling, parsing and processing
     """
 
     rename_map = {
         'global': {
-
-            'Date': 'report_date',
-            'Campaign': 'campaign',
-            'Campaign_ID': 'campaign_id',
-            'Goal_Name': 'goal_name',
-            'Goal_Completions': 'goal_completions',
-            'All_Goal_Completions': 'all_goal_completions',
-            'Account_ID': 'account_id',
-            'Device': 'device',
-            'Medium': 'advertising_channel_type',
-            'Market': 'property',
-            'Store': 'community',
-            'Data_Source': 'data_source',
-            'Match_Type': 'match_type',
-            'Keyword_Cost': 'keyword_cost',
-            'Clicks': 'clicks',
-            'Cost': 'cost',
-            'Impressions': 'impressions',
-            'Conversions': 'conversions',
-            'Keyword': 'keyword'
-
+            'date': 'report_date',
+            'campaign_name': 'campaign',
+            'campaign_id': 'campaign_id',
         }
     }
 
@@ -68,15 +43,16 @@ class GoogleAdsKeywordPerformanceCustomizer(GoogleAds):
         start_date = self.calculate_date(start_date=True)
         end_date = self.calculate_date(start_date=False)
 
-        # TODO: replace once GAds package is updated for dynamic cred retrieval
-        gads = GoogleAdsReporting(customer_id=CUSTOMER_ID, yaml_path=yaml_path)
-        account_ids = self.get_account_ids()
+        account_pairs = self.get_account_ids()
 
-        for account_id in account_ids:
-            df = gads.keyword_performance(
-                customer_id=account_id,
+        for pair in account_pairs:
+            manager_account_id = pair['manager_account_id']
+            account_id = pair['account_id']
+            client = self.build_client(manager_customer_id=manager_account_id)
+            df = client.keyword_performance(
                 start_date=start_date,
-                end_date=end_date
+                end_date=end_date,
+                customer_id=account_id
             )
 
             if df.shape[0]:
@@ -132,4 +108,3 @@ class GoogleAdsKeywordPerformanceCustomizer(GoogleAds):
         df['device'][df['device'] == 'UNKNOWN'] = 'Desktop'
         df['device'][df['device'] == 'OTHER'] = 'Desktop'
         return df
-

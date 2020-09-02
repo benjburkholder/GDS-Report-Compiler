@@ -84,17 +84,12 @@ class Customizer:
 
     def generate_set_statement_by_entity_columns(self, entity_columns: list) -> str:
         statement = "SET\n"
-        count = 1
+        count = len(entity_columns)
         for col in enumerate(entity_columns, start=1):
-            if count == len(entity_columns):
+            if col[0] == count:
                 statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
             else:
-                if len(entity_columns) == col[0]:
-                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
-
-                else:
-                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']},\n"
-
+                statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']},\n"
         return statement
 
     def create_backfilter_statement(
@@ -461,6 +456,7 @@ class Customizer:
         assert self.valid_global_configuration(), self.global_configuration_message
         self.engine = build_postgresql_engine(customizer=self)
         self.build_application_engine()
+        setattr(self, f"{os.path.basename(__file__).replace('.py', '')}_class", True)
 
     def build_application_engine(self):
         database = self.db['DATABASE']
