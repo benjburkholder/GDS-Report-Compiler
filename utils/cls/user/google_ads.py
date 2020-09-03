@@ -162,3 +162,4 @@ class GoogleAds(Customizer):
     def ingest(self):
         self.ingest_statement()
         print('SUCCESS: Table Ingested.')
+
