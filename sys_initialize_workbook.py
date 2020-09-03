@@ -1,16 +1,13 @@
 """
 Initialize Workbook Module
-
 This script will create a brand new workbook from the configuration given in workbook.json
-
-
 """
 from utils import grc
 from utils.config_manager import ConfigManager
 from utils.gs_manager import GoogleSheetsManager
 
 
-def main() -> None:
+def workbook_creation() -> None:
 
     gs = GoogleSheetsManager()
     gs = grc.get_customizer_secrets(
@@ -26,4 +23,4 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    workbook_creation()
