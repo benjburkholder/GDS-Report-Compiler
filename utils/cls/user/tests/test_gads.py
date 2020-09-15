@@ -1,10 +1,10 @@
 """
-Unit Tests for Google Ads (gads.py)
+Unit Tests for Google Ads (google_ads.py)
 """
 import sqlalchemy
 
 from .test_core import TestHelper
-from ..gads import (
+from ..google_ads import (
     GoogleAdsCampaign,
     GoogleAdsKeyword
 )

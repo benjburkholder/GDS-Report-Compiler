@@ -616,7 +616,7 @@ def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ing
 
 def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
     for slack_vertical in customizer.vertical_specific_slack_alerts:
-        core_vertical = customizer.vertical.replace(' ', '_').lower()
+        core_vertical = customizer.vertical
 
         if core_vertical == slack_vertical:
             slack_vertical_present = True

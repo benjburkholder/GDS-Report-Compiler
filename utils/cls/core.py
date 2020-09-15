@@ -84,17 +84,12 @@ class Customizer:
 
     def generate_set_statement_by_entity_columns(self, entity_columns: list) -> str:
         statement = "SET\n"
-        count = 1
+        count = len(entity_columns)
         for col in enumerate(entity_columns, start=1):
-            if count == len(entity_columns):
+            if col[0] == count:
                 statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
             else:
-                if len(entity_columns) == col[0]:
-                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']}\n"
-
-                else:
-                    statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']},\n"
-
+                statement += f"{col[1]['name']} = LOOKUP.{col[1]['name']},\n"
         return statement
 
     def create_backfilter_statement(
@@ -399,10 +394,20 @@ class Customizer:
 
         return list(set(target_keys))
 
+    def __check_for_custom_columns(self):
+        base_path = self.get_base_path() / 'conf' / 'stored'
+        if 'stored_custom_columns.json' in os.listdir(base_path):
+            with open(os.path.join(base_path, 'stored_custom_columns.json')) as f:
+                data = json.load(f)
+
+        return data if data else None
+
     def __create_insert_statement(self, master_columns, target_columns, ingest_defaults):
         # Converts both to dataframes for easier comparison via column selection
 
         target_column_keys = self.__compile_target_keys(target_columns=target_columns)
+
+        # custom_columns = self.__check_for_custom_columns()
 
         master_df = pd.DataFrame(master_columns)[target_column_keys].drop_duplicates(keep='first', subset='name').to_dict(orient='records')
         target_df = pd.DataFrame(target_columns)[target_column_keys]
@@ -463,6 +468,9 @@ class Customizer:
                 {insert_statement}
                 FROM public.{self.get_attribute('table')}
                 """
+
+    def __add_custom_columns(self):
+        pass
 
     def __get_ingest_defaults(self, target_sheet):
         assert len(target_sheet) == 1, "Only one client sheet should be present, check config workbook sheet name matches only one table name"
@@ -576,7 +584,7 @@ class Customizer:
     def __init__(self, database: str = None):
         # assign project core application configuration
         app = self.get_configuration_by_file_name(
-            file_name='app.json'
+            file_name=self.__configuration_app_file_name
         )
         self.dbms = app['dbms']
         self.client = app['client']
@@ -584,6 +592,7 @@ class Customizer:
         self.project = app['project']
         self.version = app['version']
         self.db = app['db']
+
         if database:
             self.db['DATABASE'] = database
         # load configuration for customize-able base class attributes
@@ -764,12 +773,12 @@ class Customizer:
                             cadence=sheets['table']['audit_cadence']
                         )
 
-    def __get_base_path(self):
+    def get_base_path(self):
         return pathlib.Path(__file__).parents[2]
 
-    def _get_configuration_path_by_file_name(self, file_name: str):
+    def get_configuration_path_by_file_name(self, file_name: str):
         return os.path.join(
-            self.__get_base_path(),
+            self.get_base_path(),
             'conf',
             'stored',
             file_name
@@ -777,7 +786,7 @@ class Customizer:
 
     def get_configuration_by_file_name(self, file_name: str) -> dict:
         with open(
-            self._get_configuration_path_by_file_name(file_name=file_name),
+            self.get_configuration_path_by_file_name(file_name=file_name),
             'r'
         ) as file:
             return json.load(file)
