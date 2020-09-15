@@ -5,40 +5,46 @@ import os
 import json
 import gspread
 import pathlib
-import gspread_formatting as gsf
+import webbrowser
 from time import sleep
+import gspread_formatting as gsf
 
 from conf.static import SHEETS
 
 
 class ConfigManager:
 
-    def __init__(self, client: gspread.client):
-        self.client = client
+    def __init__(self):
         self.whitelist_emails = SHEETS['WHITELIST_EMAILS']
+        self.template_workbook_name = 'workbook_template.json'
+        self.template_app_name = 'app_template.json'
+        self.workbook_name = 'workbook.json'
+        self.app_name = 'app.json'
 
     rows_default = 100
 
-    def initialize_workbook(self) -> None:
+    def initialize_workbook(self, client: gspread.client) -> None:
         # check if key exists in current configuration
-        wb_config = self.get_workbook_config()
-        app_config = self.get_app_config()
+        wb_config = self.get_workbook_config(workbook_name=self.workbook_name)
+        app_config = self.get_app_config(app_name=self.app_name)
         client_name = app_config.get('client')
         release_version = app_config.get('version')
         key = wb_config.get('key')
         if not key:
-            sh = self.create_workbook(client_name=client_name, release_version=release_version)
+            sh = self.create_workbook(client_name=client_name, release_version=release_version, client=client)
         else:
-            sh = self.update_workbook(key=key)
+            sh = self.update_workbook(key=key, client=client)
 
-        wb_config['key'] = sh.id
+        webbrowser.open(sh.url)
+        wb_config['key'] = input('ENTER WORKBOOK KEY (IN URL): ')
         wb_config['config_sheet_name'] = sh.title
-        self.write_workbook_config(config=wb_config)
+        self.write_workbook_config(config=wb_config, workbook_name=self.workbook_name)
 
         # for each sheet in workbook
         worksheets = sh.worksheets()
         sheet_titles = [sheet.title for sheet in worksheets]
         for sheet in wb_config.get('sheets', []):
+            sleep(15)
             if sheet['table'].get('type') in ('lookup', 'source'):
                 sheet_name = sheet['sheet']
                 columns = sheet['table']['columns']
@@ -83,7 +89,7 @@ class ConfigManager:
     def _letter_from_idx(idx: int) -> str:
         return chr(idx + 97)
 
-    def __get_project_root(self):
+    def get_project_root(self):
         """
         Returns the global location of the project root
         ====================================================================================================
@@ -91,35 +97,45 @@ class ConfigManager:
         """
         return pathlib.Path(__file__).parents[self.project_root_idx]
 
-    def write_workbook_config(self, config: dict) -> None:
+    def write_workbook_config(self, config: dict, workbook_name: str) -> None:
         path = os.path.join(
-            self.__get_project_root(),
+            self.get_project_root(),
             'conf',
             'stored',
-            'workbook.json'
+            workbook_name
         )
         with open(path, 'w') as file:
             file.write(json.dumps(config))
 
-    def get_workbook_config(self) -> dict:
+    def get_workbook_config(self, workbook_name: str) -> dict:
         path = os.path.join(
-            self.__get_project_root(),
+            self.get_project_root(),
             'conf',
             'stored',
-            'workbook.json'
+            workbook_name
         )
         with open(path, 'r') as file:
             return json.load(file)
 
-    def get_app_config(self) -> dict:
+    def get_app_config(self, app_name: str) -> dict:
         path = os.path.join(
-            self.__get_project_root(),
+            self.get_project_root(),
             'conf',
             'stored',
-            'app.json'
+            app_name
         )
         with open(path, 'r') as file:
             return json.load(file)
+
+    def write_app_config(self, config: dict, app_name: str) -> None:
+        path = os.path.join(
+            self.get_project_root(),
+            'conf',
+            'stored',
+            app_name
+        )
+        with open(path, 'w') as file:
+            file.write(json.dumps(config))
 
     @staticmethod
     def _get_spreadsheet_title(client_name: str, release_version: str) -> str:
@@ -133,11 +149,11 @@ class ConfigManager:
                 role='writer'
             )
 
-    def create_workbook(self, client_name: str, release_version: str) -> gspread.Spreadsheet:
+    def create_workbook(self, client_name: str, release_version: str, client: gspread.client) -> gspread.Spreadsheet:
         tries = 3
         while True:
             try:
-                sh = self.client.create(
+                sh = client.create(
                     self._get_spreadsheet_title(client_name=client_name, release_version=release_version)
                 )
                 self._share_workbook_with_whitelist(sh=sh)
@@ -149,7 +165,7 @@ class ConfigManager:
                 if tries == 0:
                     raise api_err
 
-    def update_workbook(self, key: str) -> gspread.Spreadsheet:
-        sh = self.client.open_by_key(key=key)
+    def update_workbook(self, key: str, client: gspread.client) -> gspread.Spreadsheet:
+        sh = client.open_by_key(key=key)
         self._share_workbook_with_whitelist(sh=sh)
         return sh
