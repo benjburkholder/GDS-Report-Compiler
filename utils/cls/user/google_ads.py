@@ -5,11 +5,17 @@ import datetime
 from utils.dbms_helpers import postgres_helpers
 from utils.cls.core import Customizer, get_configured_item_by_key
 
+# LMPY PACKAGES
+from googleadspy.reporting.client.reporting import GoogleAdsReporting
+
 TABLE_SCHEMA = 'public'
 DATE_COL = 'report_date'
 
 
-class Dialogtech(Customizer):
+class GoogleAds(Customizer):
+
+    credential_name = 'GoogleAdsYaml'
+    secrets_name = ''
 
     rename_map = {
         'global': {
@@ -17,8 +23,8 @@ class Dialogtech(Customizer):
         }
     }
 
-    def get_rename_map(self, phone_label: str):
-        return get_configured_item_by_key(key=phone_label, lookup=self.rename_map)
+    def get_rename_map(self, account_id: str):
+        return get_configured_item_by_key(key=account_id, lookup=self.rename_map)
 
     post_processing_sql_list = []
 
@@ -32,12 +38,28 @@ class Dialogtech(Customizer):
         # put this in a function to leave room for customization
         return self.post_processing_sql_list
 
+    def build_client(self, manager_customer_id: str) -> GoogleAdsReporting:
+        """
+        Datasource-specific method to construct the client using preconfigured secrets
+        ====================================================================================================
+        :return:
+        """
+        self.get_secrets(include_dat=False)
+        return GoogleAdsReporting(
+            manager_customer_id=manager_customer_id,
+            client_id=self.secrets['client_id'],
+            client_secret=self.secrets['client_secret'],
+            developer_token=self.secrets['developer_token'],
+            refresh_token=self.secrets['refresh_token'],
+            user_agent=self.secrets['user_agent']
+        )
+
     def __init__(self):
         super().__init__()
         self.set_attribute('table_schema', TABLE_SCHEMA)
         self.set_attribute('date_col', DATE_COL)
 
-    def ingest_by_phone_label(self, df: pd.DataFrame, phone_label: str, start_date: datetime.datetime, end_date: datetime.datetime) -> None:
+    def ingest_by_account_id(self, df: pd.DataFrame, account_id: str, start_date: str, end_date: str) -> None:
         table_schema = self.get_attribute('table_schema')
         table = self.get_attribute('table')
         date_col = self.get_attribute('date_col')
@@ -49,12 +71,12 @@ class Dialogtech(Customizer):
                     DELETE FROM
                     {table_schema}.{table}
                     WHERE {date_col} BETWEEN :start_date AND :end_date
-                    AND phone_label = :phone_label;
+                    AND account_id = :account_id;
                     """
                 ),
                 start_date=start_date,
                 end_date=end_date,
-                phone_label=phone_label
+                account_id=account_id
             )
 
             df.to_sql(
@@ -69,37 +91,32 @@ class Dialogtech(Customizer):
     def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
         return pd.date_range(start=start_date, end=end_date).to_list()
 
-    def calculate_date(self, start_date: bool = True) -> datetime.datetime:
+    def calculate_date(self, start_date: bool = True) -> str:
         if self.get_attribute('historical'):
             if start_date:
-                return datetime.datetime.strptime(self.get_attribute('historical_start_date'), '%Y-%m-%d')
+                return self.get_attribute('historical_start_date')
             else:
-                return datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
+                return self.get_attribute('historical_end_date')
         else:
             if start_date:
-                return datetime.datetime.today() - datetime.timedelta(7)
+                return (datetime.datetime.today() - datetime.timedelta(7)).strftime('%Y-%m-%d')
             else:
-                return datetime.datetime.today() - datetime.timedelta(1)
+                return (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')
 
-    def pull_dialogtech_labels(self):
+    def get_account_ids(self) -> list:
         engine = postgres_helpers.build_postgresql_engine(customizer=self)
         with engine.connect() as con:
             sql = sqlalchemy.text(
                 """
-                SELECT DISTINCT *
-                FROM public.lookup_dt_mapping;
+                SELECT DISTINCT
+                    manager_account_id,
+                    account_id
+                FROM public.source_gads_accountmaster;
                 """
             )
             results = con.execute(sql).fetchall()
-
             return [
-                {
-                    'phone_label': result[0],
-                    'medium': result[1],
-                    'property': result[2],
-                    'exact': result[3]
-                }
-                for result in results
+                dict(result) for result in results
             ] if results else []
 
     def type(self, df: pd.DataFrame) -> pd.DataFrame:

@@ -1,1 +1,34 @@
-{"sheet": null, "table": {"name": "marketing_data", "schema": "public", "type": "master", "columns": [], "indexes": [{"name": "ix_marketing_data", "tablespace": "pg_default", "clustered": true, "method": "btree", "columns": [{"name": "report_date", "sort": "asc", "nulls_last": true}, {"name": "data_source", "sort": "asc", "nulls_last": true}, {"name": "property", "sort": "asc", "nulls_last": true}]}], "owner": "postgres"}}
+{
+  "table": {
+    "name": "marketing_data",
+    "schema": "public",
+    "type": "master",
+    "columns": [],
+    "indexes": [
+      {
+        "name": "ix_marketing_data",
+        "tablespace": "pg_default",
+        "clustered": true,
+        "method": "btree",
+        "columns": [
+          {
+            "name": "report_date",
+            "sort": "asc",
+            "nulls_last": true
+          },
+          {
+            "name": "data_source",
+            "sort": "asc",
+            "nulls_last": true
+          },
+          {
+            "name": "property",
+            "sort": "asc",
+            "nulls_last": true
+          }
+        ]
+      }
+    ],
+    "owner": "postgres"
+  }
+}
