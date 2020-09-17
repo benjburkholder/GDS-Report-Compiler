@@ -310,9 +310,10 @@ def build_marketing_table(customizer) -> int:
         # Add custom columns to end of marketing table
         if customizer.custom_marketing_data_columns['table']['active']:
             if customizer.custom_marketing_data_columns['table']['columns']:
-                customizer.marketing_data['table']['columns'].append(
-                    customizer.custom_marketing_data_columns['table']['columns']
-                )
+                for column in customizer.custom_marketing_data_columns['table']['columns']:
+                    customizer.marketing_data['table']['columns'].append(
+                        column
+                    )
 
         create_table_from_schema(customizer, schema=customizer.marketing_data)
 

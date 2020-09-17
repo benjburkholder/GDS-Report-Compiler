@@ -58,12 +58,6 @@ class GoogleAnalytics(Customizer):
         self.set_attribute('table_schema', TABLE_SCHEMA)
         self.set_attribute('date_col', DATE_COL)
 
-        # if we have valid secrets after the request loop, let's update the db with the latest
-        # we put the onus on the client library to refresh these credentials as needed
-        # and to store them where they belong
-        if getattr(self, 'secrets_dat', {}):
-            self.set_customizer_secrets_dat()
-
     def ingest_by_view_id(self, view_id: str, df: pd.DataFrame, start_date: str, end_date: str) -> None:
         table_schema = self.get_attribute('table_schema')
         table = self.get_attribute('table')
@@ -198,6 +192,8 @@ class GoogleAnalytics(Customizer):
                         start_date=start,
                         end_date=end
                     )
+
+                    self.set_customizer_secrets_dat()
 
                     if df.shape[0]:
                         df.rename(columns=rename_map, inplace=True)

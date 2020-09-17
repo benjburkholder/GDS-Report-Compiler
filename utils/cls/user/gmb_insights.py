@@ -59,10 +59,8 @@ class GoogleMyBusinessInsightsCustomizer(GoogleMyBusiness):
         start_date = self.calculate_date(start_date=True).strftime('%Y-%m-%d')
         end_date = self.calculate_date(start_date=False).strftime('%Y-%m-%d')
 
-        # TODO: update gmb library to pass a customizer with credentials
-
         gmb_client = GoogleMyBusinessReporting(
-            secrets_path=self.get_attribute('secrets_path')
+            customizer=self
         )
         accounts = self.get_filtered_accounts(gmb_client=gmb_client)
         for account in accounts:
@@ -80,6 +78,8 @@ class GoogleMyBusinessInsightsCustomizer(GoogleMyBusiness):
                     end_date=end_date,
                     account=account,
                     location=listing)
+
+                self.set_customizer_secrets_dat()
 
                 if report:
                     df = pd.DataFrame(report)
