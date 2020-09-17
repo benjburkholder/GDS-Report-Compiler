@@ -566,7 +566,7 @@ def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_s
 def dynamic_typing(customizer: custom.Customizer):
     for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['name'] == customizer.get_attribute('table'):
-            customizer.get_attribute('schema')['columns'].append(sheet['table']['columns'])
+            customizer.get_attribute('schema')['columns'].extend(sheet['table']['columns'])
 
 
 def refresh_source_tables(customizer: custom.Customizer):
@@ -594,6 +594,7 @@ def refresh_source_tables(customizer: custom.Customizer):
     return 0
 
 
+# TODO (bburkho) Update to load from workbook.json
 def systematic_procedure_execution() -> list:
     table_names = []
     for sheet in Customizer().configuration_workbook['sheets']:
