@@ -55,10 +55,8 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
 
     def pull(self):
 
-        # TODO update gmb library to pass a customizer with credentials
-
         gmb_client = GoogleMyBusinessReporting(
-            secrets_path=self.get_attribute('secrets_path')
+            customizer=self
         )
         accounts = self.get_filtered_accounts(gmb_client=gmb_client)
         for account in accounts:
@@ -73,6 +71,8 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
                 listing_id = listing['store_code']
                 report = gmb_client.get_reviews(
                     location=listing)
+
+                self.set_customizer_secrets_dat()
 
                 if report:
                     df = pd.DataFrame(report)
