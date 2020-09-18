@@ -6,7 +6,7 @@ from utils.cls.user.ga import GoogleAnalytics
 
 # CUSTOM IMPORTS
 IS_CLASS = True
-HISTORICAL = True
+HISTORICAL = False
 HISTORICAL_START_DATE = '2019-08-27'
 HISTORICAL_END_DATE = '2020-07-28'
 DATA_SOURCE = 'Google Analytics - Traffic'
