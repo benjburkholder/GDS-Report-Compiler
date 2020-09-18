@@ -1,3 +1,4 @@
+from time import sleep
 import pandas as pd
 import sqlalchemy
 import datetime
@@ -204,6 +205,8 @@ class GoogleAnalytics(Customizer):
                         self.ingest_by_view_id(view_id=view_id, df=df, start_date=start, end_date=end)
                     else:
                         print(f'WARN: No data returned for {start} for view {view_id} for property {prop}')
+                        sleep(10)  # If no data available, sleep to avoid API quota error
+
             # always increments the date_range idx
             date_idx += 1
 

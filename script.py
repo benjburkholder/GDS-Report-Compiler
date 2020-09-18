@@ -54,29 +54,4 @@ def post_processing_workflow(script_name: str) -> None:
 
 
 if __name__ == '__main__':
-    try:
-        # main(argv=sys.argv)
-        # TODO: UNCOMMENT FOR PROD
-        main(
-            argv=[
-                'script.py',
-                'google_ads_campaign_conversions',
-                '--pull=1',
-                '--ingest=1',
-                '--backfilter=1',
-                '--expedited=1'
-            ]
-        )
-    except Exception as error:
-        if not static.DEBUG:
-            '''
-            send_error_email(
-                client_name=Customizer.client,
-                script_name=SCRIPT_NAME,
-                to=Customizer.recipients,
-                error=error,
-                stack_trace=traceback.format_exc(),
-                engine=grc.create_application_sql_engine()
-            )
-            '''
-        raise
+    main(argv=sys.argv)

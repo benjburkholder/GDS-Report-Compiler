@@ -127,7 +127,7 @@ class Customizer:
                 UPDATE {table['schema']}.{table['name']} TARGET
                     {set_statement}
                 FROM {lookup_table['schema']}.{lookup_table['name']} LOOKUP
-                WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT(LOOKUP.{backfilter_column['name']}, '%')
+                WHERE TARGET.{backfilter_column['name']} ILIKE CONCAT('%', LOOKUP.{backfilter_column['name']}, '%')
                 """
 
             if self.get_attribute(attrib='historical'):
