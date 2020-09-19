@@ -533,6 +533,8 @@ def setup(script_name: str, expedited: int):
         print('Refreshing source tables...')
         refresh_source_tables(customizer=customizer)
 
+    __dynamic_typing(customizer=customizer)  # Push table schema to respective class file
+
     return customizer
 
 
@@ -553,20 +555,11 @@ def run_configuration_check(script_name: str, required_attributes: list, customi
         raise
 
 
-def run_processing(df: pd.DataFrame, customizer: custom.Customizer, processing_stages: list):
-    for stage in processing_stages:
-        print(f'Checking for processing stage {stage}...')
-        if get_optional_attribute(cls=customizer, attribute=stage):
-            if stage != 'post_processing':
-                print(f'\tNow processing stage {stage}')
-                df = get_optional_attribute(cls=customizer, attribute=stage)(df=df)
-    return df
-
-
-def dynamic_typing(customizer: custom.Customizer):
+def __dynamic_typing(customizer: custom.Customizer):
     for sheet in customizer.configuration_workbook['sheets']:
         if sheet['table']['name'] == customizer.get_attribute('table'):
-            customizer.get_attribute('schema')['columns'].extend(sheet['table']['columns'])
+            for column in sheet['table']['columns']:
+                customizer.get_attribute('schema')['columns'].append(column)
 
 
 def refresh_source_tables(customizer: custom.Customizer):
@@ -592,28 +585,6 @@ def refresh_source_tables(customizer: custom.Customizer):
         print('Not listed refresh day.')
 
     return 0
-
-
-# TODO (bburkho) Update to load from workbook.json
-def systematic_procedure_execution() -> list:
-    table_names = []
-    for sheet in Customizer().configuration_workbook['sheets']:
-        if sheet['table']['type'] == 'reporting':
-            if sheet['table']['active']:
-                table_names.append(sheet['table']['name'])
-
-    return table_names if True else None
-
-
-def procedure_flag_indicator(refresh_indicator: sys.argv, back_filter: bool, ingest: bool) -> (bool, bool):
-
-    if 'backfill' in refresh_indicator:
-        back_filter = True
-
-    if 'ingest' in refresh_indicator:
-        ingest = True
-
-    return back_filter, ingest
 
 
 def insert_vertical_specific_alert_channel(customizer: custom.Customizer):
