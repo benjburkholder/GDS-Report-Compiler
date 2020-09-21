@@ -44,10 +44,8 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
         self.set_attribute('data_source', DATA_SOURCE)
         self.set_attribute('schema', {'columns': []})
 
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
-    def __calculate_date_range(self, df: pd.DataFrame) -> (str, str):
+    @staticmethod
+    def __calculate_date_range(df: pd.DataFrame) -> (str, str):
         start_date = df['report_date'].min().split('T')[0]
         end_date = df['report_date'].max().split('T')[0]
 

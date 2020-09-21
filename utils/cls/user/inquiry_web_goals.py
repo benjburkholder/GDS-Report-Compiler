@@ -51,9 +51,6 @@ class InquiryWebGoals(Inquiry):
         self.set_attribute('data_source', DATA_SOURCE)
         self.set_attribute('schema', {'columns': []})
 
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
     def pull(self):
         gs = self.create_gs_object()
         df = gs.get_spreadsheet_by_name(

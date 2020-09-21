@@ -35,9 +35,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         self.set_attribute('data_source', DATA_SOURCE)
         self.set_attribute('schema', {'columns': []})
 
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
     # place custom sql here
     post_processing_sql_list = []
         

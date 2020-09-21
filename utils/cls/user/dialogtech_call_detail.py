@@ -38,9 +38,6 @@ class DialogtechCallDetailCustomizer(Dialogtech):
         self.set_attribute('data_source', DATA_SOURCE)
         self.set_attribute('schema', {'columns': []})
 
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
     def pull(self):
 
         start_date = self.calculate_date(start_date=True)
