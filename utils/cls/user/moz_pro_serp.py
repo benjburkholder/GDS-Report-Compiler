@@ -37,9 +37,6 @@ class MozProSerpCustomizer(Moz):
         self.set_attribute('data_source', DATA_SOURCE)
         self.set_attribute('schema', {'columns': []})
 
-        # set whether this data source is being actively used or not
-        self.set_attribute('active', True)
-
     def pull(self):
 
         date_range = self.get_date_range()
