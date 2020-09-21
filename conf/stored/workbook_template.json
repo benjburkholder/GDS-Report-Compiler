@@ -1098,6 +1098,7 @@
                         "name": "property",
                         "type": "character varying",
                         "length": 100,
+                        "entity_col": true,
                         "default": "Non-Location Pages",
                         "master_include": true
                     },
@@ -1117,7 +1118,6 @@
                         "default": "Non-Location Pages",
                         "master_include": true
                     },
-
                     {
                         "name": "view_id",
                         "type": "character varying",
