@@ -41,7 +41,7 @@
   },
   {
     "name": "google_my_business_insights",
-    "active": 1,
+    "active": 0,
     "args": {
       "pull": 1,
       "ingest": 1,
