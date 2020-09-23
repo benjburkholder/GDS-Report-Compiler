@@ -43,8 +43,7 @@ class DialogtechCallDetailCustomizer(Dialogtech):
         start_date = self.calculate_date(start_date=True)
         end_date = self.calculate_date(start_date=False)
 
-        # TODO update call to insert existing slack vertical to use as argument
-        dialog_tech = CallDetailReporting(vertical='<ENTER CLIENT VERTICAL>')
+        dialog_tech = CallDetailReporting(vertical=self.vertical)
 
         phone_labels = self.pull_dialogtech_labels()
 
