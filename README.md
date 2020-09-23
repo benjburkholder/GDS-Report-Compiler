@@ -64,3 +64,17 @@ timeout 10
 %venvpath% %cd%\google_analytics_goals.py %refresh_indicator_skip%
 timeout 10
 ````
+
+## Internal Packages
+pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-ads-py.git
+<br><br>
+pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-my-business-py.git
+<br><br>
+pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/dialogtech-py.git
+<br><br>
+pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/moz-py.git
+<br><br>
+pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-analytics-py.git
+<br><br>
+pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-search-console-py.git
+
