@@ -101,7 +101,7 @@
   },
   {
     "name": "google_ads_campaign",
-    "active": 1,
+    "active": 0,
     "args": {
       "pull": 1,
       "ingest": 1,

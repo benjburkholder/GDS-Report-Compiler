@@ -136,7 +136,6 @@ dmypy.json
 .pytype/
 
 secrets/
-app.json
 
 # tests configuration
 /utils/cls/user/tests/conf/test_config.py
