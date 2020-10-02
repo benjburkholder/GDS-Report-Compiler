@@ -108,8 +108,8 @@ class GoogleAds(Customizer):
         with engine.connect() as con:
             sql = sqlalchemy.text(
                 """
-                SELECT DISTINCT
-                    account_id
+                SELECT
+                    account_id, manager_account_id
                 FROM public.source_gads_accountmaster;
                 """
             )
