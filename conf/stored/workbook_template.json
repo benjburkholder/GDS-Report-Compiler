@@ -177,6 +177,11 @@
                         "name": "account_id",
                         "type": "character varying",
                         "length": 150
+                    },
+                    {
+                        "name": "manager_account_id",
+                        "type": "character varying",
+                        "length": 150
                     }
                 ],
                 "owner": "postgres"
