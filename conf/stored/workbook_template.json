@@ -552,16 +552,14 @@
                         "name": "report_date",
                         "type": "date",
                         "master_include": true,
-                        "aggregate_type": "month",
-                        "group_by": true
+                        "aggregate_type": "month"
                     },
                     {
                         "name": "data_source",
                         "type": "character varying",
                         "length": 100,
                         "master_include": true,
-                        "ingest_indicator": true,
-                        "group_by": true
+                        "ingest_indicator": true
                     },
                     {
                         "name": "property",
@@ -569,42 +567,36 @@
                         "length": 100,
                         "entity_col": true,
                         "default": "Non-Location Pages",
-                        "master_include": true,
-                        "group_by": true
+                        "master_include": true
                     },
                     {
                         "name": "account_name",
                         "type": "character varying",
                         "length": 100,
-                        "master_include": true,
-                        "group_by": true
+                        "master_include": true
                     },
                     {
                         "name": "listing_id",
                         "type": "character varying",
                         "length": 150,
                         "backfilter": true,
-                        "master_include": true,
-                        "group_by": true
+                        "master_include": true
                     },
                     {
                         "name": "directory",
                         "type": "character varying",
                         "length": 100,
-                        "master_include": true,
-                        "group_by": true
+                        "master_include": true
                     },
                     {
                         "name": "points_reached",
                         "type": "bigint",
-                        "master_include": true,
-                        "aggregate_type": "sum"
+                        "master_include": true
                     },
                     {
                         "name": "max_points",
                         "type": "bigint",
-                        "master_include": true,
-                        "aggregate_type": "sum"
+                        "master_include": true
                     }
                 ],
                 "indexes": [
