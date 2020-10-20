@@ -205,6 +205,8 @@ class GoogleSearchConsole(Customizer):
                     df = self.type(df=df)
                     df['property_url'] = property_url
                     df['data_source'] = self.get_attribute('data_source')
+                    df['property'] = None
+                    df['community'] = None
                     self.ingest_by_property_url(property_url=property_url, df=df, report_date=report_date)
 
                 else:

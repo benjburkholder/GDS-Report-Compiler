@@ -200,6 +200,7 @@ class GoogleAnalytics(Customizer):
                         df = self.type(df=df)
                         df['view_id'] = view_id
                         df['property'] = prop
+                        df['community'] = None
                         df['data_source'] = self.get_attribute('data_source')
                         self.ingest_by_view_id(view_id=view_id, df=df, start_date=start, end_date=end)
                     else:

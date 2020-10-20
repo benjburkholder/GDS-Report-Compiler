@@ -76,6 +76,7 @@ class MozProSerpCustomizer(Moz):
                 if df.shape[0]:
                     df['data_source'] = DATA_SOURCE
                     df['property'] = None
+                    df['community'] = None
                     df = self.type(df=df)
                     self.ingest_by_custom_indicator(
                         id_value=campaign_id['campaign_id'],
