@@ -59,6 +59,7 @@ class GoogleAdsCampaignConversionsCustomizer(GoogleAds):
             if df.shape[0]:
                 df['data_source'] = DATA_SOURCE
                 df['property'] = None
+                df['community'] = None
                 df['account_id'] = account_id
                 df = self.type(df=df)
                 rename_map = self.get_rename_map(account_id=account_id)

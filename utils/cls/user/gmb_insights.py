@@ -85,6 +85,7 @@ class GoogleMyBusinessInsightsCustomizer(GoogleMyBusiness):
                     df['account_name'] = account_name
                     df['data_source'] = DATA_SOURCE
                     df['property'] = None
+                    df['community'] = None
                     df.rename(columns=self.get_rename_map(account_name=account_name), inplace=True)
                     df = self.type(df=df)
                     df['photo_views'] = (df['photo_views_customers'] + df['photo_views_merchant'])

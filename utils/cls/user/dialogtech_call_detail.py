@@ -57,6 +57,7 @@ class DialogtechCallDetailCustomizer(Dialogtech):
             if df.shape[0]:
                 df['data_source'] = DATA_SOURCE
                 df['property'] = phone_label['property']
+                df['community'] = None
                 df['medium'] = phone_label['medium']
                 df = self.type(df=df)
                 rename_map = self.get_rename_map(phone_label=phone_label['phone_label'])

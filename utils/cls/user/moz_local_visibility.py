@@ -61,6 +61,7 @@ class MozLocalVisibilityCustomizer(Moz):
                 # add data source
                 df['data_source'] = DATA_SOURCE
                 df['property'] = None
+                df['community'] = None
                 df['listing_id'] = df['listing_id'].astype(int)
 
                 # drop duplicate data

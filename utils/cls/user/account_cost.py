@@ -44,6 +44,8 @@ class AccountCostCustomizer(AccountCost):
         if df.shape[0]:
             df = self.type(df=df)
             df.rename(columns=self.rename_map['global'], inplace=True)
+            df['property'] = None
+            df['community'] = None
             df['data_source'] = DATA_SOURCE
             df['daily_cost'] = df['daily_cost'].astype(float)
             df['daily_cost'] = df['daily_cost'].apply(lambda x: round(x, 2))
