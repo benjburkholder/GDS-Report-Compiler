@@ -58,7 +58,9 @@
         "name": "lookup_ga_eventsmapping",
         "schema": "public",
         "type": "lookup",
-        "tablespace": ["google_analytics"],
+        "tablespace": [
+          "google_analytics"
+        ],
         "active": false,
         "columns": [
           {
@@ -677,6 +679,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -777,6 +781,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -886,6 +892,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -1024,6 +1032,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -1231,12 +1241,6 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
-            "master_include": true
-          },
-          {
-            "name": "community",
-            "type": "character varying",
-            "length": 100,
             "entity_col": true,
             "default": "Non-Location Pages",
             "master_include": true
@@ -1393,6 +1397,132 @@
     },
     {
       "table": {
+        "name": "google_analytics_ecommerce",
+        "schema": "public",
+        "tablespace": [
+          "google_analytics"
+        ],
+        "type": "reporting",
+        "audit_cadence": "monthly",
+        "backfilter_cadence": false,
+        "active": false,
+        "columns": [
+          {
+            "name": "report_date",
+            "type": "date",
+            "master_include": true
+          },
+          {
+            "name": "data_source",
+            "type": "character varying",
+            "length": 100,
+            "master_include": true,
+            "ingest_indicator": true
+          },
+          {
+            "name": "property",
+            "type": "character varying",
+            "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
+            "master_include": true
+          },
+          {
+            "name": "community",
+            "type": "character varying",
+            "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
+            "master_include": true
+          },
+          {
+            "name": "service_line",
+            "type": "character varying",
+            "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
+            "master_include": true
+          },
+          {
+            "name": "view_id",
+            "type": "character varying",
+            "length": 25,
+            "master_include": true
+          },
+          {
+            "name": "medium",
+            "type": "character varying",
+            "length": 100,
+            "master_include": true
+          },
+          {
+            "name": "source_medium",
+            "type": "character varying",
+            "length": 100,
+            "master_include": true
+          },
+          {
+            "name": "device",
+            "type": "character varying",
+            "length": 100,
+            "master_include": true
+          },
+          {
+            "name": "url",
+            "type": "character varying",
+            "length": 1000,
+            "backfilter": true,
+            "master_include": true
+          },
+          {
+            "name": "transaction_id",
+            "type": "character varying",
+            "length": 1000,
+            "master_include": true
+          },
+          {
+            "name": "product_name",
+            "type": "character varying",
+            "length": 500,
+            "master_include": true
+          },
+          {
+            "name": "product_brand",
+            "type": "character varying",
+            "length": 500,
+            "master_include": true
+          }
+        ],
+        "indexes": [
+          {
+            "name": "ix_google_analytics_ecommerce",
+            "tablespace": "pg_default",
+            "clustered": true,
+            "method": "btree",
+            "columns": [
+              {
+                "name": "report_date",
+                "sort": "asc",
+                "nulls_last": true
+              },
+              {
+                "name": "source_medium",
+                "sort": "asc",
+                "nulls_last": true
+              },
+              {
+                "name": "device",
+                "sort": "asc",
+                "nulls_last": true
+              }
+            ]
+          }
+        ],
+        "owner": "postgres"
+      }
+    },
+    {
+      "table": {
         "name": "google_analytics_events",
         "schema": "public",
         "tablespace": [
@@ -1427,6 +1557,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -1558,6 +1690,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -1677,6 +1811,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -1807,6 +1943,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -1903,6 +2041,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -2010,6 +2150,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -2131,6 +2273,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -2284,6 +2428,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -2403,6 +2549,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -2517,6 +2665,8 @@
             "name": "community",
             "type": "character varying",
             "length": 100,
+            "entity_col": true,
+            "default": "Non-Location Pages",
             "master_include": true
           },
           {
