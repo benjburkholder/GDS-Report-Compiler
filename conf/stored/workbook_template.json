@@ -1915,13 +1915,13 @@
             "name": "device",
             "type": "character varying",
             "length": 150,
-            "backfilter": true,
             "master_include": true
           },
           {
             "name": "page",
             "type": "character varying",
             "length": 250,
+            "backfilter": true,
             "master_include": true
           },
           {
@@ -2022,7 +2022,6 @@
             "name": "medium",
             "type": "character varying",
             "length": 150,
-            "backfilter": true,
             "master_include": true
           },
           {
@@ -2052,6 +2051,7 @@
             "name": "phone_label",
             "type": "character varying",
             "length": 150,
+            "backfilter": true,
             "master_include": true
           },
           {
