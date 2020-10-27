@@ -330,10 +330,6 @@ class Customizer:
         # if it does, execute a refreshment
         self._refresh_mv(mv=mv)
 
-
-
-
-
     def create_ingest_statement(self, master_columns, target_sheets) -> list:
 
         default_ingest_statements = self.__get_ingest_defaults(target_sheet=target_sheets)
