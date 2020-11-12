@@ -112,6 +112,49 @@
         "owner": "postgres"
       }
     },
+     {
+      "sheet": "GA Ecommerce Mapping",
+      "table": {
+        "name": "lookup_ecommercetolocation",
+        "schema": "public",
+        "type": "lookup",
+        "tablespace": [
+          "google_analytics_ecommerce"
+        ],
+        "update_types": [
+          "exact",
+          "fuzzy"
+        ],
+        "active": false,
+        "columns": [
+          {
+            "name": "product_brand",
+            "type": "character varying",
+            "length": 100
+          },
+          {
+            "name": "property",
+            "type": "character varying",
+            "length": 100
+          },
+          {
+            "name": "community",
+            "type": "character varying",
+            "length": 100
+          },
+          {
+            "name": "url",
+            "type": "character varying",
+            "length": 250
+          },
+          {
+            "name": "exact",
+            "type": "bigint"
+          }
+        ],
+        "owner": "postgres"
+      }
+    },
     {
       "sheet": "Moz Pro Campaign Master",
       "table": {
@@ -1400,7 +1443,7 @@
         "name": "google_analytics_ecommerce",
         "schema": "public",
         "tablespace": [
-          "google_analytics"
+          "google_analytics_ecommerce"
         ],
         "type": "reporting",
         "audit_cadence": "monthly",
@@ -1439,8 +1482,6 @@
             "name": "service_line",
             "type": "character varying",
             "length": 100,
-            "entity_col": true,
-            "default": "Non-Location Pages",
             "master_include": true
           },
           {
@@ -1471,7 +1512,6 @@
             "name": "url",
             "type": "character varying",
             "length": 1000,
-            "backfilter": true,
             "master_include": true
           },
           {
@@ -1490,6 +1530,7 @@
             "name": "product_brand",
             "type": "character varying",
             "length": 500,
+            "backfilter": true,
             "master_include": true
           }
         ],
