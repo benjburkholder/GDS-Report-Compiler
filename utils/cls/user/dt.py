@@ -97,7 +97,8 @@ class Dialogtech(Customizer):
                     'phone_label': result[0],
                     'medium': result[1],
                     'property': result[2],
-                    'exact': result[3]
+                    'community': result[3],
+                    'exact': result[4]
                 }
                 for result in results
             ] if results else []
