@@ -19,6 +19,7 @@ def execute_post_processing_scripts_for_process(script_filter: str = None):
     md = MarketingData()
     scripts = md.find_post_processing_scripts(script_filter=script_filter)
     if scripts:
+        scripts = md.sort_script_order(scripts=scripts)
         md.execute_scripts(scripts=scripts)
     else:
         if script_filter:
@@ -100,11 +101,16 @@ class MarketingData(Customizer):
             if self.valid_script_file_extension in file:
                 if script_filter:
                     if script_filter in file:
+                        execution_order_number = int(file.split('_')[0])
+                        assert type(execution_order_number) == int
+                        file_content = get_file_content(
+                            directory=user_scripts_directory,
+                            file=file
+                        )
+                        script = (execution_order_number, file_content)
+
                         queries.append(
-                            get_file_content(
-                                directory=user_scripts_directory,
-                                file=file
-                            )
+                            script
                         )
                 else:
                     queries.append(
@@ -126,7 +132,22 @@ class MarketingData(Customizer):
         for script in scripts:
             with self.engine.begin() as con:
                 print('********************************************************')
-                print(script)
-                con.execute(script)
+                print(script[1])
+                con.execute(script[1])
                 print('********************************************************')
         return True
+
+    @staticmethod
+    def sort_script_order(scripts: list) -> list:
+        """
+        Sorts list from 1 to n based for execution order.
+        :param scripts:
+        :return: list
+        """
+        sorted_list = sorted(
+            scripts, key=lambda x: x[0]
+        )
+
+        return sorted_list
+
+
