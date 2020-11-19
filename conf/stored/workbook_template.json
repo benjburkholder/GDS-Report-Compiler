@@ -700,8 +700,7 @@
           {
             "name": "report_date",
             "type": "date",
-            "master_include": true,
-            "aggregate_type": "month"
+            "master_include": true
           },
           {
             "name": "data_source",
