@@ -6,7 +6,7 @@ A full-featured custom report building platform that can be easily cloned and ta
 #### Easy Project Initialization
 After generating a fresh clone of the GRC Platform template, execute the file sys_initialize_workbook.py. This process requires user input:
 <ol>
-<li><u>Source & Lookup Table Activation:</u> User will be asked to enter 'y' for each data source prompted. The associated lookup and source tables for these data sources will then be activated automatically.</li>
+<li><u>Source & Lookup Table Activation:</u> User will be asked to enter 'y' for each data source prompted. The associated lookup and source tables for these data sources will then be activated automatically. If not to include, just hit 'enter' to move onto the next one.</li>
 <li><u>Config Sheet Creation:</u>User will be prompted to enter the client's database name and vertical type. Browser will then open automatically to the generated config sheet, the user will copy the key in the url and paste into the prompt.</li>
 </ol>
 
@@ -40,6 +40,8 @@ The name of the file needs to include, after the numeric prefix, the data source
 ### Control Over Script Workflow
 Located in /conf/stored/workflow.json, all available data sources are listed with the ability to toggle (boolean 0 and 1) which steps should be included and which can be skipped during script execution.
 
+The 'args' values are passed as command line arguments during the script run.
+
  ```{
     "name": "google_analytics_traffic",
     "active": 0,
@@ -71,4 +73,3 @@ pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/
 pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-analytics-py.git
 <br><br>
 pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-search-console-py.git
-
