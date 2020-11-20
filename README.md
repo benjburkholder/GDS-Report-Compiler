@@ -37,7 +37,7 @@ In order to give the user more control over the ETL process, custom sql query fi
 The number at the beginning denotes the order in which the queries are executed, 1 to n essentially. Each data sources group needs to be separately numbered 1 to n.
 The name of the file needs to include, after the numeric prefix, the data source name as it appears in the platform (this is how the queries are found for the post-processing stage of each data source). Anything after these two required pieces should just be a basic descriptor of what the query does.
 
-### Control Over Script Workflow
+#### Control Over Script Workflow
 Located in /conf/stored/workflow.json, all available data sources are listed with the ability to toggle (boolean 0 and 1) which steps should be included and which can be skipped during script execution.
 
 The 'args' values are passed as command line arguments during the script run.
@@ -61,6 +61,12 @@ The 'args' values are passed as command line arguments during the script run.
 <li><u>Expedited:</u> typically only first data source in list is set to 0, rest are set to 1. If 1, the table check and refresh step is skipped, if 0 then the check / creation and refresh is performed. This only should happen once, so the first data source is typically set to 0 to handle first and skip during all of the rest.</li>
 </ol>
 
+#### Easy Template Updates (via Git Upstream)
+Since the GDS-Report-Compiler template is constantly iterated upon, it's crucial to push these changes / additions down to previously launched client projects. 
+
+This is achieved by setting the template as the upstream and setting the freshly cloned project as the downstream. Then, when changes are pushed to the template, you can pull these changes down into the client project.
+
+
 ## Internal Packages
 pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-ads-py.git
 <br><br>
@@ -73,3 +79,31 @@ pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/
 pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-analytics-py.git
 <br><br>
 pip install git+https://linkmedia360:{AGENCY_PASSWORD}@github.com/Linkmedia-360/google-search-console-py.git
+
+## New Project Setup
+Full step-by-step instructions for setting up new client project.
+<ol>
+<li>In GDS-Report-Compiler repo, hit "Use this template" button. For repo name, use this structure: "grc-{client_name}". Enter a description and create repo from template.</li>
+<li>Clone new client repo down into appropriate client directory in Ubuntu VM.</li>
+<li>Next is to set upstream to GRC Platform Template:</li>
+
+    Set Upstream to GDS Platform Template:
+    git remote add upstream https://github.com/Linkmedia-360/GDS-Report-Compiler.git
+    
+    Check Remote:
+    git remote -v
+    
+    Pull From Upstream:
+    git pull upstream master --allow-unrelated-histories --no-commit
+    
+Once any merge conflicts are resolved, both the downstream client repo and upstream template should be in parity.
+
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+</ol>
