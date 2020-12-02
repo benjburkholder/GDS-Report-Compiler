@@ -483,13 +483,19 @@ def get_expedited_from_args(argv: list) -> int:
     return _get_value_from_args_by_flag(argv=argv, flag=flag, default=0)
 
 
+def get_debug_from_args(argv: list) -> int:
+    flag = '--debug='
+    return _get_value_from_args_by_flag(argv=argv, flag=flag, default=0)
+
+
 def get_args(argv: list) -> tuple:
     pull = get_pull_from_args(argv=argv)
     ingest_only = get_ingest_from_args(argv=argv)
     backfilter_only = get_backfilter_from_args(argv=argv)
     expedited = get_expedited_from_args(argv=argv)
-    print(f'ingest_only: {ingest_only}, backfilter_only: {backfilter_only}, expedited: {expedited}')
-    return pull, ingest_only, backfilter_only, expedited
+    debug = get_debug_from_args(argv=argv)
+    print(f'ingest_only: {ingest_only}, backfilter_only: {backfilter_only}, expedited: {expedited}, debug: {debug}')
+    return pull, ingest_only, backfilter_only, expedited, debug
 
 
 def setup(script_name: str, expedited: int):
@@ -506,6 +512,8 @@ def setup(script_name: str, expedited: int):
     :return:
     """
     customizer = custom.get_customizer(calling_file=script_name)
+    customizer.set_attribute('marketing_data_table', customizer.marketing_data["table"]["name"])
+    insert_vertical_specific_alert_channel(customizer=customizer)
     assert customizer, f"{script_name} | No customizer returned. Please check your configuration"
 
     if not expedited:

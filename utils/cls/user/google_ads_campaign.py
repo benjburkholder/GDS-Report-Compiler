@@ -1,6 +1,9 @@
 """
 Google Ads Campaign Customizer Module
 """
+
+import datetime
+
 # PLATFORM IMPORTS
 from utils.cls.user.google_ads import GoogleAds
 
@@ -38,12 +41,17 @@ class GoogleAdsCampaignCustomizer(GoogleAds):
         self.set_attribute('historical_end_date', HISTORICAL_END_DATE)
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', DATA_SOURCE)
+        self.set_attribute('audit_type', 'daily')
         self.set_attribute('schema', {'columns': []})
 
     def pull(self):
 
         start_date = self.calculate_date(start_date=True)
         end_date = self.calculate_date(start_date=False)
+
+        # Assign rolling date range to customizer
+        self.set_attribute('start_date', datetime.datetime.strptime(start_date, '%Y-%m-%d').date())
+        self.set_attribute('end_date', datetime.datetime.strptime(end_date, '%Y-%m-%d').date())
 
         account_pairs = self.get_account_ids()
 
