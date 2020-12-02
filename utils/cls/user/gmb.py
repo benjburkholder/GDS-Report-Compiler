@@ -71,6 +71,8 @@ class GoogleMyBusiness(Customizer):
                 index_label=None
             )
 
+        print(f'Data pulled for {start_date} and {end_date} for listing_id: {listing_id}.')
+
     @staticmethod
     def get_date_range(start_date: datetime.datetime, end_date: datetime.datetime) -> list:
         return pd.date_range(start=start_date, end=end_date).to_list()

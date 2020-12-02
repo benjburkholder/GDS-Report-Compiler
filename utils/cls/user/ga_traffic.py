@@ -27,6 +27,7 @@ class GoogleAnalyticsTrafficCustomizer(GoogleAnalytics):
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
         self.set_attribute('data_source', DATA_SOURCE)
+        self.set_attribute('audit_type', 'daily')
         self.set_attribute('schema', {'columns': []})
 
     # place custom sql here

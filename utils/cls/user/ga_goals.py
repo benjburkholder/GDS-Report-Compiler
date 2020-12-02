@@ -33,6 +33,7 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         self.set_attribute('metrics', self.metrics)
         self.set_attribute('dimensions', self.dimensions)
         self.set_attribute('data_source', DATA_SOURCE)
+        self.set_attribute('audit_type', 'monthly')
         self.set_attribute('schema', {'columns': []})
 
     # place custom sql here
@@ -40,22 +41,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
         
     metrics = {
         'global': [
-            'goal1Completions',
-            'goal2Completions'
-        ],
-        # waters edge of bradenton
-        '93397410': [
-            'goal1Completions',
-            'goal2Completions',
-            'goal3Completions'
-        ],
-        # waters edge of lake wales - same as bradenton
-        '93397216': '93397410',
-        # avondale - same as bradenton
-        '122822546': '93397410',
-        # broadway park only has one goal setup
-        '201135214': [
-            'goal1Completions'
         ]
     }
 
@@ -76,41 +61,6 @@ class GoogleAnalyticsGoalsCustomizer(GoogleAnalytics):
             'sourceMedium': 'source_medium',
             'channelGrouping': 'medium',
             'deviceCategory': 'device',
-            'pagePath': 'url',
-            'goal1Completions': 'contact_us_form',
-            'goal2Completions': 'brochure_request_form'
-        },
-        # lake wales - 2/1/3 configuration
-        '93397216':  {
-            'date': 'report_date',
-            'sourceMedium': 'source_medium',
-            'channelGrouping': 'medium',
-            'deviceCategory': 'device',
-            'pagePath': 'url',
-            'goal1Completions': 'contact_us_form',
-            'goal2Completions': 'brochure_request_form',
-            'goal3Completions': 'ppc_form'
-        },
-        # avondale - same as lake wales
-        '122822546': '93397216',
-        # bradenton - 1/2/3 configuration
-        '93397410':  {
-            'date': 'report_date',
-            'sourceMedium': 'source_medium',
-            'channelGrouping': 'medium',
-            'deviceCategory': 'device',
-            'pagePath': 'url',
-            'goal1Completions': 'brochure_request_form',
-            'goal2Completions': 'contact_us_form',
-            'goal3Completions': 'ppc_form'
-        },
-        # broadway park - only one goal
-        '201135214': {
-            'date': 'report_date',
-            'sourceMedium': 'source_medium',
-            'channelGrouping': 'medium',
-            'deviceCategory': 'device',
-            'pagePath': 'url',
-            'goal1Completions': 'contact_us_form',
-        },
+            'pagePath': 'url'
+        }
     }

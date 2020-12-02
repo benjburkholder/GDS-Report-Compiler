@@ -18,13 +18,14 @@ def main(argv) -> None:
     # single logical branch - either get the args or use what is provided
     if len(argv) > 1:
         use_args = False
-        pull, ingest, backfilter, expedited = grc.get_args(argv=argv)
+        pull, ingest, backfilter, expedited, debug = grc.get_args(argv=argv)
     else:
         use_args = True
         pull = None
         ingest = None
         backfilter = None
         expedited = None
+        debug = None
 
     # iterate and pull each script in workflow.json
     for work_item in workflow:
@@ -37,6 +38,7 @@ def main(argv) -> None:
             ingest = args['ingest'] if use_args else ingest
             backfilter = args['backfilter'] if use_args else backfilter
             expedited = args['expedited'] if use_args else expedited
+            debug = args['debug'] if use_args else debug
             
             # execute with the configured command line args
             call_args = [
@@ -46,7 +48,8 @@ def main(argv) -> None:
                 f'--pull={pull}',
                 f'--ingest={ingest}',
                 f'--backfilter={backfilter}',
-                f'--expedited={expedited}'
+                f'--expedited={expedited}',
+                f'--debug={debug}'
             ]
             subprocess.call(
                 call_args
