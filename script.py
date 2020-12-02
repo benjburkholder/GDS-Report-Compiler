@@ -7,8 +7,6 @@ from utils import grc
 from conf import static
 from utils.cls.pltfm.gmail import send_error_email
 from utils.cls.pltfm.marketing_data import execute_post_processing_scripts_for_process
-if static.DEBUG:
-    print("WARN: Error reporting disabled and expedited runtime mode activated")
 
 
 def main(argv) -> int:
@@ -42,6 +40,7 @@ def main(argv) -> int:
         post_processing_workflow(script_name=script_name)
 
     except Exception as error:
+        print("WARN: Error reporting disabled and expedited runtime mode activated")
         if not debug:
             send_error_email(
                 to=customizer.recipients,
@@ -51,6 +50,8 @@ def main(argv) -> int:
                 script_name=script_name,
                 stack_trace=traceback.format_exc(),
             )
+
+        raise error
 
     # todo: wait until data is fully backfilled to do this
     customizer.audit()
