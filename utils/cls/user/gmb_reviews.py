@@ -2,8 +2,8 @@
 GMB Reviews Customizer Module
 """
 
-import pandas as pd
 import datetime
+import pandas as pd
 
 # PLATFORM IMPORTS
 from utils.cls.user.gmb import GoogleMyBusiness
@@ -42,6 +42,7 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
         self.set_attribute('historical_end_date', HISTORICAL_END_DATE)
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', DATA_SOURCE)
+        self.set_attribute('audit_type', 'monthly')
         self.set_attribute('schema', {'columns': []})
 
     @staticmethod

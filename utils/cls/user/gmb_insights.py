@@ -2,6 +2,7 @@
 GMB Insights Customizer Module
 """
 
+import datetime
 import pandas as pd
 
 # PLATFORM IMPORTS
@@ -49,12 +50,17 @@ class GoogleMyBusinessInsightsCustomizer(GoogleMyBusiness):
         self.set_attribute('historical_end_date', HISTORICAL_END_DATE)
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', DATA_SOURCE)
+        self.set_attribute('audit_type', 'monthly')
         self.set_attribute('schema', {'columns': []})
 
     def pull(self):
 
         start_date = self.calculate_date(start_date=True).strftime('%Y-%m-%d')
         end_date = self.calculate_date(start_date=False).strftime('%Y-%m-%d')
+
+        # Assign rolling date range to customizer
+        self.set_attribute('start_date', datetime.datetime.strptime(start_date, '%Y-%m-%d').date())
+        self.set_attribute('end_date', datetime.datetime.strptime(end_date, '%Y-%m-%d').date())
 
         gmb_client = GoogleMyBusinessReporting(
             customizer=self

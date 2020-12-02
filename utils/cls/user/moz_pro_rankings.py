@@ -35,12 +35,15 @@ class MozProRankingsCustomizer(Moz):
         self.set_attribute('historical_end_date', HISTORICAL_END_DATE)
         self.set_attribute('table', self.prefix)
         self.set_attribute('data_source', DATA_SOURCE)
+        self.set_attribute('audit_type', 'monthly')
         self.set_attribute('schema', {'columns': []})
 
     def pull(self):
 
         date_range = self.get_date_range()
         moz_pro_accounts = self.pull_moz_pro_accounts()
+
+        self.set_attribute('date_range', date_range)
 
         if HISTORICAL:
             for campaign_id in moz_pro_accounts:

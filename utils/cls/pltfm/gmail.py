@@ -139,9 +139,10 @@ class GmailCustomizer(Customizer):
         ====================================================================================================
         :return:
         """
+        self.get_secrets(include_dat=False)
         credentials = client.Credentials.new_from_json(
             json.dumps(
-                self.get_secrets()
+                self.secrets
             )
         )
         return apiclient.discovery.build(

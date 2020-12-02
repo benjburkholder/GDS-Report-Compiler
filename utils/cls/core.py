@@ -12,6 +12,7 @@ import pandas as pd
 import sqlalchemy
 
 from utils.dbms_helpers.postgres_helpers import build_postgresql_engine
+from utils.tests import test_data_quality
 from ..stdlib import module_from_file
 from conf.static import ENTITY_COLS
 
@@ -755,19 +756,50 @@ class Customizer:
             for statement in ingest_procedure:
                 con.execute(statement)
 
-    # TODO: since we're moving to unit testing, are these safe to remove?
+    # TODO: Finish audit logic
     def audit(self):
-        for sheets in self.configuration_workbook['sheets']:
-            if sheets['table']['type'] == 'reporting':
-                if sheets['table']['audit_cadence']:
-                    if sheets['table']['name'] == self.get_attribute('table'):
-                        audit_automation_indicator = [
-                            column['name'] for column in sheets['table']['columns'] if 'ingest_indicator' in column
-                        ][0]
-                        self.audit_automation_procedure(
-                            index_column=self.get_attribute(audit_automation_indicator),
-                            cadence=sheets['table']['audit_cadence']
-                        )
+        data_test = test_data_quality.TestDataQuality()
+
+        if self.get_attribute('start_date') and self.get_attribute('end_date'):
+            start_date = self.get_attribute('start_date')
+            end_date = self.get_attribute('end_date')
+            data_source = self.get_attribute('data_source')
+            marketing_table = self.get_attribute('marketing_data_table')
+
+            if self.get_attribute('audit_type') == 'daily':
+                data_test.test_daily_data(start_date=start_date,
+                                          end_date=end_date,
+                                          data_source=data_source,
+                                          marketing_table=marketing_table,
+                                          customizer=self
+                                          )
+
+            elif self.get_attribute('audit_type') == 'weekly':
+                data_test.test_weekly_data(start_date=start_date,
+                                           end_date=end_date,
+                                           data_source=data_source,
+                                           marketing_table=marketing_table
+                                           )
+
+        elif self.get_attribute('date_range') and self.get_attribute('date_range') is not None:
+            month = self.get_attribute('date_range')
+            data_source = self.get_attribute('data_source')
+            marketing_table = self.get_attribute('marketing_data_table')
+
+            data_test.test_monthly_data(month=month,
+                                        data_source=data_source,
+                                        marketing_table=marketing_table
+                                        )
+
+        elif self.get_attribute('date_range') and self.get_attribute('date_range') is not None:
+            month = self.get_attribute('date_range')
+            data_source = self.get_attribute('data_source')
+            marketing_table = self.get_attribute('marketing_data_table')
+
+            data_test.test_monthly_data(month=month,
+                                        data_source=data_source,
+                                        marketing_table=marketing_table
+                                        )
 
     def get_base_path(self):
         return pathlib.Path(__file__).parents[2]
