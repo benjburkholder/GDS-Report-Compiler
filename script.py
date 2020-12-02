@@ -42,7 +42,7 @@ def main(argv) -> int:
         post_processing_workflow(script_name=script_name)
 
     except Exception as error:
-        if not debug:
+        if debug:
             send_error_email(
                 to=customizer.recipients,
                 client_name=customizer.client,
