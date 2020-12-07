@@ -98,10 +98,18 @@ class TestDataQuality(unittest.TestCase):
     def __pull_monthly_data(start_date, data_source, marketing_table, customizer):
 
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        month_range = calendar.monthrange(start_date.year, start_date.month -1)
 
-        first_date = f'{start_date.year}-{start_date.month - 1}-01'
-        last_date = f'{start_date.year}-{start_date.month - 1}-{month_range[1]}'
+        if 'Moz Pro' in data_source:
+            month_range = calendar.monthrange(start_date.year, start_date.month - 1)
+
+            first_date = f'{start_date.year}-{start_date.month - 1}-01'
+            last_date = f'{start_date.year}-{start_date.month - 1}-{month_range[1]}'
+
+        else:
+            month_range = calendar.monthrange(start_date.year, start_date.month)
+
+            first_date = f'{start_date.year}-{start_date.month}-01'
+            last_date = f'{start_date.year}-{start_date.month}-{month_range[1]}'
 
         engine = postgres_helpers.build_postgresql_engine(customizer=customizer)
         with engine.connect() as con:
@@ -160,7 +168,12 @@ class TestDataQuality(unittest.TestCase):
     def __test_monthly(self, start_date, data_source, monthly):
 
         start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-        report_month = f'{start_date.year}-{start_date.month - 1}'
+
+        if 'Moz Pro' in data_source:
+            report_month = f'{start_date.year}-{start_date.month - 1}'
+
+        else:
+            report_month = f'{start_date.year}-{start_date.month}'
 
         try:
             assert len(monthly) > 0
