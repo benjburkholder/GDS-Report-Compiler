@@ -94,6 +94,9 @@ class GoogleMyBusinessReviewsCustomizer(GoogleMyBusiness):
                              'property']]
 
                     start_date, end_date = self.__calculate_date_range(df=df)
+                    self.set_attribute('start_date', start_date)
+                    self.set_attribute('end_date', end_date)
+
                     self.ingest_by_listing_id(listing_id=listing_id, df=df, start_date=start_date, end_date=end_date)
                 else:
                     print('INFO: No data returned for ' + str(listing))

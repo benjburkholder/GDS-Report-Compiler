@@ -756,13 +756,15 @@ class Customizer:
             for statement in ingest_procedure:
                 con.execute(statement)
 
-    # TODO: Finish audit logic
     def audit(self):
         data_test = test_data_quality.TestDataQuality()
 
-        if self.get_attribute('start_date') and self.get_attribute('end_date'):
+        if self.get_attribute('start_date'):
             start_date = self.get_attribute('start_date')
-            end_date = self.get_attribute('end_date')
+
+            if self.get_attribute('end_date') is not None:
+                end_date = self.get_attribute('end_date')
+
             data_source = self.get_attribute('data_source')
             marketing_table = self.get_attribute('marketing_data_table')
 
@@ -778,28 +780,16 @@ class Customizer:
                 data_test.test_weekly_data(start_date=start_date,
                                            end_date=end_date,
                                            data_source=data_source,
-                                           marketing_table=marketing_table
+                                           marketing_table=marketing_table,
+                                           customizer=self
                                            )
 
-        elif self.get_attribute('date_range') and self.get_attribute('date_range') is not None:
-            month = self.get_attribute('date_range')
-            data_source = self.get_attribute('data_source')
-            marketing_table = self.get_attribute('marketing_data_table')
-
-            data_test.test_monthly_data(month=month,
-                                        data_source=data_source,
-                                        marketing_table=marketing_table
-                                        )
-
-        elif self.get_attribute('date_range') and self.get_attribute('date_range') is not None:
-            month = self.get_attribute('date_range')
-            data_source = self.get_attribute('data_source')
-            marketing_table = self.get_attribute('marketing_data_table')
-
-            data_test.test_monthly_data(month=month,
-                                        data_source=data_source,
-                                        marketing_table=marketing_table
-                                        )
+            elif self.get_attribute('audit_type') == 'monthly':
+                data_test.test_monthly_data(start_date=start_date,
+                                            data_source=data_source,
+                                            marketing_table=marketing_table,
+                                            customizer=self
+                                            )
 
     def get_base_path(self):
         return pathlib.Path(__file__).parents[2]
