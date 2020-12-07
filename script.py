@@ -28,6 +28,9 @@ def main(argv) -> int:
         expedited=expedited
     )
 
+    if debug:
+        print("WARN: Error reporting disabled and expedited runtime mode activated")
+
     try:
         if pull:
             customizer.pull()
@@ -40,7 +43,6 @@ def main(argv) -> int:
         post_processing_workflow(script_name=script_name)
 
     except Exception as error:
-        print("WARN: Error reporting disabled and expedited runtime mode activated")
         if not debug:
             send_error_email(
                 to=customizer.recipients,
