@@ -41,12 +41,12 @@ class GoogleAdsKeywordCustomizer(GoogleAds):
 
     def pull(self):
 
-        start_date = self.calculate_date(start_date=True)
-        end_date = self.calculate_date(start_date=False)
+        start_date = self.calculate_date(start_date=True).strftime('%Y-%m-%d')
+        end_date = self.calculate_date(start_date=False).strftime('%Y-%m-%d')
 
         # Assign rolling date range to customizer
-        self.set_attribute('start_date', datetime.datetime.strptime(start_date, '%Y-%m-%d').date())
-        self.set_attribute('end_date', datetime.datetime.strptime(end_date, '%Y-%m-%d').date())
+        self.set_attribute('start_date', start_date)
+        self.set_attribute('end_date', end_date)
 
         account_pairs = self.get_account_ids()
 

@@ -43,7 +43,8 @@ class MozProRankingsCustomizer(Moz):
         date_range = self.get_date_range()
         moz_pro_accounts = self.pull_moz_pro_accounts()
 
-        self.set_attribute('date_range', date_range)
+        self.set_attribute('start_date', date_range.strftime('%Y-%m-%d'))
+        self.set_attribute('end_date', None)
 
         if HISTORICAL:
             for campaign_id in moz_pro_accounts:

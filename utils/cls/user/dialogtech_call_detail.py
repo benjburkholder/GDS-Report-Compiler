@@ -45,8 +45,8 @@ class DialogtechCallDetailCustomizer(Dialogtech):
         end_date = self.calculate_date(start_date=False)
 
         # Assign rolling date range to customizer
-        self.set_attribute('start_date', datetime.datetime.strptime(start_date, '%Y-%m-%d').date())
-        self.set_attribute('end_date', datetime.datetime.strptime(end_date, '%Y-%m-%d').date())
+        self.set_attribute('start_date', datetime.datetime.strftime(start_date, '%Y-%m-%d'))
+        self.set_attribute('end_date', datetime.datetime.strftime(end_date, '%Y-%m-%d'))
 
         dialog_tech = CallDetailReporting(vertical=self.vertical)
 
