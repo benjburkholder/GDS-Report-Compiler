@@ -60,6 +60,7 @@ class ConfigManager:
                     idx = 1
                     for col in columns:
                         value = col['name']
+                        sleep(15)
                         ws.update_cell(1, idx, value)
                         zero_idx = idx - 1
                         ltr = self._letter_from_idx(idx=zero_idx)
