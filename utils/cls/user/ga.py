@@ -164,8 +164,8 @@ class GoogleAnalytics(Customizer):
         end_date = self.calculate_date(start_date=False)
 
         # Assign rolling date range to customizer
-        self.set_attribute('start_date', datetime.datetime.strptime(start_date, '%Y-%m-%d').date())
-        self.set_attribute('end_date', datetime.datetime.strptime(end_date, '%Y-%m-%d').date())
+        self.set_attribute('start_date', start_date.date())
+        self.set_attribute('end_date', end_date.date())
 
         # initialize the client module for connecting to GA
         ga_client = GoogleAnalyticsClient(
