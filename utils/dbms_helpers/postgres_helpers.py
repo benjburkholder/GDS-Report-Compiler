@@ -36,10 +36,9 @@ def clear_postgresql_other_table(customizer, sheet):
 
     sql = sqlalchemy.text(
         f"""
-            DELETE
-            FROM public.{sheet['table']['name']};
-
-            """
+        DELETE
+        FROM public.{sheet['table']['name']};
+        """
     )
     with engine.connect() as con:
         con.execute(sql)
