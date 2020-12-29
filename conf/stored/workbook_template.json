@@ -2434,7 +2434,7 @@
     },
     {
       "table": {
-        "name": "google_ads_keyword_performance",
+        "name": "google_ads_keyword",
         "schema": "public",
         "type": "reporting",
         "tablespace": [
