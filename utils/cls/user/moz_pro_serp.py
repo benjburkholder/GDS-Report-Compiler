@@ -43,9 +43,6 @@ class MozProSerpCustomizer(Moz):
         date_range = self.get_date_range()
         moz_pro_accounts = self.pull_moz_pro_accounts()
 
-        self.set_attribute('start_date', date_range.strftime('%Y-%m-%d'))
-        self.set_attribute('end_date', None)
-
         if HISTORICAL:
             for campaign_id in moz_pro_accounts:
                 for date in date_range:
@@ -71,6 +68,9 @@ class MozProSerpCustomizer(Moz):
                         print('INFO: No data returned for ' + str(campaign_id))
 
         else:
+            self.set_attribute('start_date', date_range.strftime('%Y-%m-%d'))
+            self.set_attribute('end_date', None)
+
             for campaign_id in moz_pro_accounts:
                 # pull report from Linkmedia360 database
                 df = SEOReporting().get_serp_performance(
