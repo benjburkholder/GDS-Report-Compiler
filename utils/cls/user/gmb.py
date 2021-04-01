@@ -85,7 +85,7 @@ class GoogleMyBusiness(Customizer):
                 return datetime.datetime.strptime(self.get_attribute('historical_end_date'), '%Y-%m-%d')
         else:
             if start_date:
-                return datetime.datetime.today() - datetime.timedelta(7)
+                return datetime.datetime.today() - datetime.timedelta(540)
             else:
                 return datetime.datetime.today() - datetime.timedelta(1)
 
